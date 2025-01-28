@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { LogOut, Settings, Building2, Sparkles } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { Home, Settings, LogOut, Building2, Sparkles } from 'lucide-react';
 
 interface SidebarImobiliariaProps {
   isOpen: boolean;
@@ -43,7 +42,7 @@ export default function SidebarImobiliaria({
   activeImobiliaria,
   onImobiliariaClick 
 }: SidebarImobiliariaProps) {
-  const router = useRouter();
+  const router = usePathname();
   const [showSettings, setShowSettings] = useState(false);
 
   const handleLogout = () => {

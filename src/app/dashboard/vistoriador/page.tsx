@@ -193,7 +193,7 @@ export default function DashVistoriador() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeVistoria, setActiveVistoria] = useState('1');
-  const [activeTab, setActiveTab] = useState<VistoriadorTab>('dados');
+  const [activeTab, _setActiveTab] = useState<'vistorias' | 'configuracoes'>('vistorias');
   const [showSettings, setShowSettings] = useState(false);
   const [selectedAmbiente, setSelectedAmbiente] = useState<string | null>(null);
   const [showChangePassword, setShowChangePassword] = useState(false);

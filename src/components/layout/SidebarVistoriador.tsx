@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { LogOut, Settings, ClipboardList, Sparkles, Home } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 interface SidebarVistoriadorProps {

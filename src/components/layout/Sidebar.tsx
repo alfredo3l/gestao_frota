@@ -17,18 +17,21 @@ import {
   UserCheck,
   Loader2,
   CheckCircle2,
-  Lock
+  Lock,
+  ChevronLeft,
+  Home
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onMenuItemClick: (itemName: string) => void;
-  activeItem: string;
+  onSettingsClick: () => void;
+  onLogoutClick: () => void;
+  children: React.ReactNode;
 }
 
-export default function Sidebar({ isOpen, onClose, onMenuItemClick, activeItem }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onSettingsClick, onLogoutClick, children }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
