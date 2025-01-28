@@ -189,6 +189,8 @@ function AmbienteDialog({ isOpen, onClose, ambiente }: AmbienteDialogProps) {
   );
 }
 
+type StatusType = 'Pendente' | 'Em andamento' | 'Concluída' | 'Agendada';
+
 export default function DashVistoriador() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -277,23 +279,23 @@ export default function DashVistoriador() {
 
     switch (activeTab) {
       case 'dados':
-        const getStatusColor = (status: string) => {
+        const getStatusColor = (status: StatusType) => {
           const colors = {
             'Pendente': 'bg-yellow-50 border-yellow-200 text-yellow-700',
             'Em andamento': 'bg-blue-50 border-blue-200 text-blue-700',
             'Concluída': 'bg-green-50 border-green-200 text-green-700',
             'Agendada': 'bg-purple-50 border-purple-200 text-purple-700'
-          };
+          } as const;
           return colors[status] || colors['Pendente'];
         };
 
-        const getStatusIcon = (status: string) => {
+        const getStatusIcon = (status: StatusType) => {
           const icons = {
             'Pendente': <AlertCircle className="w-5 h-5" />,
             'Em andamento': <Loader2 className="w-5 h-5 animate-spin" />,
             'Concluída': <CheckCircle2 className="w-5 h-5" />,
             'Agendada': <Calendar className="w-5 h-5" />
-          };
+          } as const;
           return icons[status] || icons['Pendente'];
         };
 
@@ -304,8 +306,8 @@ export default function DashVistoriador() {
               <h2 className="text-xl font-semibold text-gray-900">
                 Dados da Vistoria
               </h2>
-              <div className={`px-4 py-2 rounded-lg border flex items-center gap-2 ${getStatusColor(vistoriaAtiva?.status || 'Pendente')}`}>
-                {getStatusIcon(vistoriaAtiva?.status || 'Pendente')}
+              <div className={`px-4 py-2 rounded-lg border flex items-center gap-2 ${getStatusColor(vistoriaAtiva?.status as StatusType || 'Pendente')}`}>
+                {getStatusIcon(vistoriaAtiva?.status as StatusType || 'Pendente')}
                 <span className="font-medium">{vistoriaAtiva?.status || 'Pendente'}</span>
               </div>
             </div>
