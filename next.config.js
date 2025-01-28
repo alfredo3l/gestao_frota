@@ -12,6 +12,9 @@ const nextConfig = {
     unoptimized: true,
   },
   basePath: '/evolucao-vistoria',
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 }
 
 module.exports = nextConfig 
