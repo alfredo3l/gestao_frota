@@ -3,12 +3,22 @@
 import { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Upload } from 'lucide-react';
+import Image from 'next/image';
+
+interface Inspector {
+  id?: string;
+  name: string;
+  email: string;
+  phone: string;
+  region: string;
+  avatar: string;
+}
 
 interface InspectorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  inspector?: any;
-  onSubmit: (data: any) => void;
+  inspector?: Inspector;
+  onSubmit: (data: Inspector) => void;
 }
 
 export default function InspectorModal({
@@ -148,9 +158,11 @@ export default function InspectorModal({
                 </label>
                 <div className="mt-1 flex items-center gap-4">
                   {formData.avatar && (
-                    <img
+                    <Image
                       src={formData.avatar}
                       alt="Preview"
+                      width={64}
+                      height={64}
                       className="w-16 h-16 rounded-full object-cover border border-gray-300"
                     />
                   )}

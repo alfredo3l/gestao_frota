@@ -3,12 +3,22 @@
 import { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Upload } from 'lucide-react';
+import Image from 'next/image';
+
+interface RealEstate {
+  id?: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  logo: string;
+}
 
 interface RealEstateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  realEstate?: any;
-  onSubmit: (data: any) => void;
+  realEstate?: RealEstate;
+  onSubmit: (data: RealEstate) => void;
 }
 
 export default function RealEstateModal({
@@ -148,9 +158,11 @@ export default function RealEstateModal({
                 </label>
                 <div className="mt-1 flex items-center gap-4">
                   {formData.logo && (
-                    <img
+                    <Image
                       src={formData.logo}
                       alt="Preview"
+                      width={64}
+                      height={64}
                       className="w-16 h-16 rounded-lg object-cover border border-gray-300"
                     />
                   )}

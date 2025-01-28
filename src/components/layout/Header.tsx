@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, Menu, ChevronDown, LogOut, Settings } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -171,9 +172,11 @@ export default function Header({ onMenuClick, isMenuOpen, fullWidth = false }: H
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="w-8 h-8 rounded-full overflow-hidden border border-gray-200"
             >
-              <img
+              <Image
                 src="https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg"
                 alt="Foto de perfil"
+                width={32}
+                height={32}
                 className="w-full h-full object-cover"
               />
             </button>
