@@ -4,7 +4,6 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import Header from '../../../components/layout/Header';
 import SidebarVistoriador, { vistorias } from '../../../components/layout/SidebarVistoriador';
-import VistoriadorTabBar from '../../../components/dashboard/VistoriadorTabBar';
 import type { VistoriadorTab } from '../../../components/dashboard/VistoriadorTabBar';
 import { Home, MapPin, Calendar, Clock, Bell, Key, Camera, CheckSquare, AlertCircle, X, Play, CheckCircle2, Loader2 } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
