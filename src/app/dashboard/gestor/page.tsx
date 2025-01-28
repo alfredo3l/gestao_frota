@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Building2, Users, ClipboardList, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import Header from '../../../components/layout/Header';
+import dynamic from 'next/dynamic';
 import Sidebar from '../../../components/layout/Sidebar';
 import Charts from '../../../components/dashboard/Charts';
 import RealEstateList from '../../../components/dashboard/RealEstateList';
@@ -11,12 +11,18 @@ import InspectionsList from '../../../components/dashboard/InspectionsList';
 import InspectionsTabBar, { InspectionStatus } from '../../../components/dashboard/InspectionsTabBar';
 import SettingsManager from '../../../components/dashboard/SettingsManager';
 
+const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
+  ssr: false
+});
+
 export default function DashGestor() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window?.innerWidth >= 768);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeItem, setActiveItem] = useState('dashboard');
   const [activeInspectionTab, setActiveInspectionTab] = useState<InspectionStatus>('agendadas');
 
   useEffect(() => {
+    setIsSidebarOpen(window.innerWidth >= 768);
+    
     const handleResize = () => {
       setIsSidebarOpen(window.innerWidth >= 768);
     };
@@ -375,7 +381,7 @@ export default function DashGestor() {
         onMenuItemClick={setActiveItem}
         activeItem={activeItem.toLowerCase()}
       />
-      <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
+      <ClientHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
 
       <main className="pl-0 md:pl-20 lg:pl-64 pt-16 transition-all duration-300">
         <div className="p-4 md:p-6 space-y-6">

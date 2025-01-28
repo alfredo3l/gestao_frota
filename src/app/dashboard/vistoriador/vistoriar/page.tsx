@@ -2,10 +2,16 @@
 
 import { useState } from 'react';
 import { Camera, CheckCircle2, AlertCircle, MessageCircle, Home, ArrowLeft, Plus } from 'lucide-react';
-import Header from '../../../../components/layout/Header';
+import dynamic from 'next/dynamic';
+import SidebarVistoriador from '../../../../components/layout/SidebarVistoriador';
+import VistoriadorTabBar from '../../../../components/dashboard/VistoriadorTabBar';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import AmbienteModal from './components/AmbienteModal';
+
+const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
+  ssr: false
+});
 
 type StatusType = 'pendente' | 'em_progresso' | 'concluido';
 
@@ -158,7 +164,7 @@ export default function VistoriarPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header 
+      <ClientHeader 
         onMenuClick={() => setIsMenuOpen(!isMenuOpen)}
         isMenuOpen={isMenuOpen}
         fullWidth

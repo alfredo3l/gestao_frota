@@ -2,12 +2,17 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import Header from '../../../components/layout/Header';
 import SidebarVistoriador, { vistorias } from '../../../components/layout/SidebarVistoriador';
+import VistoriadorTabBar from '../../../components/dashboard/VistoriadorTabBar';
+import InspectionsList from '../../../components/dashboard/InspectionsList';
 import type { VistoriadorTab } from '../../../components/dashboard/VistoriadorTabBar';
 import { Home, MapPin, Calendar, Clock, Bell, Key, Camera, CheckSquare, AlertCircle, X, Play, CheckCircle2, Loader2 } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useRouter } from 'next/navigation';
+
+const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
+  ssr: false
+});
 
 // Importação dinâmica do componente de mapa para evitar erros de SSR
 const Map = dynamic(
@@ -486,7 +491,7 @@ export default function DashVistoriador() {
         onSettingsClick={handleShowSettings}
         showSettings={showSettings}
       />
-      <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
+      <ClientHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
       
       <main className="md:pl-64 pt-16">
         <div className="max-w-[1600px] mx-auto p-4 md:p-6">

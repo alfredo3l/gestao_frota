@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Check, Bell, BellOff, Mail, Smartphone, AlertCircle, CreditCard, Sparkles, Eye, EyeOff, FileText } from 'lucide-react';
+import { X, Check, Mail, Smartphone, CreditCard, Eye, EyeOff, FileText } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 
 interface DialogProps {

@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import Header from '../../../components/layout/Header';
 import SidebarImobiliaria, { imobiliarias } from '../../../components/layout/SidebarImobiliaria';
 import ImobiliariaTabBar from '../../../components/dashboard/ImobiliariaTabBar';
 import InspectionsList from '../../../components/dashboard/InspectionsList';
 import { Building2, Mail, MapPin, Phone, Bell, Key, Users } from 'lucide-react';
+
+const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
+  ssr: false
+});
 
 // Importação dinâmica do componente de mapa para evitar erros de SSR
 const Map = dynamic(() => import('../../../components/Map'), { ssr: false });
@@ -185,7 +188,7 @@ export default function DashImobiliaria() {
         }}
         onSettingsClick={() => setShowSettings(true)}
       />
-      <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
+      <ClientHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
 
       <main className="pl-0 md:pl-20 lg:pl-64 pt-16 transition-all duration-300">
         <div className="p-4 md:p-6 space-y-6">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LogOut, Settings, Calendar, Clock, MapPin, Sparkles } from 'lucide-react';
+import { LogOut, Settings, Sparkles, ClipboardList } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import * as Dialog from '@radix-ui/react-dialog';

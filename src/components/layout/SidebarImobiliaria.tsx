@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { LogOut, Settings, Building2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 

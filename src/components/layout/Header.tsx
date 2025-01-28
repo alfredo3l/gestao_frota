@@ -7,12 +7,14 @@ import Image from 'next/image';
 
 interface HeaderProps {
   onMenuClick: () => void;
+  fullWidth?: boolean;
+  isMenuOpen?: boolean;
+  isMobile?: boolean;
 }
 
-export default function Header({ onMenuClick }: HeaderProps): React.JSX.Element {
+export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isMobile = false }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [activeProfile, setActiveProfile] = useState('gestor');
 
   const pathname = usePathname();
@@ -53,16 +55,6 @@ export default function Header({ onMenuClick }: HeaderProps): React.JSX.Element 
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    const handleResize = (): void => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const notifications = [
@@ -184,7 +176,8 @@ export default function Header({ onMenuClick }: HeaderProps): React.JSX.Element 
                 <Image
                   src="https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg"
                   alt="Foto de perfil"
-                  fill
+                  width={32}
+                  height={32}
                   className="object-cover"
                 />
               </div>
