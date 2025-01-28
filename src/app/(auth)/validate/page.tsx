@@ -13,7 +13,6 @@ export default function ValidatePage() {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          router.push('/dashboard/gestor');
           return 100;
         }
         return prev + 20;
@@ -21,7 +20,17 @@ export default function ValidatePage() {
     }, 500);
 
     return () => clearInterval(timer);
-  }, [router]);
+  }, []);
+
+  useEffect(() => {
+    if (progress === 100) {
+      const redirect = setTimeout(() => {
+        router.push('/dashboard/gestor');
+      }, 100);
+      
+      return () => clearTimeout(redirect);
+    }
+  }, [progress, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">

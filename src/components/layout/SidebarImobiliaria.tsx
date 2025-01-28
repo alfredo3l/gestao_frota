@@ -10,6 +10,7 @@ interface SidebarImobiliariaProps {
   onClose: () => void;
   activeImobiliaria: string;
   onImobiliariaClick: (imobiliaria: string) => void;
+  onSettingsClick: () => void;
 }
 
 // Dados simulados de imobiliárias
@@ -41,7 +42,8 @@ export default function SidebarImobiliaria({
   isOpen, 
   onClose, 
   activeImobiliaria,
-  onImobiliariaClick 
+  onImobiliariaClick,
+  onSettingsClick
 }: SidebarImobiliariaProps) {
   const router = useRouter();
   const [showSettings, setShowSettings] = useState(false);
@@ -134,7 +136,7 @@ export default function SidebarImobiliaria({
           {/* Botões do Rodapé */}
           <div className="mt-auto mx-4 mb-6 pt-4 flex flex-col gap-2 border-t border-border">
             <button
-              onClick={() => setShowSettings(!showSettings)}
+              onClick={onSettingsClick}
               className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors group px-3 py-2 rounded-lg hover:bg-gray-50"
             >
               <Settings className="w-4 h-4 transition-transform group-hover:rotate-45" />

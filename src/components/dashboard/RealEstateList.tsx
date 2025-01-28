@@ -239,7 +239,7 @@ export default function RealEstateList(): React.JSX.Element {
           <h1 className="text-2xl font-bold text-gray-900">Imobiliárias</h1>
           <p className="text-gray-600">Gerencie as imobiliárias cadastradas</p>
         </div>
-        <button
+        <button 
           onClick={() => {
             setSelectedRealEstate(undefined);
             setIsAddModalOpen(true);
@@ -253,17 +253,17 @@ export default function RealEstateList(): React.JSX.Element {
 
       {/* Lista de Imobiliárias */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {realEstates.map((realEstate) => (
-          <div
-            key={realEstate.id}
+          {realEstates.map((realEstate) => (
+            <div
+              key={realEstate.id}
             className="bg-white rounded-xl border border-border p-4 hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-start justify-between mb-4">
+            >
+              <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-4 min-w-0">
                 <div className="relative w-16 h-16 flex-shrink-0">
                   {realEstate.logo && (
                     <Image
-                      src={realEstate.logo}
+                    src={realEstate.logo}
                       alt={realEstate.nome}
                       width={64}
                       height={64}
@@ -320,9 +320,9 @@ export default function RealEstateList(): React.JSX.Element {
                   {realEstate.endereco.bairro} - {realEstate.endereco.cidade}/{realEstate.endereco.estado}
                 </p>
               </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       {/* Modal de Adicionar/Editar */}
