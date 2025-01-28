@@ -3,22 +3,28 @@
 import { useEffect } from 'react';
 import { redirect } from 'next/navigation';
 
-type UserProfile = 'gestor' | 'vistoriador' | 'imobiliaria';
+const PROFILES = {
+  GESTOR: 'gestor',
+  VISTORIADOR: 'vistoriador',
+  IMOBILIARIA: 'imobiliaria'
+} as const;
+
+type UserProfile = typeof PROFILES[keyof typeof PROFILES];
 
 export default function Rota() {
   useEffect(() => {
     // Aqui você faria a verificação do perfil do usuário
     // Por exemplo, buscando da API ou do localStorage
-    const userProfile: UserProfile = 'gestor'; // Exemplo: pode vir do seu sistema de autenticação
+    const userProfile: UserProfile = PROFILES.GESTOR; // Exemplo: pode vir do seu sistema de autenticação
 
     switch (userProfile) {
-      case 'gestor':
+      case PROFILES.GESTOR:
         redirect('/dashboard/gestor');
         break;
-      case 'vistoriador':
+      case PROFILES.VISTORIADOR:
         redirect('/dashboard/vistoriador');
         break;
-      case 'imobiliaria':
+      case PROFILES.IMOBILIARIA:
         redirect('/dashboard/imobiliaria');
         break;
       default:
