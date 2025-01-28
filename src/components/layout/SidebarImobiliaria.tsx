@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { LogOut, Settings, Building2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import * as Dialog from '@radix-ui/react-dialog';
 
 interface SidebarImobiliariaProps {
   isOpen: boolean;
@@ -46,7 +45,6 @@ export default function SidebarImobiliaria({
   onSettingsClick
 }: SidebarImobiliariaProps) {
   const router = useRouter();
-  const [showSettings, setShowSettings] = useState(false);
 
   const handleLogout = () => {
     router.push('/login');
@@ -104,7 +102,6 @@ export default function SidebarImobiliaria({
                 key={imobiliaria.id}
                 onClick={() => {
                   onImobiliariaClick(imobiliaria.id);
-                  setShowSettings(false);
                 }}
                 className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors group ${
                   activeImobiliaria === imobiliaria.id

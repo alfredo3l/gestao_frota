@@ -7,11 +7,9 @@ import Image from 'next/image';
 
 interface HeaderProps {
   onMenuClick: () => void;
-  isMenuOpen: boolean;
-  fullWidth?: boolean;
 }
 
-export default function Header({ onMenuClick, isMenuOpen, fullWidth = false }: HeaderProps): React.JSX.Element {
+export default function Header({ onMenuClick }: HeaderProps): React.JSX.Element {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -113,12 +111,12 @@ export default function Header({ onMenuClick, isMenuOpen, fullWidth = false }: H
 
   return (
     <header className={`h-16 bg-white border-b border-border fixed top-0 right-0 z-[900] transition-all duration-300 ${
-      isMobile ? 'left-0' : (fullWidth ? 'left-0' : 'left-64')
+      isMobile ? 'left-0' : 'left-64'
     }`}>
       <div className="h-full px-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {/* Mostra o menu apenas quando não for fullWidth e estiver em mobile */}
-          {isMobile && !fullWidth && (
+          {isMobile && (
             <button
               onClick={onMenuClick}
               className="p-2 rounded-lg hover:bg-gray-50 transition-colors"

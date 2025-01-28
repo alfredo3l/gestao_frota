@@ -38,18 +38,6 @@ const mockInspections = [
   }
 ];
 
-// Função auxiliar para obter o título baseado no status
-const getStatusTitle = (status: InspectionStatus) => {
-  const titles = {
-    agendadas: 'Vistorias Agendadas',
-    atribuidas: 'Vistorias Atribuídas',
-    andamento: 'Vistorias em Andamento',
-    finalizadas: 'Vistorias Finalizadas',
-    liberadas: 'Vistorias Liberadas'
-  };
-  return titles[status];
-};
-
 // Função auxiliar para obter a cor do status
 const getStatusColor = (status: InspectionStatus) => {
   const colors = {

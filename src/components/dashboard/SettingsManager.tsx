@@ -6,6 +6,8 @@ import {
   Mail,
   Lock,
   Bell,
+  BellOff,
+  AlertCircle,
   Palette,
   Building2,
   Users,
