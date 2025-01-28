@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Evolução Vistoria
 
-## Getting Started
+Sistema de gestão de vistorias imobiliárias desenvolvido com Next.js e TypeScript.
 
-First, run the development server:
+## Sobre o Projeto
+
+O Evolução Vistoria é uma plataforma especializada em gerenciamento de vistorias imobiliárias que atende diferentes perfis de usuários:
+
+### Perfis de Usuário
+
+- **Gestor**: Administra o sistema, gerenciando clientes (imobiliárias) e vistoriadores.
+- **Imobiliária**: Solicita e acompanha vistorias de seus imóveis.
+- **Vistoriador**: Realiza as inspeções in loco e documenta as condições dos imóveis.
+
+## Tecnologias
+
+- Next.js 15
+- TypeScript
+- Tailwind CSS
+- Geist UI
+
+## Configuração do Ambiente
 
 ```bash
+# Instalar dependências
+npm install
+
+# Iniciar ambiente de desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Construir para produção
+npm run build
+
+# Iniciar em produção
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estrutura do Projeto
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/src/app`: Páginas e layouts da aplicação
+- `/src/components`: Componentes reutilizáveis
+- `/src/lib`: Utilitários e configurações
+- `/src/types`: Definições de tipos TypeScript
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Design System
 
-## Learn More
+O projeto utiliza um design system consistente com:
 
-To learn more about Next.js, take a look at the following resources:
+- Cores principais:
+  - Primária: `#264450`
+  - Primária (light): `#3a5f6f`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Funcionalidades Principais
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Gestão de usuários por perfil
+- Solicitação e acompanhamento de vistorias
+- Realização e documentação de inspeções
+- Geração de relatórios
+- Dashboard personalizado por perfil
 
-## Deploy on Vercel
+## Licença
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Este projeto é proprietário e confidencial.
