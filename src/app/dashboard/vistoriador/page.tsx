@@ -431,6 +431,11 @@ export default function DashVistoriador() {
         );
 
       case 'localizacao':
+        // Definindo coordenadas padrão caso não haja vistoria ativa
+        const defaultCoords = { lat: -23.5505, lng: -46.6333 };
+        const coords = vistoriaAtiva?.coordenadas || defaultCoords;
+        const endereco = vistoriaAtiva?.endereco || 'Endereço não disponível';
+
         return (
           <div className="bg-white rounded-xl border border-border p-6 space-y-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -445,7 +450,7 @@ export default function DashVistoriador() {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Endereço Completo</h3>
-                  <p className="text-gray-600 mt-1">{vistoriaAtiva?.endereco}</p>
+                  <p className="text-gray-600 mt-1">{endereco}</p>
                 </div>
               </div>
             </div>
@@ -454,12 +459,12 @@ export default function DashVistoriador() {
             <div className="h-[400px] rounded-lg overflow-hidden">
               <Map
                 key={`map-${vistoriaAtiva?.id}`}
-                center={vistoriaAtiva?.coordenadas}
+                center={coords}
                 zoom={15}
                 markers={[
                   {
-                    position: vistoriaAtiva?.coordenadas,
-                    title: vistoriaAtiva?.endereco
+                    position: coords,
+                    title: endereco
                   }
                 ]}
               />
@@ -486,6 +491,30 @@ export default function DashVistoriador() {
       
       <main className="md:pl-64 pt-16">
         <div className="max-w-[1600px] mx-auto p-4 md:p-6">
+          {!showSettings && (
+            <div className="mb-6">
+              <div className="bg-white border border-border rounded-xl p-1.5 flex flex-wrap gap-2">
+                {['dados', 'ambientes', 'envolvidos', 'localizacao'].map((tab) => {
+                  const isActive = activeTab === tab;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab as VistoriadorTab)}
+                      className={`
+                        flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                        ${isActive 
+                          ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-md' 
+                          : 'text-gray-600 hover:bg-gray-100/80 hover:text-gray-900'
+                        }
+                      `}
+                    >
+                      <span className="capitalize">{tab}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {renderContent()}
         </div>
       </main>
