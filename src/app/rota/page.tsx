@@ -3,11 +3,13 @@
 import { useEffect } from 'react';
 import { redirect } from 'next/navigation';
 
+type UserProfile = 'gestor' | 'vistoriador' | 'imobiliaria';
+
 export default function Rota() {
   useEffect(() => {
     // Aqui você faria a verificação do perfil do usuário
     // Por exemplo, buscando da API ou do localStorage
-    const userProfile = 'gestor'; // Exemplo: pode vir do seu sistema de autenticação
+    const userProfile: UserProfile = 'gestor'; // Exemplo: pode vir do seu sistema de autenticação
 
     switch (userProfile) {
       case 'gestor':
