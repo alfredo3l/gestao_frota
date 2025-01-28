@@ -11,7 +11,6 @@ export default function RoutePage() {
     // Simula o processo de verificação
     const timer1 = setTimeout(() => {
       const verifyingElement = document.getElementById('verifying');
-      const successElement = document.getElementById('success');
       
       if (verifyingElement) {
         verifyingElement.classList.remove('opacity-0');

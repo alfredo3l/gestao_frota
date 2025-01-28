@@ -1,17 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Menu, ChevronDown, LogOut, Settings } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 interface HeaderProps {
   onMenuClick: () => void;
-  isMenuOpen: boolean;
   fullWidth?: boolean;
 }
 
-export default function Header({ onMenuClick, isMenuOpen, fullWidth = false }: HeaderProps) {
+export default function Header({ onMenuClick, fullWidth = false }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);

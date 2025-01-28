@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Eye, Edit2, Trash2, MapPin, Phone, Mail, Plus } from 'lucide-react';
 import RealEstateModal from '../modals/RealEstateModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
+import Image from 'next/image';
 
 const REAL_ESTATE_LOGOS = [
   'https://img.freepik.com/vetores-gratis/logotipo-para-solucoes-imobiliarias-domesticas-que-e-uma-solucao-domestica_527952-33.jpg?semt=ais_hybrid',
@@ -11,10 +12,21 @@ const REAL_ESTATE_LOGOS = [
   'https://s3-sa-east-1.amazonaws.com/projetos-artes/fullsize%2F2022%2F02%2F18%2F17%2FLogo-276326_141343_171423295_576408745.jpg'
 ];
 
+interface RealEstate {
+  id: string;
+  name: string;
+  logo: string;
+  address: string;
+  phone: string;
+  email: string;
+  activeListings: number;
+  completedInspections: number;
+}
+
 // Dados simulados
-const realEstates = [
+const realEstates: RealEstate[] = [
   {
-    id: 1,
+    id: '1',
     name: 'Imob Premium',
     logo: REAL_ESTATE_LOGOS[0],
     address: 'Rua das Flores, 123',
@@ -24,7 +36,7 @@ const realEstates = [
     completedInspections: 128,
   },
   {
-    id: 2,
+    id: '2',
     name: 'Imob Plus',
     logo: REAL_ESTATE_LOGOS[1],
     address: 'Av. Principal, 456',
@@ -34,7 +46,7 @@ const realEstates = [
     completedInspections: 95,
   },
   {
-    id: 3,
+    id: '3',
     name: 'Imob Master',
     logo: REAL_ESTATE_LOGOS[2],
     address: 'Rua do Comércio, 789',
@@ -44,7 +56,7 @@ const realEstates = [
     completedInspections: 76,
   },
   {
-    id: 4,
+    id: '4',
     name: 'Imob Elite',
     logo: REAL_ESTATE_LOGOS[0],
     address: 'Av. das Palmeiras, 321',
@@ -54,7 +66,7 @@ const realEstates = [
     completedInspections: 145,
   },
   {
-    id: 5,
+    id: '5',
     name: 'Imob Prime',
     logo: REAL_ESTATE_LOGOS[1],
     address: 'Rua dos Ipês, 654',
@@ -64,7 +76,7 @@ const realEstates = [
     completedInspections: 112,
   },
   {
-    id: 6,
+    id: '6',
     name: 'Imob Select',
     logo: REAL_ESTATE_LOGOS[2],
     address: 'Av. Central, 987',
@@ -74,7 +86,7 @@ const realEstates = [
     completedInspections: 98,
   },
   {
-    id: 7,
+    id: '7',
     name: 'Imob Gold',
     logo: REAL_ESTATE_LOGOS[0],
     address: 'Rua das Acácias, 741',
@@ -84,7 +96,7 @@ const realEstates = [
     completedInspections: 89,
   },
   {
-    id: 8,
+    id: '8',
     name: 'Imob Diamond',
     logo: REAL_ESTATE_LOGOS[1],
     address: 'Av. dos Jardins, 852',
@@ -94,7 +106,7 @@ const realEstates = [
     completedInspections: 134,
   },
   {
-    id: 9,
+    id: '9',
     name: 'Imob Royal',
     logo: REAL_ESTATE_LOGOS[2],
     address: 'Rua das Orquídeas, 963',
@@ -108,14 +120,14 @@ const realEstates = [
 export default function RealEstateList() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedRealEstate, setSelectedRealEstate] = useState<any>(null);
+  const [selectedRealEstate, setSelectedRealEstate] = useState<RealEstate | null>(null);
 
-  const handleAdd = (data: any) => {
+  const handleAdd = (data: RealEstate) => {
     console.log('Adicionar:', data);
     // Aqui você vai implementar a lógica de adicionar no Supabase
   };
 
-  const handleEdit = (data: any) => {
+  const handleEdit = (data: RealEstate) => {
     console.log('Editar:', data);
     // Aqui você vai implementar a lógica de editar no Supabase
   };
@@ -152,9 +164,11 @@ export default function RealEstateList() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <img
+                  <Image
                     src={realEstate.logo}
                     alt={realEstate.name}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-lg object-cover border border-border"
                   />
                   <div>

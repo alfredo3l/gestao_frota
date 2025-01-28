@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Eye, Edit2, Trash2, MapPin, Phone, Mail, Star, Plus } from 'lucide-react';
 import InspectorModal from '../modals/InspectorModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
+import Image from 'next/image';
 
 const INSPECTOR_AVATARS = [
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqVyiI1XClbT2Ue-7CGVAp8sKoqe_068R9zw&s',
@@ -11,10 +12,22 @@ const INSPECTOR_AVATARS = [
   'https://blog.unyleya.edu.br/wp-content/uploads/2017/12/saiba-como-a-educacao-ajuda-voce-a-ser-uma-pessoa-melhor.jpeg'
 ];
 
+interface Inspector {
+  id: string;
+  name: string;
+  avatar: string;
+  region: string;
+  phone: string;
+  email: string;
+  rating: number;
+  completedInspections: number;
+  pendingInspections: number;
+}
+
 // Dados simulados
-const inspectors = [
+const inspectors: Inspector[] = [
   {
-    id: 1,
+    id: '1',
     name: 'João Silva',
     avatar: INSPECTOR_AVATARS[0],
     region: 'Zona Sul',
@@ -25,7 +38,7 @@ const inspectors = [
     pendingInspections: 5,
   },
   {
-    id: 2,
+    id: '2',
     name: 'Maria Santos',
     avatar: INSPECTOR_AVATARS[1],
     region: 'Zona Norte',
@@ -36,7 +49,7 @@ const inspectors = [
     pendingInspections: 3,
   },
   {
-    id: 3,
+    id: '3',
     name: 'Pedro Costa',
     avatar: INSPECTOR_AVATARS[2],
     region: 'Centro',
@@ -47,7 +60,7 @@ const inspectors = [
     pendingInspections: 4,
   },
   {
-    id: 4,
+    id: '4',
     name: 'Ana Oliveira',
     avatar: INSPECTOR_AVATARS[0],
     region: 'Zona Leste',
@@ -58,7 +71,7 @@ const inspectors = [
     pendingInspections: 6,
   },
   {
-    id: 5,
+    id: '5',
     name: 'Carlos Ferreira',
     avatar: INSPECTOR_AVATARS[1],
     region: 'Zona Oeste',
@@ -69,7 +82,7 @@ const inspectors = [
     pendingInspections: 4,
   },
   {
-    id: 6,
+    id: '6',
     name: 'Beatriz Lima',
     avatar: INSPECTOR_AVATARS[2],
     region: 'Centro-Sul',
@@ -80,7 +93,7 @@ const inspectors = [
     pendingInspections: 5,
   },
   {
-    id: 7,
+    id: '7',
     name: 'Rafael Souza',
     avatar: INSPECTOR_AVATARS[0],
     region: 'Centro-Norte',
@@ -91,7 +104,7 @@ const inspectors = [
     pendingInspections: 3,
   },
   {
-    id: 8,
+    id: '8',
     name: 'Juliana Martins',
     avatar: INSPECTOR_AVATARS[1],
     region: 'Zona Sul-Leste',
@@ -102,7 +115,7 @@ const inspectors = [
     pendingInspections: 5,
   },
   {
-    id: 9,
+    id: '9',
     name: 'Lucas Almeida',
     avatar: INSPECTOR_AVATARS[2],
     region: 'Zona Norte-Oeste',
@@ -117,14 +130,14 @@ const inspectors = [
 export default function InspectorsList() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedInspector, setSelectedInspector] = useState<any>(null);
+  const [selectedInspector, setSelectedInspector] = useState<Inspector | null>(null);
 
-  const handleAdd = (data: any) => {
+  const handleAdd = (data: Inspector) => {
     console.log('Adicionar:', data);
     // Aqui você vai implementar a lógica de adicionar no Supabase
   };
 
-  const handleEdit = (data: any) => {
+  const handleEdit = (data: Inspector) => {
     console.log('Editar:', data);
     // Aqui você vai implementar a lógica de editar no Supabase
   };
@@ -161,10 +174,12 @@ export default function InspectorsList() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <img
+                  <Image
                     src={inspector.avatar}
                     alt={inspector.name}
-                    className="w-16 h-16 rounded-full object-cover border border-border"
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 rounded-full object-cover border border-gray-300"
                   />
                   <div>
                     <h3 className="font-semibold text-gray-900">{inspector.name}</h3>
