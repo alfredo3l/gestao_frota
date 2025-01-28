@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import * as Dialog from '@radix-ui/react-dialog';
 import { X, Check, Bell, BellOff, Mail, Smartphone, AlertCircle, CreditCard, Sparkles, Eye, EyeOff, FileText } from 'lucide-react';
+import * as Dialog from '@radix-ui/react-dialog';
 
 interface DialogProps {
   isOpen: boolean;
@@ -11,24 +11,28 @@ interface DialogProps {
   title: string;
 }
 
-function Dialog({ isOpen, onClose, children, title }: DialogProps) {
+function BaseDialog({ isOpen, onClose, children, title }: DialogProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className={`bg-white rounded-xl w-full mx-3.5 ${title === "Escolha seu Plano" ? "max-w-6xl" : "max-w-lg"}`}>
-        <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-border bg-white rounded-t-xl">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="p-6 overflow-y-auto max-h-[calc(100vh-8rem)]">{children}</div>
-      </div>
-    </div>
+    <Dialog.Root open={isOpen} onOpenChange={onClose}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[9998]" />
+        <Dialog.Content className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl w-[calc(100%-2rem)] sm:w-full mx-auto z-[9999] ${title === "Escolha seu Plano" ? "max-w-6xl" : "max-w-lg"}`}>
+          <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-6 border-b border-border bg-white rounded-t-xl">
+            <Dialog.Title className="text-lg sm:text-xl font-semibold text-gray-900">
+              {title}
+            </Dialog.Title>
+            <Dialog.Close className="text-gray-400 hover:text-gray-600 transition-colors">
+              <X className="w-5 h-5" />
+            </Dialog.Close>
+          </div>
+          <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(100vh-8rem)]">
+            {children}
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 
@@ -48,7 +52,7 @@ export function NotificationsDialog({ isOpen, onClose }: { isOpen: boolean; onCl
   };
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Configurar Notificações">
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Configurar Notificações">
       <div className="space-y-6">
         {/* Canais */}
         <div>
@@ -144,7 +148,7 @@ export function NotificationsDialog({ isOpen, onClose }: { isOpen: boolean; onCl
           </button>
         </div>
       </div>
-    </Dialog>
+    </BaseDialog>
   );
 }
 
@@ -164,7 +168,7 @@ export function PasswordDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
   };
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Alterar Senha">
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Alterar Senha">
       <div className="space-y-6">
         <div className="space-y-4">
           <div>
@@ -235,7 +239,7 @@ export function PasswordDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
           </button>
         </div>
       </div>
-    </Dialog>
+    </BaseDialog>
   );
 }
 
@@ -247,7 +251,7 @@ export function SignatureDialog({ isOpen, onClose }: { isOpen: boolean; onClose:
   });
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Gerenciar Assinatura Digital">
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Gerenciar Assinatura Digital">
       <div className="space-y-6">
         <div className="bg-gray-50 rounded-lg p-4 border border-border">
           <div className="flex items-center gap-3 text-gray-600">
@@ -331,7 +335,7 @@ export function SignatureDialog({ isOpen, onClose }: { isOpen: boolean; onClose:
           </button>
         </div>
       </div>
-    </Dialog>
+    </BaseDialog>
   );
 }
 
@@ -366,7 +370,7 @@ export function ThemeDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () 
   };
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Personalizar Tema">
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Personalizar Tema">
       <div className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -465,7 +469,7 @@ export function ThemeDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () 
           </button>
         </div>
       </div>
-    </Dialog>
+    </BaseDialog>
   );
 }
 
@@ -512,7 +516,7 @@ export function PlansDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () 
   ];
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Escolha seu Plano">
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Escolha seu Plano">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {plans.map((plan) => (
           <div
@@ -574,7 +578,7 @@ export function PlansDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () 
           <span>Assinar {plans.find(p => p.id === selectedPlan)?.name}</span>
         </button>
       </div>
-    </Dialog>
+    </BaseDialog>
   );
 }
 
@@ -594,7 +598,7 @@ export function ProfileDialog({ isOpen, onClose }: { isOpen: boolean; onClose: (
   };
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Editar Perfil">
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Editar Perfil">
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -655,6 +659,6 @@ export function ProfileDialog({ isOpen, onClose }: { isOpen: boolean; onClose: (
           </button>
         </div>
       </div>
-    </Dialog>
+    </BaseDialog>
   );
 } 

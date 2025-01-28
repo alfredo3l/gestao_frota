@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building2, Users, ClipboardList, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import Header from '../../../components/layout/Header';
 import Sidebar from '../../../components/layout/Sidebar';
@@ -12,9 +12,18 @@ import InspectionsTabBar, { InspectionStatus } from '../../../components/dashboa
 import SettingsManager from '../../../components/dashboard/SettingsManager';
 
 export default function DashGestor() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window?.innerWidth >= 768);
   const [activeItem, setActiveItem] = useState('dashboard');
   const [activeInspectionTab, setActiveInspectionTab] = useState<InspectionStatus>('agendadas');
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSidebarOpen(window.innerWidth >= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const renderContent = () => {
     switch (activeItem.toLowerCase()) {

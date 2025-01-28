@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { Home, Settings, LogOut, Building2, Sparkles } from 'lucide-react';
+import { LogOut, Settings, Building2, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import * as Dialog from '@radix-ui/react-dialog';
 
 interface SidebarImobiliariaProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ export default function SidebarImobiliaria({
   activeImobiliaria,
   onImobiliariaClick 
 }: SidebarImobiliariaProps) {
-  const router = usePathname();
+  const router = useRouter();
   const [showSettings, setShowSettings] = useState(false);
 
   const handleLogout = () => {
@@ -51,19 +52,19 @@ export default function SidebarImobiliaria({
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay móvel */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+          className="fixed inset-0 bg-black/50 z-[1400] md:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-border transform transition-transform duration-300 ease-in-out z-30 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-border transform transition-transform duration-300 z-[1500] ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
       >
         {/* Logo */}
         <div className="p-6">

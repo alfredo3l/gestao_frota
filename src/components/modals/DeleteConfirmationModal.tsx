@@ -18,11 +18,13 @@ export default function DeleteConfirmationModal({
   title,
   description,
 }: DeleteConfirmationModalProps) {
+  if (!isOpen) return null;
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[1100]" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-md bg-white rounded-xl shadow-lg z-[1101] px-[15px] sm:px-6 py-6">
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[9998]" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-md bg-white rounded-xl shadow-lg z-[9999] px-[15px] sm:px-6 py-6">
           <div className="flex items-center justify-between mb-6">
             <Dialog.Title className="text-lg font-semibold text-gray-900">
               {title}
@@ -43,13 +45,9 @@ export default function DeleteConfirmationModal({
           </div>
 
           <div className="flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-            >
+            <Dialog.Close className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
               Cancelar
-            </button>
+            </Dialog.Close>
             <button
               type="button"
               onClick={() => {

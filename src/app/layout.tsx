@@ -14,14 +14,14 @@ export const metadata: Metadata = {
   description: "Sistema de gestão de vistorias imobiliárias",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+type RootLayoutProps = {
+  children: React.ReactNode;
+};
+
+export default function RootLayout({ children }: RootLayoutProps): React.JSX.Element {
   return (
     <html lang="pt-BR" className={`antialiased ${inter.variable}`}>
-      <body className="font-sans">
+      <body className="font-sans" suppressHydrationWarning>
         <ClientLayout>
           {children}
         </ClientLayout>

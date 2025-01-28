@@ -1,249 +1,351 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, Edit2, Trash2, MapPin, Phone, Mail, Plus } from 'lucide-react';
-import RealEstateModal from '../modals/RealEstateModal';
-import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
+import { Plus, Eye, Edit2, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import RealEstateModal from '@/components/modals/RealEstateModal';
+import DeleteConfirm from '@/components/modals/DeleteConfirm';
 
-const REAL_ESTATE_LOGOS = [
-  'https://img.freepik.com/vetores-gratis/logotipo-para-solucoes-imobiliarias-domesticas-que-e-uma-solucao-domestica_527952-33.jpg?semt=ais_hybrid',
-  'https://i.pinimg.com/550x/1f/f6/8d/1ff68d3800d83663d66d8b3bad059e75.jpg',
-  'https://s3-sa-east-1.amazonaws.com/projetos-artes/fullsize%2F2022%2F02%2F18%2F17%2FLogo-276326_141343_171423295_576408745.jpg'
-];
-
-interface RealEstate {
-  id: string;
-  name: string;
-  logo: string;
-  address: string;
-  phone: string;
+interface BaseRealEstate {
+  id?: string;
+  nome: string;
   email: string;
-  activeListings: number;
-  completedInspections: number;
+  telefone: string;
+  cnpj: string;
+  logo?: string;
+  endereco: {
+    cep: string;
+    logradouro: string;
+    numero: string;
+    complemento?: string;
+    bairro: string;
+    cidade: string;
+    estado: string;
+  };
 }
 
-// Dados simulados
-const realEstates: RealEstate[] = [
+interface RealEstate extends BaseRealEstate {
+  id: string;
+}
+
+const mockRealEstates: RealEstate[] = [
   {
     id: '1',
-    name: 'Imob Premium',
-    logo: REAL_ESTATE_LOGOS[0],
-    address: 'Rua das Flores, 123',
-    phone: '(11) 99999-9999',
-    email: 'contato@imobpremium.com.br',
-    activeListings: 45,
-    completedInspections: 128,
+    nome: 'Imobiliária Premium',
+    email: 'contato@premium.com',
+    telefone: '(11) 99999-9999',
+    cnpj: '12.345.678/0001-90',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '01234-567',
+      logradouro: 'Rua das Flores',
+      numero: '123',
+      complemento: 'Sala 456',
+      bairro: 'Centro',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
   {
     id: '2',
-    name: 'Imob Plus',
-    logo: REAL_ESTATE_LOGOS[1],
-    address: 'Av. Principal, 456',
-    phone: '(11) 98888-8888',
-    email: 'contato@imobplus.com.br',
-    activeListings: 32,
-    completedInspections: 95,
+    nome: 'Imobiliária Elite',
+    email: 'contato@elite.com',
+    telefone: '(11) 98888-8888',
+    cnpj: '98.765.432/0001-10',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '04321-765',
+      logradouro: 'Av. Principal',
+      numero: '789',
+      bairro: 'Jardins',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
   {
     id: '3',
-    name: 'Imob Master',
-    logo: REAL_ESTATE_LOGOS[2],
-    address: 'Rua do Comércio, 789',
-    phone: '(11) 97777-7777',
-    email: 'contato@imobmaster.com.br',
-    activeListings: 28,
-    completedInspections: 76,
+    nome: 'Imobiliária Luxo',
+    email: 'contato@luxo.com',
+    telefone: '(11) 97777-7777',
+    cnpj: '45.678.901/0001-23',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '05678-901',
+      logradouro: 'Rua dos Diamantes',
+      numero: '456',
+      complemento: 'Andar 10',
+      bairro: 'Vila Nova',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
   {
     id: '4',
-    name: 'Imob Elite',
-    logo: REAL_ESTATE_LOGOS[0],
-    address: 'Av. das Palmeiras, 321',
-    phone: '(11) 96666-6666',
-    email: 'contato@imobelite.com.br',
-    activeListings: 52,
-    completedInspections: 145,
+    nome: 'Imobiliária Master',
+    email: 'contato@master.com',
+    telefone: '(11) 96666-6666',
+    cnpj: '34.567.890/0001-12',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '06789-012',
+      logradouro: 'Av. das Palmeiras',
+      numero: '789',
+      bairro: 'Morumbi',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
   {
     id: '5',
-    name: 'Imob Prime',
-    logo: REAL_ESTATE_LOGOS[1],
-    address: 'Rua dos Ipês, 654',
-    phone: '(11) 95555-5555',
-    email: 'contato@imobprime.com.br',
-    activeListings: 38,
-    completedInspections: 112,
+    nome: 'Imobiliária Prime',
+    email: 'contato@prime.com',
+    telefone: '(11) 95555-5555',
+    cnpj: '23.456.789/0001-01',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '07890-123',
+      logradouro: 'Rua dos Ipês',
+      numero: '321',
+      complemento: 'Conjunto 789',
+      bairro: 'Itaim',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
   {
     id: '6',
-    name: 'Imob Select',
-    logo: REAL_ESTATE_LOGOS[2],
-    address: 'Av. Central, 987',
-    phone: '(11) 94444-4444',
-    email: 'contato@imobselect.com.br',
-    activeListings: 41,
-    completedInspections: 98,
+    nome: 'Imobiliária Gold',
+    email: 'contato@gold.com',
+    telefone: '(11) 94444-4444',
+    cnpj: '12.345.678/0001-34',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '08901-234',
+      logradouro: 'Av. das Araucárias',
+      numero: '654',
+      bairro: 'Pinheiros',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
   {
     id: '7',
-    name: 'Imob Gold',
-    logo: REAL_ESTATE_LOGOS[0],
-    address: 'Rua das Acácias, 741',
-    phone: '(11) 93333-3333',
-    email: 'contato@imobgold.com.br',
-    activeListings: 35,
-    completedInspections: 89,
+    nome: 'Imobiliária Diamond',
+    email: 'contato@diamond.com',
+    telefone: '(11) 93333-3333',
+    cnpj: '89.012.345/0001-56',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '09012-345',
+      logradouro: 'Rua das Esmeraldas',
+      numero: '987',
+      complemento: 'Sala 123',
+      bairro: 'Vila Mariana',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
   {
     id: '8',
-    name: 'Imob Diamond',
-    logo: REAL_ESTATE_LOGOS[1],
-    address: 'Av. dos Jardins, 852',
-    phone: '(11) 92222-2222',
-    email: 'contato@imobdiamond.com.br',
-    activeListings: 48,
-    completedInspections: 134,
+    nome: 'Imobiliária Royal',
+    email: 'contato@royal.com',
+    telefone: '(11) 92222-2222',
+    cnpj: '78.901.234/0001-78',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '10123-456',
+      logradouro: 'Av. dos Rubis',
+      numero: '159',
+      bairro: 'Moema',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
   {
     id: '9',
-    name: 'Imob Royal',
-    logo: REAL_ESTATE_LOGOS[2],
-    address: 'Rua das Orquídeas, 963',
-    phone: '(11) 91111-1111',
-    email: 'contato@imobroyal.com.br',
-    activeListings: 43,
-    completedInspections: 118,
+    nome: 'Imobiliária Platinum',
+    email: 'contato@platinum.com',
+    telefone: '(11) 91111-1111',
+    cnpj: '67.890.123/0001-45',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '11234-567',
+      logradouro: 'Rua dos Cristais',
+      numero: '753',
+      complemento: 'Andar 15',
+      bairro: 'Brooklin',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
+  },
+  {
+    id: '10',
+    nome: 'Imobiliária Crystal',
+    email: 'contato@crystal.com',
+    telefone: '(11) 90000-0000',
+    cnpj: '56.789.012/0001-67',
+    logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    endereco: {
+      cep: '12345-678',
+      logradouro: 'Av. das Safiras',
+      numero: '951',
+      bairro: 'Vila Olímpia',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
   },
 ];
 
-export default function RealEstateList() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedRealEstate, setSelectedRealEstate] = useState<RealEstate | null>(null);
+export default function RealEstateList(): React.JSX.Element {
+  const [realEstates, setRealEstates] = useState<RealEstate[]>(mockRealEstates);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [selectedRealEstate, setSelectedRealEstate] = useState<RealEstate | undefined>(undefined);
 
-  const handleAdd = (data: RealEstate) => {
-    console.log('Adicionar:', data);
-    // Aqui você vai implementar a lógica de adicionar no Supabase
+  const handleAdd = (data: BaseRealEstate): void => {
+    const newRealEstate: RealEstate = {
+      ...data,
+      id: String(realEstates.length + 1),
+    };
+    setRealEstates([...realEstates, newRealEstate]);
+    setIsAddModalOpen(false);
   };
 
-  const handleEdit = (data: RealEstate) => {
-    console.log('Editar:', data);
-    // Aqui você vai implementar a lógica de editar no Supabase
+  const handleEdit = (data: BaseRealEstate): void => {
+    if (selectedRealEstate) {
+      const updatedRealEstate: RealEstate = {
+        ...data,
+        id: selectedRealEstate.id,
+      };
+      setRealEstates(realEstates.map(re => re.id === selectedRealEstate.id ? updatedRealEstate : re));
+      setIsAddModalOpen(false);
+      setSelectedRealEstate(undefined);
+    }
   };
 
-  const handleDelete = () => {
-    console.log('Excluir:', selectedRealEstate?.id);
-    // Aqui você vai implementar a lógica de excluir no Supabase
+  const handleDelete = (): void => {
+    if (selectedRealEstate) {
+      setRealEstates(realEstates.filter(re => re.id !== selectedRealEstate.id));
+      setIsDeleteModalOpen(false);
+      setSelectedRealEstate(undefined);
+    }
   };
 
   return (
-    <div className="bg-white rounded-xl border border-border shadow-sm">
-      <div className="p-4 sm:p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Imobiliárias</h2>
-          <p className="text-sm text-gray-600">Gerencie as imobiliárias cadastradas</p>
+          <h1 className="text-2xl font-bold text-gray-900">Imobiliárias</h1>
+          <p className="text-gray-600">Gerencie as imobiliárias cadastradas</p>
         </div>
-        <button 
+        <button
           onClick={() => {
-            setSelectedRealEstate(null);
+            setSelectedRealEstate(undefined);
             setIsAddModalOpen(true);
           }}
-          className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-light transition-colors flex items-center justify-center gap-2"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors"
         >
           <Plus className="w-4 h-4" />
-          <span className="sm:block">Adicionar Imobiliária</span>
+          <span>Adicionar</span>
         </button>
       </div>
-      <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {realEstates.map((realEstate) => (
-            <div
-              key={realEstate.id}
-              className="bg-white rounded-xl border border-border p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={realEstate.logo}
-                    alt={realEstate.name}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-lg object-cover border border-border"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{realEstate.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{realEstate.address}</span>
-                    </div>
-                  </div>
+
+      {/* Lista de Imobiliárias */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {realEstates.map((realEstate) => (
+          <div
+            key={realEstate.id}
+            className="bg-white rounded-xl border border-border p-4 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="relative w-16 h-16 flex-shrink-0">
+                  {realEstate.logo && (
+                    <Image
+                      src={realEstate.logo}
+                      alt={realEstate.nome}
+                      width={64}
+                      height={64}
+                      className="rounded-lg object-cover border border-border"
+                    />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">{realEstate.nome}</h3>
+                  <p className="text-sm text-gray-600 truncate">{realEstate.email}</p>
                 </div>
               </div>
 
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  <span>{realEstate.phone}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Mail className="w-4 h-4" />
-                  <span>{realEstate.email}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                <div>
-                  <span className="font-medium text-primary">{realEstate.activeListings}</span> imóveis ativos
-                </div>
-                <div>
-                  <span className="font-medium text-primary">{realEstate.completedInspections}</span> vistorias realizadas
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2">
-                <button className="p-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors">
-                  <Eye className="w-5 h-5" />
+              <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                <button className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors">
+                  <Eye className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => {
                     setSelectedRealEstate(realEstate);
                     setIsAddModalOpen(true);
                   }}
-                  className="p-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+                  className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  <Edit2 className="w-5 h-5" />
+                  <Edit2 className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => {
                     setSelectedRealEstate(realEstate);
                     setIsDeleteModalOpen(true);
                   }}
-                  className="p-2 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="p-1.5 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
-          ))}
-        </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-gray-900">Telefone</p>
+                <p className="text-sm text-gray-600 truncate">{realEstate.telefone}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">CNPJ</p>
+                <p className="text-sm text-gray-600 truncate">{realEstate.cnpj}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-sm font-medium text-gray-900">Endereço</p>
+                <p className="text-sm text-gray-600">
+                  {realEstate.endereco.logradouro}, {realEstate.endereco.numero}
+                  {realEstate.endereco.complemento && ` - ${realEstate.endereco.complemento}`}
+                  <br />
+                  {realEstate.endereco.bairro} - {realEstate.endereco.cidade}/{realEstate.endereco.estado}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Modal de Adicionar/Editar */}
       <RealEstateModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setSelectedRealEstate(undefined);
+        }}
         realEstate={selectedRealEstate}
         onSubmit={selectedRealEstate ? handleEdit : handleAdd}
       />
 
       {/* Modal de Confirmação de Exclusão */}
-      <DeleteConfirmationModal
+      <DeleteConfirm
         isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedRealEstate(undefined);
+        }}
         onConfirm={handleDelete}
         title="Excluir Imobiliária"
-        description={`Tem certeza que deseja excluir a imobiliária "${selectedRealEstate?.name}"? Esta ação também removerá todos os dados associados a esta imobiliária.`}
+        description={`Tem certeza que deseja excluir a imobiliária "${selectedRealEstate?.nome}"? Esta ação não poderá ser desfeita.`}
       />
     </div>
   );

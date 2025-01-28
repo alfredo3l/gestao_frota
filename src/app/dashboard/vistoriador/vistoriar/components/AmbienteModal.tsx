@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Camera, X, CheckSquare, AlertCircle, MessageCircle } from 'lucide-react';
+import { Camera, X, CheckSquare, AlertCircle, MessageCircle, Upload } from 'lucide-react';
 import Image from 'next/image';
 
 interface Item {

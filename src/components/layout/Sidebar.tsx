@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import {
   LayoutDashboard,
   Building2,
@@ -13,37 +12,40 @@ import {
   Crown,
   Sparkles,
   ChevronDown,
-  Calendar,
-  UserCheck,
-  Loader2,
-  CheckCircle2,
-  Lock,
-  ChevronLeft,
-  Home
 } from 'lucide-react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+
+interface MenuItem {
+  name: string;
+  icon: React.ElementType;
+  hasSubmenu?: boolean;
+  submenu?: MenuItem[];
+}
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onSettingsClick: () => void;
-  onLogoutClick: () => void;
-  children: React.ReactNode;
+  onMenuItemClick: (itemName: string) => void;
+  activeItem: string;
 }
 
-export default function Sidebar({ isOpen, onClose, onSettingsClick, onLogoutClick, children }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onMenuItemClick, activeItem }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const submenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (openSubmenu) {
         const submenuRef = submenuRefs.current[openSubmenu];
         if (submenuRef && !submenuRef.contains(event.target as Node)) {
-          // Verifica se o clique não foi no botão do menu
           const menuButton = submenuRef.previousElementSibling;
           if (menuButton && !menuButton.contains(event.target as Node)) {
             setOpenSubmenu(null);
@@ -58,8 +60,9 @@ export default function Sidebar({ isOpen, onClose, onSettingsClick, onLogoutClic
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      setIsCollapsed(window.innerWidth < 1024 && window.innerWidth >= 768);
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsCollapsed(false);
     };
 
     handleResize();
@@ -67,7 +70,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsClick, onLogoutClic
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { name: 'Dashboard', icon: LayoutDashboard },
     { name: 'Imobiliárias', icon: Building2 },
     { name: 'Vistoriadores', icon: Users },
@@ -75,7 +78,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsClick, onLogoutClic
     { name: 'Configurações', icon: Settings },
   ];
 
-  const handleMenuClick = (item: any) => {
+  const handleMenuClick = (item: MenuItem) => {
     onMenuItemClick(item.name);
     if (isMobile) {
       onClose();
@@ -83,119 +86,127 @@ export default function Sidebar({ isOpen, onClose, onSettingsClick, onLogoutClic
   };
 
   const handleLogout = () => {
-    // Aqui você pode adicionar a lógica de logout (limpar tokens, etc)
     router.push('/login');
+  };
+
+  const setSubmenuRef = (name: string, el: HTMLDivElement | null) => {
+    submenuRefs.current[name] = el;
   };
 
   return (
     <>
-      {isMobile && isOpen && (
+      {/* Overlay móvel */}
+      {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40"
+          className="fixed inset-0 bg-black/50 z-[1400] md:hidden"
           onClick={onClose}
         />
       )}
-      <aside className={`${
-        isCollapsed ? 'w-20' : 'w-64'
-      } h-screen bg-white border-r border-border fixed left-0 top-0 flex flex-col z-50 transition-all duration-300 ${
-        isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : ''
-      }`}>
-        {/* Logo */}
-        <div className={`${isCollapsed ? 'p-4' : 'p-6'}`}>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-primary-light to-primary flex items-center justify-center overflow-hidden shadow-lg">
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent"></div>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_transparent_50%,_rgba(255,255,255,0.2)_100%)]"></div>
-                <span className="text-white font-bold text-xl" style={{ fontFamily: 'var(--font-inter)' }}>EV</span>
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-border transform ${
+          mounted ? 'transition-transform duration-300' : ''
+        } z-[1500] ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className={`${isCollapsed ? 'p-4' : 'p-6'}`}>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-primary-light to-primary flex items-center justify-center overflow-hidden shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_transparent_50%,_rgba(255,255,255,0.2)_100%)]"></div>
+                  <span className="text-white font-bold text-xl" style={{ fontFamily: 'var(--font-inter)' }}>EV</span>
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-white flex items-center justify-center">
+                  <Sparkles className="w-2 h-2 text-white" />
+                </div>
               </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-white flex items-center justify-center">
-                <Sparkles className="w-2 h-2 text-white" />
-              </div>
+              {!isCollapsed && (
+                <div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+                    Evolução
+                  </span>
+                  <span className="block text-sm text-gray-600">Vistoria</span>
+                </div>
+              )}
             </div>
-            {!isCollapsed && (
-              <div>
-                <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-                  Evolução
-                </span>
-                <span className="block text-sm text-gray-600">Vistoria</span>
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Menu Items */}
-        <nav className="flex-1 px-4">
-          <div className="space-y-1">
-            {menuItems.map((item) => (
-              <div key={item.name}>
-                <button
-                  onClick={() => handleMenuClick(item)}
-                  className={`
-                    w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all
-                    ${activeItem === item.name.toLowerCase() && !item.hasSubmenu
-                      ? "bg-gradient-to-r from-primary to-primary-light text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                      : "text-gray-600 hover:bg-gray-100/80 hover:text-gray-900 hover:shadow-sm"
-                    }
-                    ${isCollapsed ? 'justify-center' : ''}
-                  `}
-                  title={isCollapsed ? item.name : ''}
-                >
-                  <item.icon className="w-5 h-5 flex-shrink-0" />
-                  {!isCollapsed && (
-                    <>
-                      <span className="font-medium flex-1 text-left">{item.name}</span>
-                      {item.hasSubmenu && (
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform ${
-                            openSubmenu === item.name ? 'rotate-180' : ''
-                          }`}
-                        />
-                      )}
-                      {!item.hasSubmenu && activeItem === item.name.toLowerCase() && (
-                        <ChevronRight className="w-4 h-4" />
-                      )}
-                    </>
-                  )}
-                </button>
-
-                {/* Submenu */}
-                {item.hasSubmenu && (openSubmenu === item.name || (isCollapsed && activeItem === item.name.toLowerCase())) && (
-                  <div
-                    ref={(el) => submenuRefs.current[item.name] = el}
-                    className={`mt-1 space-y-1 ${isCollapsed ? 'absolute left-full top-0 ml-2 w-48 bg-white rounded-lg shadow-lg border border-border p-2' : 'pl-4'}`}
+          {/* Menu Items */}
+          <nav className="flex-1 px-4 overflow-y-auto">
+            <div className="space-y-1">
+              {menuItems.map((item) => (
+                <div key={item.name}>
+                  <button
+                    onClick={() => handleMenuClick(item)}
+                    className={`
+                      w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all
+                      ${activeItem === item.name.toLowerCase() && !item.hasSubmenu
+                        ? "bg-gradient-to-r from-primary to-primary-light text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        : "text-gray-600 hover:bg-gray-100/80 hover:text-gray-900 hover:shadow-sm"
+                      }
+                      ${isCollapsed ? 'justify-center' : ''}
+                    `}
+                    title={isCollapsed ? item.name : ''}
                   >
-                    {item.submenu.map((subItem) => (
-                      <button
-                        key={subItem.name}
-                        onClick={() => {
-                          onMenuItemClick(subItem.name);
-                          setOpenSubmenu(null);
-                          if (isMobile) {
-                            onClose();
-                          }
-                        }}
-                        className={`
-                          w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm
-                          ${activeItem === subItem.name.toLowerCase()
-                            ? "bg-gradient-to-r from-primary to-primary-light text-white shadow-md"
-                            : "text-gray-600 hover:bg-gray-100/80 hover:text-gray-900"
-                          }
-                        `}
-                      >
-                        <subItem.icon className="w-4 h-4" />
-                        <span className="font-medium">{subItem.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </nav>
+                    <item.icon className="w-5 h-5 flex-shrink-0" />
+                    {!isCollapsed && (
+                      <>
+                        <span className="font-medium flex-1 text-left">{item.name}</span>
+                        {item.hasSubmenu && (
+                          <ChevronDown
+                            className={`w-4 h-4 transition-transform ${
+                              openSubmenu === item.name ? 'rotate-180' : ''
+                            }`}
+                          />
+                        )}
+                        {!item.hasSubmenu && activeItem === item.name.toLowerCase() && (
+                          <ChevronRight className="w-4 h-4" />
+                        )}
+                      </>
+                    )}
+                  </button>
 
-        {/* Upgrade Plan */}
-        {!isCollapsed && (
+                  {/* Submenu */}
+                  {item.hasSubmenu && (openSubmenu === item.name || (isCollapsed && activeItem === item.name.toLowerCase())) && (
+                    <div
+                      ref={(el) => setSubmenuRef(item.name, el)}
+                      className={`mt-1 space-y-1 ${isCollapsed ? 'absolute left-full top-0 ml-2 w-48 bg-white rounded-lg shadow-lg border border-border p-2' : 'pl-4'}`}
+                    >
+                      {item.submenu?.map((subItem) => (
+                        <button
+                          key={subItem.name}
+                          onClick={() => {
+                            onMenuItemClick(subItem.name);
+                            setOpenSubmenu(null);
+                            if (isMobile) {
+                              onClose();
+                            }
+                          }}
+                          className={`
+                            w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm
+                            ${activeItem === subItem.name.toLowerCase()
+                              ? "bg-gradient-to-r from-primary to-primary-light text-white shadow-md"
+                              : "text-gray-600 hover:bg-gray-100/80 hover:text-gray-900"
+                            }
+                          `}
+                        >
+                          <subItem.icon className="w-4 h-4" />
+                          <span className="font-medium">{subItem.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </nav>
+
+          {/* Upgrade Plan */}
           <div className="p-4">
             <div className="relative p-5 rounded-xl bg-gradient-to-br from-primary via-primary-light to-primary overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_transparent_30%,_rgba(255,255,255,0.15)_100%)]"></div>
@@ -219,17 +230,17 @@ export default function Sidebar({ isOpen, onClose, onSettingsClick, onLogoutClic
               </div>
             </div>
           </div>
-        )}
 
-        {/* Logout */}
-        <div className={`p-4 border-t border-border ${isCollapsed ? 'flex justify-center' : ''}`}>
-          <button
-            onClick={handleLogout}
-            className={`flex items-center gap-2 text-gray-600 hover:text-primary transition-all px-4 py-2 rounded-lg hover:bg-gray-50 ${isCollapsed ? 'w-auto' : 'w-full'}`}
-          >
-            <LogOut className="w-5 h-5" />
-            {!isCollapsed && <span className="font-medium">Sair</span>}
-          </button>
+          {/* Logout */}
+          <div className="p-4 border-t border-border mt-auto">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 text-gray-600 hover:text-primary transition-all px-4 py-2 rounded-lg hover:bg-gray-50"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Sair</span>
+            </button>
+          </div>
         </div>
       </aside>
     </>

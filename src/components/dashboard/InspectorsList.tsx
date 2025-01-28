@@ -1,263 +1,349 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, Edit2, Trash2, MapPin, Phone, Mail, Star, Plus } from 'lucide-react';
-import InspectorModal from '../modals/InspectorModal';
-import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
+import { Plus, Eye, Edit2, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import InspectorModal from '@/components/modals/InspectorModal';
+import DeleteConfirm from '@/components/modals/DeleteConfirm';
 
-const INSPECTOR_AVATARS = [
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqVyiI1XClbT2Ue-7CGVAp8sKoqe_068R9zw&s',
-  'https://static.vecteezy.com/ti/fotos-gratis/t2/47462753-positivo-homem-em-limpar-limpo-fundo-foto.jpg',
-  'https://blog.unyleya.edu.br/wp-content/uploads/2017/12/saiba-como-a-educacao-ajuda-voce-a-ser-uma-pessoa-melhor.jpeg'
-];
-
-interface Inspector {
-  id: string;
-  name: string;
-  avatar: string;
-  region: string;
-  phone: string;
+interface BaseInspector {
+  id?: string;
+  nome: string;
   email: string;
-  rating: number;
-  completedInspections: number;
-  pendingInspections: number;
+  telefone: string;
+  cpf: string;
+  avatar?: string;
+  endereco: {
+    cep: string;
+    logradouro: string;
+    numero: string;
+    complemento?: string;
+    bairro: string;
+    cidade: string;
+    estado: string;
+  };
 }
 
-// Dados simulados
-const inspectors: Inspector[] = [
+interface Inspector extends BaseInspector {
+  id: string;
+  pendingInspections: number;
+  completedInspections: number;
+}
+
+const mockInspectors: Inspector[] = [
   {
     id: '1',
-    name: 'João Silva',
-    avatar: INSPECTOR_AVATARS[0],
-    region: 'Zona Sul',
-    phone: '(11) 99999-9999',
-    email: 'joao.silva@evolucao.com.br',
-    rating: 4.8,
-    completedInspections: 128,
+    nome: 'João Silva',
+    email: 'joao.silva@email.com',
+    telefone: '(11) 99999-9999',
+    cpf: '123.456.789-00',
+    avatar: 'https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg',
+    endereco: {
+      cep: '01234-567',
+      logradouro: 'Rua das Flores',
+      numero: '123',
+      complemento: 'Apto 456',
+      bairro: 'Centro',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
     pendingInspections: 5,
+    completedInspections: 128,
   },
   {
     id: '2',
-    name: 'Maria Santos',
-    avatar: INSPECTOR_AVATARS[1],
-    region: 'Zona Norte',
-    phone: '(11) 98888-8888',
-    email: 'maria.santos@evolucao.com.br',
-    rating: 4.9,
-    completedInspections: 95,
+    nome: 'Maria Santos',
+    email: 'maria.santos@email.com',
+    telefone: '(11) 98888-8888',
+    cpf: '987.654.321-00',
+    avatar: 'https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg',
+    endereco: {
+      cep: '04321-765',
+      logradouro: 'Av. Principal',
+      numero: '789',
+      bairro: 'Jardins',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
     pendingInspections: 3,
+    completedInspections: 95,
   },
   {
     id: '3',
-    name: 'Pedro Costa',
-    avatar: INSPECTOR_AVATARS[2],
-    region: 'Centro',
-    phone: '(11) 97777-7777',
-    email: 'pedro.costa@evolucao.com.br',
-    rating: 4.7,
-    completedInspections: 76,
-    pendingInspections: 4,
+    nome: 'Pedro Oliveira',
+    email: 'pedro.oliveira@email.com',
+    telefone: '(11) 97777-7777',
+    cpf: '456.789.123-00',
+    avatar: 'https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg',
+    endereco: {
+      cep: '05678-901',
+      logradouro: 'Rua dos Pinheiros',
+      numero: '456',
+      complemento: 'Casa 2',
+      bairro: 'Pinheiros',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
+    pendingInspections: 7,
+    completedInspections: 156,
   },
   {
     id: '4',
-    name: 'Ana Oliveira',
-    avatar: INSPECTOR_AVATARS[0],
-    region: 'Zona Leste',
-    phone: '(11) 96666-6666',
-    email: 'ana.oliveira@evolucao.com.br',
-    rating: 4.9,
-    completedInspections: 142,
-    pendingInspections: 6,
+    nome: 'Ana Costa',
+    email: 'ana.costa@email.com',
+    telefone: '(11) 96666-6666',
+    cpf: '789.123.456-00',
+    avatar: 'https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg',
+    endereco: {
+      cep: '06789-012',
+      logradouro: 'Av. Paulista',
+      numero: '1000',
+      complemento: 'Sala 502',
+      bairro: 'Bela Vista',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
+    pendingInspections: 2,
+    completedInspections: 78,
   },
   {
     id: '5',
-    name: 'Carlos Ferreira',
-    avatar: INSPECTOR_AVATARS[1],
-    region: 'Zona Oeste',
-    phone: '(11) 95555-5555',
-    email: 'carlos.ferreira@evolucao.com.br',
-    rating: 4.6,
-    completedInspections: 89,
+    nome: 'Lucas Ferreira',
+    email: 'lucas.ferreira@email.com',
+    telefone: '(11) 95555-5555',
+    cpf: '321.654.987-00',
+    avatar: 'https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg',
+    endereco: {
+      cep: '07890-123',
+      logradouro: 'Rua Augusta',
+      numero: '789',
+      bairro: 'Consolação',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
     pendingInspections: 4,
+    completedInspections: 112,
   },
   {
     id: '6',
-    name: 'Beatriz Lima',
-    avatar: INSPECTOR_AVATARS[2],
-    region: 'Centro-Sul',
-    phone: '(11) 94444-4444',
-    email: 'beatriz.lima@evolucao.com.br',
-    rating: 4.8,
-    completedInspections: 115,
-    pendingInspections: 5,
+    nome: 'Carla Rodrigues',
+    email: 'carla.rodrigues@email.com',
+    telefone: '(11) 94444-4444',
+    cpf: '654.987.321-00',
+    avatar: 'https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg',
+    endereco: {
+      cep: '08901-234',
+      logradouro: 'Rua Oscar Freire',
+      numero: '123',
+      complemento: 'Apto 1001',
+      bairro: 'Jardins',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
+    pendingInspections: 6,
+    completedInspections: 143,
   },
   {
     id: '7',
-    name: 'Rafael Souza',
-    avatar: INSPECTOR_AVATARS[0],
-    region: 'Centro-Norte',
-    phone: '(11) 93333-3333',
-    email: 'rafael.souza@evolucao.com.br',
-    rating: 4.7,
-    completedInspections: 98,
-    pendingInspections: 3,
+    nome: 'Roberto Almeida',
+    email: 'roberto.almeida@email.com',
+    telefone: '(11) 93333-3333',
+    cpf: '147.258.369-00',
+    avatar: 'https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg',
+    endereco: {
+      cep: '09012-345',
+      logradouro: 'Av. Brigadeiro Faria Lima',
+      numero: '4500',
+      complemento: 'Conj. 1502',
+      bairro: 'Itaim Bibi',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
+    pendingInspections: 1,
+    completedInspections: 67,
   },
   {
     id: '8',
-    name: 'Juliana Martins',
-    avatar: INSPECTOR_AVATARS[1],
-    region: 'Zona Sul-Leste',
-    phone: '(11) 92222-2222',
-    email: 'juliana.martins@evolucao.com.br',
-    rating: 4.9,
-    completedInspections: 134,
-    pendingInspections: 5,
-  },
-  {
-    id: '9',
-    name: 'Lucas Almeida',
-    avatar: INSPECTOR_AVATARS[2],
-    region: 'Zona Norte-Oeste',
-    phone: '(11) 91111-1111',
-    email: 'lucas.almeida@evolucao.com.br',
-    rating: 4.8,
-    completedInspections: 108,
-    pendingInspections: 4,
+    nome: 'Fernanda Lima',
+    email: 'fernanda.lima@email.com',
+    telefone: '(11) 92222-2222',
+    cpf: '369.258.147-00',
+    avatar: 'https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg',
+    endereco: {
+      cep: '10123-456',
+      logradouro: 'Rua Joaquim Floriano',
+      numero: '1000',
+      bairro: 'Itaim Bibi',
+      cidade: 'São Paulo',
+      estado: 'SP',
+    },
+    pendingInspections: 8,
+    completedInspections: 189,
   },
 ];
 
-export default function InspectorsList() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedInspector, setSelectedInspector] = useState<Inspector | null>(null);
+export default function InspectorsList(): React.JSX.Element {
+  const [inspectors, setInspectors] = useState<Inspector[]>(mockInspectors);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [selectedInspector, setSelectedInspector] = useState<Inspector | undefined>(undefined);
 
-  const handleAdd = (data: Inspector) => {
-    console.log('Adicionar:', data);
-    // Aqui você vai implementar a lógica de adicionar no Supabase
+  const handleAdd = (data: BaseInspector): void => {
+    const newInspector: Inspector = {
+      ...data,
+      id: String(inspectors.length + 1),
+      pendingInspections: 0,
+      completedInspections: 0,
+    };
+    setInspectors([...inspectors, newInspector]);
+    setIsAddModalOpen(false);
   };
 
-  const handleEdit = (data: Inspector) => {
-    console.log('Editar:', data);
-    // Aqui você vai implementar a lógica de editar no Supabase
+  const handleEdit = (data: BaseInspector): void => {
+    if (selectedInspector) {
+      const updatedInspector: Inspector = {
+        ...data,
+        id: selectedInspector.id,
+        pendingInspections: selectedInspector.pendingInspections,
+        completedInspections: selectedInspector.completedInspections,
+      };
+      setInspectors(inspectors.map(insp => insp.id === selectedInspector.id ? updatedInspector : insp));
+      setIsAddModalOpen(false);
+      setSelectedInspector(undefined);
+    }
   };
 
-  const handleDelete = () => {
-    console.log('Excluir:', selectedInspector?.id);
-    // Aqui você vai implementar a lógica de excluir no Supabase
+  const handleDelete = (): void => {
+    if (selectedInspector) {
+      setInspectors(inspectors.filter(insp => insp.id !== selectedInspector.id));
+      setIsDeleteModalOpen(false);
+      setSelectedInspector(undefined);
+    }
   };
 
   return (
-    <div className="bg-white rounded-xl border border-border shadow-sm">
-      <div className="p-4 sm:p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Vistoriadores</h2>
-          <p className="text-sm text-gray-600">Gerencie os vistoriadores cadastrados</p>
+          <h1 className="text-2xl font-bold text-gray-900">Vistoriadores</h1>
+          <p className="text-gray-600">Gerencie os vistoriadores cadastrados</p>
         </div>
-        <button 
+        <button
           onClick={() => {
-            setSelectedInspector(null);
+            setSelectedInspector(undefined);
             setIsAddModalOpen(true);
           }}
-          className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-light transition-colors flex items-center justify-center gap-2"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors"
         >
           <Plus className="w-4 h-4" />
-          <span className="sm:block">Adicionar Vistoriador</span>
+          <span>Adicionar</span>
         </button>
       </div>
-      <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {inspectors.map((inspector) => (
-            <div
-              key={inspector.id}
-              className="bg-white rounded-xl border border-border p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={inspector.avatar}
-                    alt={inspector.name}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-full object-cover border border-gray-300"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{inspector.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{inspector.region}</span>
-                    </div>
-                  </div>
+
+      {/* Lista de Vistoriadores */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {inspectors.map((inspector) => (
+          <div
+            key={inspector.id}
+            className="bg-white rounded-xl border border-border p-4 hover:shadow-md transition-shadow w-full max-w-md mx-auto"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+                  {inspector.avatar && (
+                    <Image
+                      src={inspector.avatar}
+                      alt={inspector.nome}
+                      width={56}
+                      height={56}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
-                <div className="flex items-center gap-1 bg-primary/5 px-2 py-1 rounded-full">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span className="text-sm font-medium text-primary">{inspector.rating}</span>
+                <div className="min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">{inspector.nome}</h3>
+                  <p className="text-sm text-gray-600 truncate">{inspector.email}</p>
                 </div>
               </div>
 
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  <span>{inspector.phone}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Mail className="w-4 h-4" />
-                  <span>{inspector.email}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                <div>
-                  <span className="font-medium text-primary">{inspector.completedInspections}</span> vistorias realizadas
-                </div>
-                <div>
-                  <span className="font-medium text-primary">{inspector.pendingInspections}</span> pendentes
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2">
-                <button className="p-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors">
-                  <Eye className="w-5 h-5" />
+              <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                <button className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors">
+                  <Eye className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => {
                     setSelectedInspector(inspector);
                     setIsAddModalOpen(true);
                   }}
-                  className="p-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+                  className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  <Edit2 className="w-5 h-5" />
+                  <Edit2 className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => {
                     setSelectedInspector(inspector);
                     setIsDeleteModalOpen(true);
                   }}
-                  className="p-2 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="p-1.5 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
-          ))}
-        </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-gray-900">Telefone</p>
+                <p className="text-sm text-gray-600 truncate">{inspector.telefone}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">CPF</p>
+                <p className="text-sm text-gray-600 truncate">{inspector.cpf}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-sm font-medium text-gray-900">Endereço</p>
+                <p className="text-sm text-gray-600">
+                  {inspector.endereco.logradouro}, {inspector.endereco.numero}
+                  {inspector.endereco.complemento && ` - ${inspector.endereco.complemento}`}
+                  <br />
+                  {inspector.endereco.bairro} - {inspector.endereco.cidade}/{inspector.endereco.estado}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Vistorias Pendentes</p>
+                <p className="text-sm text-gray-600">{inspector.pendingInspections}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Vistorias Realizadas</p>
+                <p className="text-sm text-gray-600">{inspector.completedInspections}</p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Modal de Adicionar/Editar */}
       <InspectorModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setSelectedInspector(undefined);
+        }}
         inspector={selectedInspector}
         onSubmit={selectedInspector ? handleEdit : handleAdd}
       />
 
       {/* Modal de Confirmação de Exclusão */}
-      <DeleteConfirmationModal
+      <DeleteConfirm
         isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedInspector(undefined);
+        }}
         onConfirm={handleDelete}
         title="Excluir Vistoriador"
-        description={`Tem certeza que deseja excluir o vistoriador "${selectedInspector?.name}"? Esta ação não pode ser desfeita.`}
+        description={`Tem certeza que deseja excluir o vistoriador "${selectedInspector?.nome}"? Esta ação não poderá ser desfeita.`}
       />
     </div>
   );

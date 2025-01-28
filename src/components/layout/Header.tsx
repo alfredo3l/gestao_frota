@@ -7,11 +7,12 @@ import Image from 'next/image';
 
 interface HeaderProps {
   onMenuClick: () => void;
+  isMenuOpen: boolean;
   fullWidth?: boolean;
 }
 
-export default function Header({ onMenuClick, fullWidth = false }: HeaderProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+export default function Header({ onMenuClick, isMenuOpen, fullWidth = false }: HeaderProps): React.JSX.Element {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [activeProfile, setActiveProfile] = useState('gestor');
@@ -20,6 +21,8 @@ export default function Header({ onMenuClick, fullWidth = false }: HeaderProps) 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
 
   // Detecta o perfil ativo baseado na URL
   useEffect(() => {
@@ -33,11 +36,19 @@ export default function Header({ onMenuClick, fullWidth = false }: HeaderProps) 
   }, [pathname]);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent): void => {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false);
+      }
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node) &&
+        profileButtonRef.current &&
+        !profileButtonRef.current.contains(event.target as Node)
+      ) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -47,7 +58,7 @@ export default function Header({ onMenuClick, fullWidth = false }: HeaderProps) 
   }, []);
 
   useEffect(() => {
-    const handleResize = () => {
+    const handleResize = (): void => {
       setIsMobile(window.innerWidth < 768);
     };
 
@@ -80,7 +91,7 @@ export default function Header({ onMenuClick, fullWidth = false }: HeaderProps) 
     },
   ];
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     router.push('/login');
   };
 
@@ -101,9 +112,9 @@ export default function Header({ onMenuClick, fullWidth = false }: HeaderProps) 
   };
 
   return (
-    <header className={`h-16 bg-white border-b border-border fixed top-0 z-[1000] transition-all duration-300 ${
-      isMobile || fullWidth ? 'left-0' : 'left-64'
-    } right-0`}>
+    <header className={`h-16 bg-white border-b border-border fixed top-0 right-0 z-[900] transition-all duration-300 ${
+      isMobile ? 'left-0' : (fullWidth ? 'left-0' : 'left-64')
+    }`}>
       <div className="h-full px-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {/* Mostra o menu apenas quando não for fullWidth e estiver em mobile */}
@@ -171,13 +182,14 @@ export default function Header({ onMenuClick, fullWidth = false }: HeaderProps) 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="w-8 h-8 rounded-full overflow-hidden border border-gray-200"
             >
-              <Image
-                src="https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg"
-                alt="Foto de perfil"
-                width={32}
-                height={32}
-                className="w-full h-full object-cover"
-              />
+              <div className="relative w-8 h-8">
+                <Image
+                  src="https://consultoriodehipnose.com.br/wp-content/uploads/2021/05/as-9-necessidades-basicas-do-ser-humano.jpg"
+                  alt="Foto de perfil"
+                  fill
+                  className="object-cover"
+                />
+              </div>
             </button>
 
             {isMobileMenuOpen && (
