@@ -5,7 +5,8 @@ export interface Inspection {
   address: string;
   date: string;
   time: string;
-  inspectionType: string;
+  type: string;
+  status?: string;
   inspector: string;
   progress: number;
   isContestacao?: boolean;
