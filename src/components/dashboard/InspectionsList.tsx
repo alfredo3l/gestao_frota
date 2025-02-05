@@ -15,7 +15,7 @@ const mockInspections: Inspection[] = [
     address: 'Rua das Flores, 123 - Centro',
     date: '25/03/2024',
     time: '14:30',
-    inspectionType: 'Entrada',
+    type: 'Entrada',
     inspector: 'João Silva',
     progress: 0,
     isContestacao: true
@@ -27,7 +27,7 @@ const mockInspections: Inspection[] = [
     address: 'Av. Principal, 456 - Jardins',
     date: '26/03/2024',
     time: '09:00',
-    inspectionType: 'Saída',
+    type: 'Saída',
     inspector: 'Maria Santos',
     progress: 65,
     isContestacao: false
@@ -39,7 +39,7 @@ const mockInspections: Inspection[] = [
     address: 'Rua do Comércio, 789 - Centro',
     date: '26/03/2024',
     time: '15:45',
-    inspectionType: 'Periódica',
+    type: 'Periódica',
     inspector: 'Pedro Costa',
     progress: 30,
     isContestacao: true
@@ -98,7 +98,7 @@ export default function InspectionsList({ status }: InspectionsListProps) {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = inspection.propertyCode.toLowerCase().includes(searchLower) ||
       inspection.address.toLowerCase().includes(searchLower);
-    const matchesType = selectedType === '' || inspection.inspectionType === selectedType;
+    const matchesType = selectedType === '' || inspection.type === selectedType;
     
     return matchesSearch && matchesType;
   });
@@ -201,7 +201,7 @@ export default function InspectionsList({ status }: InspectionsListProps) {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span className="font-medium">Tipo:</span>
-                <span>{inspection.inspectionType}</span>
+                <span>{inspection.type}</span>
               </div>
               {(status === 'atribuidas' || status === 'andamento' || status === 'finalizadas') && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
