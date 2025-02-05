@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Building2, Users, ClipboardList, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Building2, Users, ClipboardList, AlertCircle, ArrowUpRight, ArrowDownRight, Calendar, MapPin, Clock, Hash, ArrowRight, Search, Trash2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Sidebar from '../../../components/layout/Sidebar';
 import Charts from '../../../components/dashboard/Charts';
@@ -10,6 +10,8 @@ import InspectorsList from '../../../components/dashboard/InspectorsList';
 import InspectionsList from '../../../components/dashboard/InspectionsList';
 import InspectionsTabBar, { InspectionStatus } from '../../../components/dashboard/InspectionsTabBar';
 import SettingsManager from '../../../components/dashboard/SettingsManager';
+import InspectionModal, { InspectionFormData } from '../../../components/modals/InspectionModal';
+import DeleteConfirm from '../../../components/modals/DeleteConfirm';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false
@@ -19,6 +21,14 @@ export default function DashGestor() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeItem, setActiveItem] = useState('dashboard');
   const [activeInspectionTab, setActiveInspectionTab] = useState<InspectionStatus>('agendadas');
+  const [isInspectionModalOpen, setIsInspectionModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [isContestacao, setIsContestacao] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
 
   useEffect(() => {
     setIsSidebarOpen(window.innerWidth >= 768);
@@ -30,6 +40,28 @@ export default function DashGestor() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handleAddInspection = () => {
+    setIsInspectionModalOpen(true);
+  };
+
+  const handleSubmitInspection = (data: InspectionFormData) => {
+    // TODO: Implementar lógica para salvar a vistoria
+    console.log('Nova vistoria:', data);
+  };
+
+  const handleDelete = () => {
+    if (selectedInspection) {
+      // Aqui você implementaria a lógica real de exclusão
+      console.log('Excluindo vistoria:', selectedInspection.id);
+      setIsDeleteModalOpen(false);
+      setSelectedInspection(null);
+    }
+  };
+
+  const canDelete = (status: InspectionStatus) => {
+    return status === 'agendadas' || status === 'atribuidas';
+  };
 
   const renderContent = () => {
     switch (activeItem.toLowerCase()) {
@@ -43,8 +75,14 @@ export default function DashGestor() {
             <InspectionsTabBar
               activeTab={activeInspectionTab}
               onTabChange={setActiveInspectionTab}
+              onAddInspection={handleAddInspection}
             />
             <InspectionsList status={activeInspectionTab} />
+            <InspectionModal
+              isOpen={isInspectionModalOpen}
+              onClose={() => setIsInspectionModalOpen(false)}
+              onSubmit={handleSubmitInspection}
+            />
           </div>
         );
       case 'configurações':
@@ -388,6 +426,25 @@ export default function DashGestor() {
           {renderContent()}
         </div>
       </main>
+
+      {/* Modal de Adicionar Vistoria */}
+      <InspectionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmitInspection}
+      />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <DeleteConfirm
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedInspection(null);
+        }}
+        onConfirm={handleDelete}
+        title="Excluir Vistoria"
+        description={`Tem certeza que deseja excluir esta vistoria? Esta ação não poderá ser desfeita.`}
+      />
     </div>
   );
 } 

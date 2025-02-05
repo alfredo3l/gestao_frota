@@ -9,6 +9,7 @@ import type { VistoriadorTab } from '../../../components/dashboard/VistoriadorTa
 import { Home, MapPin, Calendar, Clock, Bell, Key, Camera, CheckSquare, AlertCircle, X, Play, CheckCircle2, Loader2 } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false

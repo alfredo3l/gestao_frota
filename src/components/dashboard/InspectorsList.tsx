@@ -268,7 +268,11 @@ export default function InspectorsList(): React.JSX.Element {
               </div>
 
               <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                <button className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors">
+                <button 
+                  className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+                  aria-label="Visualizar detalhes do vistoriador"
+                  title="Visualizar detalhes"
+                >
                   <Eye className="w-4 h-4" />
                 </button>
                 <button 
@@ -277,6 +281,8 @@ export default function InspectorsList(): React.JSX.Element {
                     setIsAddModalOpen(true);
                   }}
                   className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+                  aria-label="Editar vistoriador"
+                  title="Editar"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
@@ -286,6 +292,8 @@ export default function InspectorsList(): React.JSX.Element {
                     setIsDeleteModalOpen(true);
                   }}
                   className="p-1.5 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
+                  aria-label="Excluir vistoriador"
+                  title="Excluir"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

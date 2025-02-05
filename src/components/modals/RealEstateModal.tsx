@@ -12,6 +12,7 @@ interface BaseRealEstate {
   telefone: string;
   cnpj: string;
   logo?: string;
+  prazoContestacao: number;
   endereco: {
     cep: string;
     logradouro: string;
@@ -47,6 +48,7 @@ export default function RealEstateModal({
     telefone: '',
     cnpj: '',
     logo: '',
+    prazoContestacao: 7,
     endereco: {
       cep: '',
       logradouro: '',
@@ -75,6 +77,7 @@ export default function RealEstateModal({
         telefone: '',
         cnpj: '',
         logo: '',
+        prazoContestacao: 7,
         endereco: {
           cep: '',
           logradouro: '',
@@ -355,6 +358,35 @@ export default function RealEstateModal({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Prazo de Contestação */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700" htmlFor="prazoContestacao">
+                Prazo limite de contestação das vistorias
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  id="prazoContestacao"
+                  name="prazoContestacao"
+                  value={formData.prazoContestacao}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    prazoContestacao: parseInt(e.target.value)
+                  })}
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-gray-900"
+                  title="Prazo em dias para contestação de vistorias"
+                  placeholder="Dias"
+                  aria-label="Prazo em dias para contestação de vistorias"
+                />
+                <span className="text-sm text-gray-600">dias após a finalização da vistoria</span>
+              </div>
+              <p className="text-xs text-gray-500">
+                Define o período em que a imobiliária pode contestar uma vistoria após sua finalização.
+              </p>
             </div>
 
             {/* Botões */}

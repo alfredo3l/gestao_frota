@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Check, Mail, Smartphone, CreditCard, Eye, EyeOff, FileText } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Check, Mail, Smartphone, CreditCard, Eye, EyeOff, FileText, Upload, Building2, User, Plus, ChevronDown, Save, Trash2 } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
+import Image from 'next/image';
 
 interface DialogProps {
   isOpen: boolean;
@@ -34,6 +35,16 @@ function BaseDialog({ isOpen, onClose, children, title }: DialogProps) {
       </Dialog.Portal>
     </Dialog.Root>
   );
+}
+
+interface ViaCepResponse {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  erro?: boolean;
 }
 
 // Diálogo de Notificações
@@ -180,6 +191,8 @@ export function PasswordDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
                 value={passwords.current}
                 onChange={handleChange}
                 className="w-full px-3 py-2 pr-10 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                title="Digite sua senha atual"
+                placeholder="Digite sua senha atual"
               />
               <button
                 type="button"
@@ -200,6 +213,8 @@ export function PasswordDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
                 value={passwords.new}
                 onChange={handleChange}
                 className="w-full px-3 py-2 pr-10 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                title="Digite sua nova senha"
+                placeholder="Digite sua nova senha"
               />
               <button
                 type="button"
@@ -219,6 +234,8 @@ export function PasswordDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
               value={passwords.confirm}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              title="Confirme sua nova senha"
+              placeholder="Confirme sua nova senha"
             />
           </div>
         </div>
@@ -415,6 +432,7 @@ export function ThemeDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () 
               value={selectedColor}
               onChange={handleCustomColorChange}
               className="w-12 h-12 rounded-lg overflow-hidden"
+              title="Selecionar cor personalizada"
             />
             <div className="flex-1">
               <input
@@ -422,6 +440,8 @@ export function ThemeDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                 value={selectedColor.toUpperCase()}
                 onChange={(e) => handleColorChange(e.target.value)}
                 className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                title="Código da cor em hexadecimal"
+                placeholder="Digite o código da cor (ex: #000000)"
               />
             </div>
           </div>
@@ -462,7 +482,7 @@ export function ThemeDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () 
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg"
+            className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-light transition-colors rounded-lg"
             style={{ backgroundColor: selectedColor }}
           >
             Aplicar Tema
@@ -584,78 +604,635 @@ export function PlansDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () 
 
 // Diálogo de Edição de Perfil
 export function ProfileDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [profile, setProfile] = useState({
+    // Dados da Empresa
+    companyName: 'Evolução Vistoria',
+    companyCnpj: '12.345.678/0001-90',
+    companyAddress: 'Av. Paulista, 1000',
+    companyNumber: '1000',
+    companyComplement: '',
+    companyNeighborhood: 'Bela Vista',
+    companyCity: 'São Paulo',
+    companyState: 'SP',
+    companyCep: '01310-100',
+    companyLogo: '',
+    // Dados Pessoais
     name: 'Paulo Morales',
     email: 'paulomorales@gmail.com',
-    phone: '(11) 98765-4321',
-    company: 'Evolução Vistoria',
-    role: 'Gestor'
+    phone: '(11) 98765-4321'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Aplicar máscara para CEP
+    if (name === 'companyCep') {
+      const cepValue = value.replace(/\D/g, ''); // Remove não dígitos
+      const cepMask = cepValue.replace(/(\d{5})(\d{3})/, '$1-$2'); // Aplica máscara 00000-000
+      setProfile(prev => ({ ...prev, [name]: cepMask }));
+
+      // Buscar endereço quando CEP estiver completo
+      if (cepValue.length === 8) {
+        fetchAddress(cepValue);
+      }
+      return;
+    }
+
     setProfile(prev => ({ ...prev, [name]: value }));
+  };
+
+  const fetchAddress = async (cep: string) => {
+    setIsLoadingCep(true);
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data: ViaCepResponse = await response.json();
+
+      if (!data.erro) {
+        setProfile(prev => ({
+          ...prev,
+          companyAddress: data.logradouro,
+          companyNeighborhood: data.bairro,
+          companyCity: data.localidade,
+          companyState: data.uf,
+          companyComplement: data.complemento
+        }));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+    } finally {
+      setIsLoadingCep(false);
+    }
+  };
+
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfile(prev => ({ ...prev, companyLogo: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
     <BaseDialog isOpen={isOpen} onClose={onClose} title="Editar Perfil">
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-            <input
-              type="text"
-              name="name"
-              value={profile.name}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
+      <div className="space-y-8">
+        {/* Dados da Empresa */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-medium text-gray-900">Dados da Empresa</h3>
           </div>
+
+          {/* Logo da Empresa */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-            <input
-              type="email"
-              name="email"
-              value={profile.email}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Logo da Empresa
+            </label>
+            <div className="flex items-center gap-4">
+              {profile.companyLogo ? (
+                <div className="relative w-24 h-24">
+                  <Image
+                    src={profile.companyLogo}
+                    alt="Logo da empresa"
+                    fill
+                    className="rounded-lg object-cover border border-border"
+                  />
+                </div>
+              ) : (
+                <div className="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+                  <Building2 className="w-8 h-8 text-gray-400" />
+                </div>
+              )}
+              <label 
+                htmlFor="logo-input"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary cursor-pointer"
+              >
+                <Upload className="w-4 h-4" />
+                Escolher logo
+              </label>
+              <input
+                ref={logoInputRef}
+                type="file"
+                id="logo-input"
+                accept="image/*"
+                onChange={handleLogoSelect}
+                className="hidden"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-            <input
-              type="tel"
-              name="phone"
-              value={profile.phone}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
+
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
+                Nome da Empresa
+              </label>
+              <input
+                type="text"
+                id="companyName"
+                name="companyName"
+                value={profile.companyName}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="companyCnpj" className="block text-sm font-medium text-gray-700 mb-1">
+                CNPJ
+              </label>
+              <input
+                type="text"
+                id="companyCnpj"
+                name="companyCnpj"
+                value={profile.companyCnpj}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="companyCep" className="block text-sm font-medium text-gray-700 mb-1">
+                CEP
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="companyCep"
+                  name="companyCep"
+                  value={profile.companyCep}
+                  onChange={handleChange}
+                  maxLength={9}
+                  placeholder="00000-000"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                  required
+                />
+                {isLoadingCep && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="companyAddress" className="block text-sm font-medium text-gray-700 mb-1">
+                Endereço
+              </label>
+              <input
+                type="text"
+                id="companyAddress"
+                name="companyAddress"
+                value={profile.companyAddress}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="companyNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                  Número
+                </label>
+                <input
+                  type="text"
+                  id="companyNumber"
+                  name="companyNumber"
+                  value={profile.companyNumber}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="companyComplement" className="block text-sm font-medium text-gray-700 mb-1">
+                  Complemento
+                </label>
+                <input
+                  type="text"
+                  id="companyComplement"
+                  name="companyComplement"
+                  value={profile.companyComplement}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="companyNeighborhood" className="block text-sm font-medium text-gray-700 mb-1">
+                Bairro
+              </label>
+              <input
+                type="text"
+                id="companyNeighborhood"
+                name="companyNeighborhood"
+                value={profile.companyNeighborhood}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="companyCity" className="block text-sm font-medium text-gray-700 mb-1">
+                  Cidade
+                </label>
+                <input
+                  type="text"
+                  id="companyCity"
+                  name="companyCity"
+                  value={profile.companyCity}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="companyState" className="block text-sm font-medium text-gray-700 mb-1">
+                  Estado
+                </label>
+                <input
+                  type="text"
+                  id="companyState"
+                  name="companyState"
+                  value={profile.companyState}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                  required
+                />
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-            <input
-              type="text"
-              name="company"
-              value={profile.company}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
+        </div>
+
+        {/* Dados Pessoais */}
+        <div className="space-y-6 pt-6 border-t border-border">
+          <div className="flex items-center gap-2">
+            <User className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-medium text-gray-900">Dados Pessoais</h3>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Nome
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={profile.name}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                E-mail
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={profile.email}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Telefone
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={profile.phone}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
           </div>
         </div>
 
         {/* Botões de Ação */}
-        <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-border">
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-border">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-sm font-medium text-white bg-[#1B3B5A] hover:bg-[#1B3B5A]/90 transition-colors rounded-lg"
+          >
+            Salvar Alterações
+          </button>
+        </div>
+      </div>
+    </BaseDialog>
+  );
+}
+
+// Diálogo de Configuração de Vistorias
+export function InspectionConfigDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [tiposVistoria, setTiposVistoria] = useState(['Entrada', 'Saída', 'Periódica']);
+  const [tiposImoveis, setTiposImoveis] = useState(['Apartamento', 'Casa', 'Sala Comercial']);
+  const [showNewVistoriaInput, setShowNewVistoriaInput] = useState(false);
+  const [showNewImovelInput, setShowNewImovelInput] = useState(false);
+  const [newVistoriaValue, setNewVistoriaValue] = useState('');
+  const [newImovelValue, setNewImovelValue] = useState('');
+  const [selectedVistoria, setSelectedVistoria] = useState('');
+  const [selectedImovel, setSelectedImovel] = useState('');
+  const [entendimentoProcesso, setEntendimentoProcesso] = useState('');
+  const [documentos, setDocumentos] = useState<File[]>([]);
+  const documentInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAddTipoVistoria = () => {
+    if (newVistoriaValue.trim()) {
+      setTiposVistoria([...tiposVistoria, newVistoriaValue.trim()]);
+      setNewVistoriaValue('');
+      setShowNewVistoriaInput(false);
+    }
+  };
+
+  const handleAddTipoImovel = () => {
+    if (newImovelValue.trim()) {
+      setTiposImoveis([...tiposImoveis, newImovelValue.trim()]);
+      setNewImovelValue('');
+      setShowNewImovelInput(false);
+    }
+  };
+
+  const handleRemoveTipoVistoria = (tipo: string) => {
+    setTiposVistoria(tiposVistoria.filter(t => t !== tipo));
+    if (selectedVistoria === tipo) {
+      setSelectedVistoria('');
+    }
+  };
+
+  const handleRemoveTipoImovel = (tipo: string) => {
+    setTiposImoveis(tiposImoveis.filter(t => t !== tipo));
+    if (selectedImovel === tipo) {
+      setSelectedImovel('');
+    }
+  };
+
+  const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setDocumentos(prev => [...prev, ...files]);
+  };
+
+  const handleRemoveDocumento = (index: number) => {
+    setDocumentos(prev => prev.filter((_, i) => i !== index));
+  };
+
+  return (
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Configuração de Vistorias">
+      <div className="space-y-6">
+        {/* Tipos de Vistoria */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">Tipos de Vistoria</h3>
+            <button
+              onClick={() => setShowNewVistoriaInput(true)}
+              className="p-1.5 text-primary hover:bg-primary/5 rounded-lg transition-colors"
+              title="Adicionar novo tipo"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {/* Dropdown de Tipos de Vistoria */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowNewVistoriaInput(!showNewVistoriaInput)}
+                className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary flex items-center justify-between"
+              >
+                <span className="text-gray-700">{selectedVistoria || 'Selecione um tipo'}</span>
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              </button>
+
+              {/* Lista de Opções */}
+              {showNewVistoriaInput && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                  {tiposVistoria.map((tipo) => (
+                    <div
+                      key={tipo}
+                      className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 group"
+                    >
+                      <button
+                        onClick={() => {
+                          setSelectedVistoria(tipo);
+                          setShowNewVistoriaInput(false);
+                        }}
+                        className="flex-1 text-left"
+                      >
+                        <span>{tipo}</span>
+                      </button>
+                      <button
+                        onClick={() => handleRemoveTipoVistoria(tipo)}
+                        className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remover tipo"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {/* Campo para adicionar novo tipo */}
+                  <div className="p-2 border-t border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={newVistoriaValue}
+                        onChange={(e) => setNewVistoriaValue(e.target.value)}
+                        placeholder="Adicionar novo tipo..."
+                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                      />
+                      <button
+                        onClick={handleAddTipoVistoria}
+                        className="p-1.5 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors"
+                        title="Adicionar novo tipo de vistoria"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span className="sr-only">Adicionar novo tipo de vistoria</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Entendimento do Processo */}
+        <div className="space-y-4 pt-6 border-t border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">Entendimento do Processo de Vistoria</h3>
+          <textarea
+            value={entendimentoProcesso}
+            onChange={(e) => setEntendimentoProcesso(e.target.value)}
+            placeholder="Descreva o processo de vistoria..."
+            className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+          />
+        </div>
+
+        {/* Modelos de Documentos */}
+        <div className="space-y-4 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">Modelos de Documentos</h3>
+            <button
+              onClick={() => documentInputRef.current?.click()}
+              className="p-1.5 text-primary hover:bg-primary/5 rounded-lg transition-colors"
+              title="Adicionar documento"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+          <input
+            ref={documentInputRef}
+            type="file"
+            accept=".doc,.docx"
+            onChange={handleDocumentUpload}
+            className="hidden"
+            title="Selecionar documentos"
+            multiple
+          />
+          
+          {/* Lista de Documentos */}
+          <div className="space-y-2">
+            {documentos.map((doc, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg group hover:border-gray-300"
+              >
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <span className="text-sm text-gray-700">{doc.name}</span>
+                </div>
+                <button
+                  onClick={() => handleRemoveDocumento(index)}
+                  className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Remover documento"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            {documentos.length === 0 && (
+              <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                <p className="text-sm text-gray-500">
+                  Clique no botão + para adicionar documentos
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Tipos de Imóveis */}
+        <div className="space-y-4 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">Tipos de Imóveis</h3>
+            <button
+              onClick={() => setShowNewImovelInput(true)}
+              className="p-1.5 text-primary hover:bg-primary/5 rounded-lg transition-colors"
+              title="Adicionar novo tipo"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {/* Dropdown de Tipos de Imóveis */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowNewImovelInput(!showNewImovelInput)}
+                className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary flex items-center justify-between"
+              >
+                <span className="text-gray-700">{selectedImovel || 'Selecione um tipo'}</span>
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              </button>
+
+              {/* Lista de Opções */}
+              {showNewImovelInput && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                  {tiposImoveis.map((tipo) => (
+                    <div
+                      key={tipo}
+                      className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 group"
+                    >
+                      <button
+                        onClick={() => {
+                          setSelectedImovel(tipo);
+                          setShowNewImovelInput(false);
+                        }}
+                        className="flex-1 text-left"
+                      >
+                        <span>{tipo}</span>
+                      </button>
+                      <button
+                        onClick={() => handleRemoveTipoImovel(tipo)}
+                        className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remover tipo"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {/* Campo para adicionar novo tipo */}
+                  <div className="p-2 border-t border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={newImovelValue}
+                        onChange={(e) => setNewImovelValue(e.target.value)}
+                        placeholder="Adicionar novo tipo..."
+                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                      />
+                      <button
+                        onClick={handleAddTipoImovel}
+                        className="p-1.5 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors"
+                        title="Adicionar novo tipo de imóvel"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span className="sr-only">Adicionar novo tipo de imóvel</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Botões de Ação */}
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-light transition-colors rounded-lg"
+            className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-light transition-colors rounded-lg flex items-center gap-2"
           >
-            Salvar Alterações
+            <Save className="w-4 h-4" />
+            Salvar Configurações
           </button>
         </div>
       </div>

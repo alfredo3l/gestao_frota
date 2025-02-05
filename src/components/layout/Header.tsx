@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Menu } from 'lucide-react';
+import { Bell, Menu, ChevronDown } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 
@@ -112,6 +112,8 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
             <button
               onClick={onMenuClick}
               className="p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              aria-label="Alternar menu lateral"
+              title="Alternar menu lateral"
             >
               <Menu className="w-6 h-6 text-gray-600" />
             </button>
@@ -131,6 +133,8 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
             <button 
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
               className="p-2 rounded-lg hover:bg-gray-50 transition-colors relative"
+              aria-label="Abrir notificações"
+              title="Abrir notificações"
             >
               <Bell className="w-5 h-5 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -171,6 +175,12 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="w-8 h-8 rounded-full overflow-hidden border border-gray-200"
+              aria-label="Abrir menu do perfil"
+              title="Abrir menu do perfil"
+              aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
+              aria-haspopup="true"
+              ref={profileButtonRef}
+              id="profile-button"
             >
               <div className="relative w-8 h-8">
                 <Image
@@ -184,7 +194,12 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
             </button>
 
             {isMobileMenuOpen && (
-              <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-border py-1 z-[1001]">
+              <div 
+                className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-border py-1 z-[1001]"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="profile-button"
+              >
                 <div className="px-4 py-2 border-b border-border">
                   <p className="text-sm font-medium text-gray-900">Paulo Morales</p>
                   <p className="text-xs text-gray-600">paulomorales@gmail.com</p>
@@ -196,6 +211,10 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
                       ? 'bg-primary text-white hover:bg-primary-light' 
                       : 'hover:bg-gray-50 text-gray-600'
                   }`}
+                  role="menuitem"
+                  title="Mudar para Perfil Gestor"
+                  aria-label="Mudar para Perfil Gestor"
+                  aria-current={activeProfile === 'gestor' ? "true" : "false"}
                 >
                   Perfil Gestor
                 </button>
@@ -206,6 +225,10 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
                       ? 'bg-primary text-white hover:bg-primary-light' 
                       : 'hover:bg-gray-50 text-gray-600'
                   }`}
+                  role="menuitem"
+                  title="Mudar para Perfil Imobiliária"
+                  aria-label="Mudar para Perfil Imobiliária"
+                  aria-current={activeProfile === 'imobiliaria' ? "true" : "false"}
                 >
                   Perfil Imobiliária
                 </button>
@@ -216,6 +239,10 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
                       ? 'bg-primary text-white hover:bg-primary-light' 
                       : 'hover:bg-gray-50 text-gray-600'
                   }`}
+                  role="menuitem"
+                  title="Mudar para Perfil Vistoriador"
+                  aria-label="Mudar para Perfil Vistoriador"
+                  aria-current={activeProfile === 'vistoriador' ? "true" : "false"}
                 >
                   Perfil Vistoriador
                 </button>
@@ -223,6 +250,9 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
                   <button 
                     onClick={handleLogout}
                     className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-600"
+                    role="menuitem"
+                    title="Sair da conta"
+                    aria-label="Sair da conta"
                   >
                     Sair
                   </button>

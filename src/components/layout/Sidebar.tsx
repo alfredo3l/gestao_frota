@@ -72,9 +72,9 @@ export default function Sidebar({ isOpen, onClose, onMenuItemClick, activeItem }
 
   const menuItems: MenuItem[] = [
     { name: 'Dashboard', icon: LayoutDashboard },
+    { name: 'Vistorias', icon: ClipboardList },
     { name: 'Imobiliárias', icon: Building2 },
     { name: 'Vistoriadores', icon: Users },
-    { name: 'Vistorias', icon: ClipboardList },
     { name: 'Configurações', icon: Settings },
   ];
 

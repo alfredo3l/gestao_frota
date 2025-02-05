@@ -1,214 +1,337 @@
 'use client';
 
 import { useState } from 'react';
+import { Calendar, MapPin, Clock, Building2, Hash, ArrowRight, Search, Trash2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import SidebarImobiliaria, { imobiliarias } from '../../../components/layout/SidebarImobiliaria';
-import ImobiliariaTabBar from '../../../components/dashboard/ImobiliariaTabBar';
-import InspectionsList from '../../../components/dashboard/InspectionsList';
-import { Building2, Mail, MapPin, Phone, Bell, Key, Users } from 'lucide-react';
+import ImobiliariaTabBar, { ImobiliariaInspectionStatus } from '../../../components/dashboard/ImobiliariaTabBar';
+import InspectionModal, { InspectionFormData } from '../../../components/modals/InspectionModal';
+import DeleteConfirm from '../../../components/modals/DeleteConfirm';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false
 });
 
-// Importação dinâmica do componente de mapa para evitar erros de SSR
-const Map = dynamic(() => import('../../../components/Map'), { ssr: false });
+interface Inspection {
+  id: number;
+  company: string;
+  propertyCode: string;
+  address: string;
+  date: string;
+  time: string;
+  type: string;
+  status: string;
+  isContestacao?: boolean;
+}
+
+const mockInspections: Inspection[] = [
+  // Agendadas
+  {
+    id: 1,
+    company: 'Imob Premium',
+    propertyCode: 'APT-123',
+    address: 'Rua das Flores, 123 - Centro',
+    date: '25/03/2024',
+    time: '14:30',
+    type: 'Entrada',
+    status: 'agendadas',
+    isContestacao: true
+  },
+  {
+    id: 2,
+    company: 'Imob Plus',
+    propertyCode: 'CASA-456',
+    address: 'Av. Principal, 456 - Jardins',
+    date: '26/03/2024',
+    time: '09:00',
+    type: 'Saída',
+    status: 'agendadas',
+    isContestacao: false
+  },
+  {
+    id: 3,
+    company: 'Imob Master',
+    propertyCode: 'SALA-789',
+    address: 'Rua do Comércio, 789 - Centro',
+    date: '26/03/2024',
+    time: '15:45',
+    type: 'Periódica',
+    status: 'agendadas',
+    isContestacao: false
+  },
+  // Em Andamento
+  {
+    id: 4,
+    company: 'Imob Elite',
+    propertyCode: 'APT-789',
+    address: 'Av. das Palmeiras, 321 - Jardim América',
+    date: '25/03/2024',
+    time: '10:00',
+    type: 'Entrada',
+    status: 'andamento',
+    isContestacao: true
+  },
+  {
+    id: 5,
+    company: 'Imob Prime',
+    propertyCode: 'CASA-321',
+    address: 'Rua dos Ipês, 567 - Vila Nova',
+    date: '25/03/2024',
+    time: '11:30',
+    type: 'Saída',
+    status: 'andamento',
+    isContestacao: false
+  },
+  {
+    id: 6,
+    company: 'Imob Select',
+    propertyCode: 'SALA-456',
+    address: 'Av. Central, 890 - Centro',
+    date: '25/03/2024',
+    time: '13:15',
+    type: 'Periódica',
+    status: 'andamento',
+    isContestacao: false
+  },
+  // Finalizadas
+  {
+    id: 7,
+    company: 'Imob Gold',
+    propertyCode: 'APT-456',
+    address: 'Rua das Acácias, 234 - Jardim Europa',
+    date: '24/03/2024',
+    time: '15:00',
+    type: 'Entrada',
+    status: 'finalizadas',
+    isContestacao: true
+  },
+  {
+    id: 8,
+    company: 'Imob Diamond',
+    propertyCode: 'CASA-789',
+    address: 'Av. dos Pinheiros, 678 - Alto da Boa Vista',
+    date: '24/03/2024',
+    time: '16:30',
+    type: 'Saída',
+    status: 'finalizadas',
+    isContestacao: false
+  },
+  {
+    id: 9,
+    company: 'Imob Platinum',
+    propertyCode: 'SALA-123',
+    address: 'Rua do Parque, 901 - Moema',
+    date: '24/03/2024',
+    time: '17:45',
+    type: 'Periódica',
+    status: 'finalizadas',
+    isContestacao: false
+  }
+];
 
 export default function DashImobiliaria() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeImobiliaria, setActiveImobiliaria] = useState('1');
-  const [activeTab, setActiveTab] = useState('vistorias');
-  const [showSettings, setShowSettings] = useState(false);
+  const [activeTab, setActiveTab] = useState<ImobiliariaInspectionStatus>('agendadas');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [isContestacao, setIsContestacao] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
 
-  // Encontra a imobiliária ativa
-  const imobiliariaAtiva = imobiliarias.find(imob => imob.id === activeImobiliaria);
+  const handleAddInspection = () => {
+    setIsModalOpen(true);
+  };
 
-  const renderContent = () => {
-    if (!imobiliariaAtiva) return null;
+  const handleSubmitInspection = (data: InspectionFormData) => {
+    console.log('Nova vistoria:', data);
+    setIsModalOpen(false);
+  };
 
-    if (showSettings) {
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">Configurações</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Notificações */}
-            <div className="bg-white rounded-xl border border-border p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Notificações</h3>
-                  <p className="text-sm text-gray-600">Gerencie suas preferências de notificação</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" />
-                  <span className="text-sm text-gray-600">Novas vistorias</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" />
-                  <span className="text-sm text-gray-600">Vistorias concluídas</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" />
-                  <span className="text-sm text-gray-600">Relatórios disponíveis</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Segurança */}
-            <div className="bg-white rounded-xl border border-border p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Key className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Segurança</h3>
-                  <p className="text-sm text-gray-600">Altere sua senha e configure a segurança</p>
-                </div>
-              </div>
-              <button className="text-sm text-primary hover:text-primary-light transition-colors">
-                Alterar senha
-              </button>
-            </div>
-
-            {/* Usuários */}
-            <div className="bg-white rounded-xl border border-border p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Usuários</h3>
-                  <p className="text-sm text-gray-600">Gerencie os usuários da imobiliária</p>
-                </div>
-              </div>
-              <button className="text-sm text-primary hover:text-primary-light transition-colors">
-                Gerenciar usuários
-              </button>
-            </div>
-          </div>
-        </div>
-      );
+  const handleDelete = () => {
+    if (selectedInspection) {
+      // Aqui você implementaria a lógica real de exclusão
+      console.log('Excluindo vistoria:', selectedInspection.id);
+      setIsDeleteModalOpen(false);
+      setSelectedInspection(null);
     }
+  };
 
-    switch (activeTab) {
-      case 'vistorias':
-        return <InspectionsList status="agendadas" />;
-      
-      case 'informacoes':
-        return (
-          <div className="bg-white rounded-xl border border-border p-6 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Informações da Imobiliária
-            </h2>
-            
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Nome</p>
-                  <p className="text-sm text-gray-600">{imobiliariaAtiva.nome}</p>
-                </div>
-              </div>
+  // Filtra as vistorias baseado no termo de busca, tipo selecionado e aba ativa
+  const filteredInspections = mockInspections.filter(inspection => {
+    const matchesSearch = searchTerm === '' || 
+      inspection.propertyCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inspection.address.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = selectedType === '' || inspection.type === selectedType;
+    
+    return matchesSearch && matchesType && inspection.status === activeTab;
+  });
 
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">E-mail</p>
-                  <p className="text-sm text-gray-600">{imobiliariaAtiva.email}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Telefone</p>
-                  <p className="text-sm text-gray-600">(11) 99999-9999</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      
-      case 'endereco':
-        return (
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-border p-6">
-              <div className="flex items-start gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Endereço</p>
-                  <p className="text-sm text-gray-600">{imobiliariaAtiva.endereco}</p>
-                </div>
-              </div>
-
-              {/* Mapa */}
-              <div className="h-[400px] rounded-lg overflow-hidden">
-                <Map 
-                  center={imobiliariaAtiva.coordenadas}
-                  zoom={15}
-                  markers={[{
-                    position: imobiliariaAtiva.coordenadas,
-                    title: imobiliariaAtiva.nome
-                  }]}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      
-      default:
-        return null;
-    }
+  const getStatusColor = (status: ImobiliariaInspectionStatus) => {
+    const colors = {
+      agendadas: 'bg-yellow-50 text-yellow-700',
+      andamento: 'bg-purple-50 text-purple-700',
+      finalizadas: 'bg-green-50 text-green-700'
+    };
+    return colors[status];
   };
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <SidebarImobiliaria
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        activeImobiliaria={activeImobiliaria}
-        onImobiliariaClick={(id) => {
-          setActiveImobiliaria(id);
-          setShowSettings(false);
-        }}
-        onSettingsClick={() => setShowSettings(true)}
-      />
-      <ClientHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
+      <ClientHeader onMenuClick={() => setIsMenuOpen(!isMenuOpen)} isMenuOpen={isMenuOpen} />
 
-      <main className="pl-0 md:pl-20 lg:pl-64 pt-16 transition-all duration-300">
+      <main className="pt-16 transition-all duration-300">
         <div className="p-4 md:p-6 space-y-6">
-          {/* Cabeçalho da Imobiliária */}
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {imobiliariaAtiva?.nome}
-            </h1>
+          {/* Barra de Tabs */}
+          <ImobiliariaTabBar
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onAddInspection={handleAddInspection}
+          />
+
+          {/* Campo de Pesquisa e Filtros */}
+          <div className="mb-6 flex flex-wrap gap-4 items-center">
+            <div className="relative flex-1 max-w-md">
+              <input
+                type="text"
+                placeholder="Pesquisar por código ou endereço..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900 text-sm placeholder:text-gray-500"
+              />
+              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
+
+            <div className="w-56">
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="w-full py-3 px-4 bg-white border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900 text-sm appearance-none"
+                aria-label="Filtrar por tipo de vistoria"
+              >
+                <option value="">Todos os tipos</option>
+                <option value="Entrada">Entrada</option>
+                <option value="Saída">Saída</option>
+                <option value="Conferência">Conferência</option>
+              </select>
+            </div>
+
+            <label className="flex items-center gap-3 py-1 cursor-pointer">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={isContestacao}
+                  onChange={(e) => setIsContestacao(e.target.checked)}
+                />
+                <div className={`w-12 h-7 rounded-full transition-colors ${
+                  isContestacao ? 'bg-primary' : 'bg-gray-200'
+                }`}>
+                  <div className={`absolute w-5 h-5 rounded-full bg-white top-1 transition-transform ${
+                    isContestacao ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </div>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Contestação</span>
+            </label>
           </div>
 
-          {/* TabBar e Conteúdo */}
-          <div className="space-y-6">
-            {!showSettings && (
-              <ImobiliariaTabBar
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-              />
-            )}
-            {renderContent()}
+          {/* Lista de Vistorias */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredInspections.map((inspection) => (
+              <div
+                key={inspection.id}
+                className={`bg-white rounded-xl p-4 hover:shadow-md transition-shadow space-y-4 ${
+                  inspection.isContestacao 
+                    ? 'border-2 border-red-200' 
+                    : 'border border-border'
+                }`}
+              >
+                {/* Cabeçalho do Card */}
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-gray-600" />
+                      <h3 className="font-semibold text-gray-900">{inspection.company}</h3>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {inspection.isContestacao && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-100">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                          <span>Contestação</span>
+                        </div>
+                      )}
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(activeTab)}`}>
+                        {activeTab === 'andamento' ? 'Em Andamento' : activeTab}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <Hash className="w-4 h-4 text-gray-600" />
+                    <span className="font-medium">{inspection.propertyCode}</span>
+                  </div>
+                  <div className="flex items-start gap-1 text-sm text-gray-600">
+                    <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span className="line-clamp-2">{inspection.address}</span>
+                  </div>
+                </div>
+
+                {/* Informações da Vistoria */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="w-4 h-4" />
+                    <span>{inspection.date}</span>
+                    <Clock className="w-4 h-4 ml-2" />
+                    <span>{inspection.time}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="font-medium">Tipo:</span>
+                    <span>{inspection.type}</span>
+                  </div>
+                </div>
+
+                {/* Botões de Ação */}
+                <div className="flex items-center justify-between">
+                  <button className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-light transition-colors py-2">
+                    <span>Ver Detalhes</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  
+                  {activeTab === 'agendadas' && (
+                    <button
+                      onClick={() => {
+                        setSelectedInspection(inspection);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      aria-label="Excluir vistoria"
+                      title="Excluir vistoria"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
+
+          {/* Modal de Adicionar Vistoria */}
+          <InspectionModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleSubmitInspection}
+          />
+
+          {/* Modal de Confirmação de Exclusão */}
+          <DeleteConfirm
+            isOpen={isDeleteModalOpen}
+            onClose={() => {
+              setIsDeleteModalOpen(false);
+              setSelectedInspection(null);
+            }}
+            onConfirm={handleDelete}
+            title="Excluir Vistoria"
+            description={`Tem certeza que deseja excluir esta vistoria? Esta ação não poderá ser desfeita.`}
+          />
         </div>
       </main>
     </div>

@@ -1,37 +1,55 @@
 'use client';
 
+import { Calendar, Loader2, CheckCircle2, Plus } from 'lucide-react';
+
+export type ImobiliariaInspectionStatus = 'agendadas' | 'andamento' | 'finalizadas';
+
 interface ImobiliariaTabBarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: ImobiliariaInspectionStatus;
+  onTabChange: (tab: ImobiliariaInspectionStatus) => void;
+  onAddInspection?: () => void;
 }
 
-export default function ImobiliariaTabBar({ activeTab, onTabChange }: ImobiliariaTabBarProps) {
-  const tabs = [
-    { id: 'vistorias', label: 'Vistorias' },
-    { id: 'informacoes', label: 'Informações' },
-    { id: 'endereco', label: 'Endereço' },
-  ];
+const tabs = [
+  { id: 'agendadas', label: 'Agendadas', icon: Calendar },
+  { id: 'andamento', label: 'Em Andamento', icon: Loader2 },
+  { id: 'finalizadas', label: 'Finalizadas', icon: CheckCircle2 },
+] as const;
 
+export default function ImobiliariaTabBar({ activeTab, onTabChange, onAddInspection }: ImobiliariaTabBarProps) {
   return (
-    <div className="border-b border-border">
-      <nav className="flex space-x-8" aria-label="Tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`
-              py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap
-              ${
-                activeTab === tab.id
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }
-            `}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
+    <div className="bg-white border border-border rounded-xl p-1.5 flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap gap-2">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const Icon = tab.icon;
+          
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id as ImobiliariaInspectionStatus)}
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                ${isActive 
+                  ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-md' 
+                  : 'text-gray-600 hover:bg-gray-100/80 hover:text-gray-900'
+                }
+              `}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      
+      <button
+        onClick={onAddInspection}
+        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-primary to-primary-light text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+      >
+        <Plus className="w-4 h-4" />
+        <span>Add Vistoria</span>
+      </button>
     </div>
   );
 } 

@@ -13,6 +13,7 @@ interface BaseRealEstate {
   telefone: string;
   cnpj: string;
   logo?: string;
+  prazoContestacao: number;
   endereco: {
     cep: string;
     logradouro: string;
@@ -36,6 +37,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 99999-9999',
     cnpj: '12.345.678/0001-90',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '01234-567',
       logradouro: 'Rua das Flores',
@@ -53,6 +55,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 98888-8888',
     cnpj: '98.765.432/0001-10',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '04321-765',
       logradouro: 'Av. Principal',
@@ -69,6 +72,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 97777-7777',
     cnpj: '45.678.901/0001-23',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '05678-901',
       logradouro: 'Rua dos Diamantes',
@@ -86,6 +90,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 96666-6666',
     cnpj: '34.567.890/0001-12',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '06789-012',
       logradouro: 'Av. das Palmeiras',
@@ -102,6 +107,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 95555-5555',
     cnpj: '23.456.789/0001-01',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '07890-123',
       logradouro: 'Rua dos Ipês',
@@ -119,6 +125,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 94444-4444',
     cnpj: '12.345.678/0001-34',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '08901-234',
       logradouro: 'Av. das Araucárias',
@@ -135,6 +142,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 93333-3333',
     cnpj: '89.012.345/0001-56',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '09012-345',
       logradouro: 'Rua das Esmeraldas',
@@ -152,6 +160,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 92222-2222',
     cnpj: '78.901.234/0001-78',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '10123-456',
       logradouro: 'Av. dos Rubis',
@@ -168,6 +177,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 91111-1111',
     cnpj: '67.890.123/0001-45',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '11234-567',
       logradouro: 'Rua dos Cristais',
@@ -185,6 +195,7 @@ const mockRealEstates: RealEstate[] = [
     telefone: '(11) 90000-0000',
     cnpj: '56.789.012/0001-67',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
+    prazoContestacao: 30,
     endereco: {
       cep: '12345-678',
       logradouro: 'Av. das Safiras',

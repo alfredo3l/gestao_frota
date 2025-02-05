@@ -16,12 +16,13 @@ import {
   Shield,
   FileText,
   Pencil,
-  ChevronRight
+  ChevronRight,
+  ClipboardList
 } from 'lucide-react';
-import { NotificationsDialog, PlansDialog, ProfileDialog, PasswordDialog, SignatureDialog, ThemeDialog } from './dialogs/SettingsDialogs';
+import { NotificationsDialog, PlansDialog, ProfileDialog, PasswordDialog, SignatureDialog, ThemeDialog, InspectionConfigDialog } from './dialogs/SettingsDialogs';
 
 export default function SettingsManager() {
-  const [activeDialog, setActiveDialog] = useState<'notifications' | 'plans' | 'profile' | 'password' | 'signature' | 'theme' | null>(null);
+  const [activeDialog, setActiveDialog] = useState<'notifications' | 'plans' | 'profile' | 'password' | 'signature' | 'theme' | 'inspectionConfig' | null>(null);
 
   return (
     <>
@@ -49,8 +50,11 @@ export default function SettingsManager() {
               <button 
                 onClick={() => setActiveDialog('profile')}
                 className="text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Editar informações pessoais"
+                aria-label="Editar informações pessoais"
               >
                 <Pencil className="w-4 h-4" />
+                <span className="sr-only">Editar informações pessoais</span>
               </button>
             </div>
 
@@ -160,6 +164,23 @@ export default function SettingsManager() {
           </div>
 
           <div className="divide-y divide-border">
+            {/* Vistorias */}
+            <button 
+              onClick={() => setActiveDialog('inspectionConfig')}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <ClipboardList className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-medium text-gray-900">Vistorias</h3>
+                  <p className="text-sm text-gray-600">Configurar regras e limites</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
+
             {/* Imobiliárias */}
             <button className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
               <div className="flex items-center gap-3">
@@ -245,6 +266,12 @@ export default function SettingsManager() {
       />
       <ThemeDialog
         isOpen={activeDialog === 'theme'}
+        onClose={() => setActiveDialog(null)}
+      />
+
+      {/* Modal de Configuração de Vistorias */}
+      <InspectionConfigDialog
+        isOpen={activeDialog === 'inspectionConfig'}
         onClose={() => setActiveDialog(null)}
       />
     </>
