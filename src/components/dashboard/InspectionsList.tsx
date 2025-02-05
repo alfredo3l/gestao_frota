@@ -4,19 +4,7 @@ import { useState } from 'react';
 import { Calendar, MapPin, Clock, User, ArrowRight, Building2, Hash, Printer, Copy, RefreshCw, X, Search, Trash2 } from 'lucide-react';
 import type { InspectionStatus } from './InspectionsTabBar';
 import DeleteConfirm from '../modals/DeleteConfirm';
-
-interface Inspection {
-  id: number;
-  company: string;
-  propertyCode: string;
-  address: string;
-  date: string;
-  time: string;
-  inspectionType: string;
-  inspector: string;
-  progress: number;
-  isContestacao?: boolean;
-}
+import { Inspection } from '@/types/inspection';
 
 // Dados simulados de vistorias
 const mockInspections: Inspection[] = [

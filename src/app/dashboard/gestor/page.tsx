@@ -12,6 +12,7 @@ import InspectionsTabBar, { InspectionStatus } from '../../../components/dashboa
 import SettingsManager from '../../../components/dashboard/SettingsManager';
 import InspectionModal, { InspectionFormData } from '../../../components/modals/InspectionModal';
 import DeleteConfirm from '../../../components/modals/DeleteConfirm';
+import { Inspection } from '@/types/inspection';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false

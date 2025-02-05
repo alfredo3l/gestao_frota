@@ -1,27 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { Calendar, MapPin, Clock, Building2, Hash, ArrowRight, Search, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building2, Users, ClipboardList, AlertCircle, ArrowUpRight, ArrowDownRight, Calendar, MapPin, Clock, Hash, ArrowRight, Search, Trash2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import ImobiliariaTabBar, { ImobiliariaInspectionStatus } from '../../../components/dashboard/ImobiliariaTabBar';
+import Sidebar from '../../../components/layout/Sidebar';
+import Charts from '../../../components/dashboard/Charts';
+import InspectionsList from '../../../components/dashboard/InspectionsList';
+import InspectionsTabBar, { InspectionStatus } from '../../../components/dashboard/InspectionsTabBar';
+import SettingsManager from '../../../components/dashboard/SettingsManager';
 import InspectionModal, { InspectionFormData } from '../../../components/modals/InspectionModal';
 import DeleteConfirm from '../../../components/modals/DeleteConfirm';
+import { Inspection } from '@/types/inspection';
+import ImobiliariaTabBar, { ImobiliariaInspectionStatus } from '../../../components/dashboard/ImobiliariaTabBar';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false
 });
-
-interface Inspection {
-  id: number;
-  company: string;
-  propertyCode: string;
-  address: string;
-  date: string;
-  time: string;
-  type: string;
-  status: string;
-  isContestacao?: boolean;
-}
 
 const mockInspections: Inspection[] = [
   // Agendadas
