@@ -6,6 +6,10 @@ import type { InspectionStatus } from './InspectionsTabBar';
 import DeleteConfirm from '../modals/DeleteConfirm';
 import { Inspection } from '@/types/inspection';
 
+interface InspectionsListProps {
+  status: InspectionStatus;
+}
+
 // Dados simulados de vistorias
 const mockInspections: Inspection[] = [
   {
