@@ -7,8 +7,8 @@ export interface Inspection {
   time: string;
   type: string;
   status?: string;
-  inspector: string;
-  progress: number;
+  inspector?: string;
+  progress?: number;
   isContestacao?: boolean;
 }
 
