@@ -34,6 +34,8 @@ export default function DashGestor() {
   const [filterStatus, setFilterStatus] = useState<InspectionStatus | ''>('');
   const [filterInspector, setFilterInspector] = useState<string>('');
   const [filterSearchTerm, setFilterSearchTerm] = useState<string>('');
+  const [filterStartDate, setFilterStartDate] = useState<string>('');
+  const [filterEndDate, setFilterEndDate] = useState<string>('');
 
   useEffect(() => {
     setIsSidebarOpen(window.innerWidth >= 768);
@@ -315,66 +317,171 @@ export default function DashGestor() {
               </div>
               
               {/* Filtros da Tabela */}
-              <div className="p-4 md:p-6 border-b border-border grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Busca</label>
-                  <div className="relative">
+              <div className="p-4 md:p-6 border-b border-border bg-white/50 backdrop-blur-sm">
+                <div className="flex gap-3 items-center mb-4">
+                  {/* Barra de Busca Principal */}
+                  <div className="relative flex-1 max-w-xl">
                     <input 
                       type="text"
                       placeholder="Buscar por endereço..."
                       value={filterSearchTerm}
                       onChange={(e) => setFilterSearchTerm(e.target.value)}
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                      className="w-full h-10 pl-10 pr-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
                     />
-                    <Search className="absolute right-3 top-3 text-gray-400" size={18} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  </div>
+
+                  {/* Botão de Filtros */}
+                  <div className="relative group">
+                    <button 
+                      className={`h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 text-sm text-gray-700 hover:border-primary/30 hover:bg-primary/5 transition-all ${
+                        (filterRealEstate || filterStatus || filterInspector || filterStartDate || filterEndDate) ? 'border-primary text-primary' : ''
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        Filtros
+                        {(filterRealEstate || filterStatus || filterInspector || filterStartDate || filterEndDate) && (
+                          <span className="w-5 h-5 flex items-center justify-center bg-primary text-white text-xs font-medium rounded-full">
+                            {[filterRealEstate, filterStatus, filterInspector, (filterStartDate || filterEndDate)].filter(Boolean).length}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+
+                    {/* Popover de Filtros */}
+                    <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-sm font-medium text-gray-900">Filtros</h3>
+                          {(filterRealEstate || filterStatus || filterInspector || filterStartDate || filterEndDate) && (
+                            <button 
+                              onClick={() => {
+                                setFilterRealEstate('');
+                                setFilterStatus('');
+                                setFilterInspector('');
+                                setFilterStartDate('');
+                                setFilterEndDate('');
+                              }}
+                              className="text-xs text-red-600 hover:text-red-700 transition-colors"
+                            >
+                              Limpar Filtros
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-4">
+                          {/* Filtro de Imobiliária */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Imobiliária</label>
+                            <select 
+                              value={filterRealEstate}
+                              onChange={(e) => setFilterRealEstate(e.target.value)}
+                              className="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+                            >
+                              <option value="">Todas Imobiliárias</option>
+                              <option value="Tech Field">Tech Field</option>
+                              <option value="Tank Field Cinco">Tank Field Cinco</option>
+                              {Array.from(new Set(mockInspections.map(i => i.company)))
+                                .filter(company => !['Tech Field', 'Tank Field Cinco'].includes(company))
+                                .map(estate => (
+                                  <option key={estate} value={estate}>{estate}</option>
+                                ))
+                              }
+                            </select>
+                          </div>
+
+                          {/* Filtro de Status */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                            <select 
+                              value={filterStatus}
+                              onChange={(e) => setFilterStatus(e.target.value as InspectionStatus)}
+                              className="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+                            >
+                              <option value="">Todos Status</option>
+                              <option value="agendadas">Agendadas</option>
+                              <option value="finalizadas">Concluídas</option>
+                              <option value="atrasadas">Atrasadas</option>
+                              <option value="andamento">Em Andamento</option>
+                              <option value="liberadas">Liberadas</option>
+                            </select>
+                          </div>
+
+                          {/* Filtro de Vistoriador */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Vistoriador</label>
+                            <select 
+                              value={filterInspector}
+                              onChange={(e) => setFilterInspector(e.target.value)}
+                              className="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+                            >
+                              <option value="">Todos Vistoriadores</option>
+                              {Array.from(new Set(mockInspections.map(i => i.inspector))).map(inspector => (
+                                <option key={inspector} value={inspector}>{inspector}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Filtros de Data */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Período</label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <input
+                                  type="date"
+                                  value={filterStartDate}
+                                  onChange={(e) => setFilterStartDate(e.target.value)}
+                                  className="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+                                />
+                              </div>
+                              <div>
+                                <input
+                                  type="date"
+                                  value={filterEndDate}
+                                  onChange={(e) => setFilterEndDate(e.target.value)}
+                                  className="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Imobiliária</label>
-                  <select 
-                    value={filterRealEstate}
-                    onChange={(e) => setFilterRealEstate(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                  >
-                    <option value="">Todas Imobiliárias</option>
-                    <option value="Tech Field">Tech Field</option>
-                    <option value="Tank Field Cinco">Tank Field Cinco</option>
-                    {Array.from(new Set(mockInspections.map(i => i.company)))
-                      .filter(company => !['Tech Field', 'Tank Field Cinco'].includes(company))
-                      .map(estate => (
-                        <option key={estate} value={estate}>{estate}</option>
-                      ))
-                    }
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <select 
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value as InspectionStatus)}
-                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                  >
-                    <option value="">Todos Status</option>
-                    <option value="agendadas">Agendadas</option>
-                    <option value="finalizadas">Concluídas</option>
-                    <option value="atrasadas">Atrasadas</option>
-                    <option value="andamento">Em Andamento</option>
-                    <option value="liberadas">Liberadas</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Vistoriador</label>
-                  <select 
-                    value={filterInspector}
-                    onChange={(e) => setFilterInspector(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                  >
-                    <option value="">Todos Vistoriadores</option>
-                    {Array.from(new Set(mockInspections.map(i => i.inspector))).map(inspector => (
-                      <option key={inspector} value={inspector}>{inspector}</option>
-                    ))}
-                  </select>
-                </div>
+
+                {/* Chips de Filtros Ativos */}
+                {(filterRealEstate || filterStatus || filterInspector || filterStartDate || filterEndDate) && (
+                  <div className="flex flex-wrap gap-2">
+                    {filterRealEstate && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/5 text-primary text-sm rounded-full">
+                        <Building2 className="w-3 h-3" />
+                        {filterRealEstate}
+                      </span>
+                    )}
+                    {filterStatus && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/5 text-primary text-sm rounded-full">
+                        <AlertCircle className="w-3 h-3" />
+                        {filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
+                      </span>
+                    )}
+                    {filterInspector && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/5 text-primary text-sm rounded-full">
+                        <Users className="w-3 h-3" />
+                        {filterInspector}
+                      </span>
+                    )}
+                    {(filterStartDate || filterEndDate) && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/5 text-primary text-sm rounded-full">
+                        <Calendar className="w-3 h-3" />
+                        {filterStartDate && filterEndDate ? `${filterStartDate} - ${filterEndDate}` : 
+                         filterStartDate ? `A partir de ${filterStartDate}` : 
+                         `Até ${filterEndDate}`}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="overflow-x-auto">
@@ -412,6 +519,9 @@ export default function DashGestor() {
                         const matchInspector = !filterInspector || inspection.inspector === filterInspector;
                         const matchSearchTerm = !filterSearchTerm || 
                           inspection.address.toLowerCase().includes(filterSearchTerm.toLowerCase());
+                        const inspectionDate = new Date(inspection.date.split('/').reverse().join('-'));
+                        const matchStartDate = !filterStartDate || inspectionDate >= new Date(filterStartDate);
+                        const matchEndDate = !filterEndDate || inspectionDate <= new Date(filterEndDate);
 
                         return matchRealEstate && matchStatus && matchInspector && matchSearchTerm;
                       })
@@ -511,4 +621,4 @@ export default function DashGestor() {
       />
     </div>
   );
-} 
+}
