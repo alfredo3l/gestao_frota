@@ -164,7 +164,8 @@ export default function DashImobiliaria() {
     const colors = {
       agendadas: 'bg-yellow-50 text-yellow-700',
       andamento: 'bg-purple-50 text-purple-700',
-      finalizadas: 'bg-green-50 text-green-700'
+      finalizadas: 'bg-green-50 text-green-700',
+      imoveis: 'bg-blue-50 text-blue-700'
     };
     return colors[status];
   };
