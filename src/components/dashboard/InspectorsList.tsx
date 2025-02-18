@@ -237,7 +237,7 @@ export default function InspectorsList(): React.JSX.Element {
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors"
         >
           <Plus className="w-4 h-4" />
-          <span>Adicionar</span>
+          <span>Adicionar vistoriador</span>
         </button>
       </div>
 
@@ -246,70 +246,38 @@ export default function InspectorsList(): React.JSX.Element {
         {inspectors.map((inspector) => (
           <div
             key={inspector.id}
-            className="bg-white rounded-xl border border-border p-4 hover:shadow-md transition-shadow w-full max-w-md mx-auto"
+            className="bg-white rounded-xl border border-border p-4 hover:shadow-md transition-shadow"
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
-                  {inspector.avatar && (
-                    <Image
-                      src={inspector.avatar}
-                      alt={inspector.nome}
-                      width={56}
-                      height={56}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">{inspector.nome}</h3>
-                  <p className="text-sm text-gray-600 truncate">{inspector.email}</p>
-                </div>
+            {/* Cabeçalho com Avatar e Nome */}
+            <div className="flex flex-col items-center text-center mb-4">
+              <div className="relative w-20 h-20 mb-3">
+                {inspector.avatar && (
+                  <Image
+                    src={inspector.avatar}
+                    alt={inspector.nome}
+                    width={80}
+                    height={80}
+                    className="rounded-full object-cover border border-border"
+                  />
+                )}
               </div>
-
-              <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                <button 
-                  className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
-                  aria-label="Visualizar detalhes do vistoriador"
-                  title="Visualizar detalhes"
-                >
-                  <Eye className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => {
-                    setSelectedInspector(inspector);
-                    setIsAddModalOpen(true);
-                  }}
-                  className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
-                  aria-label="Editar vistoriador"
-                  title="Editar"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => {
-                    setSelectedInspector(inspector);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  className="p-1.5 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
-                  aria-label="Excluir vistoriador"
-                  title="Excluir"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{inspector.nome}</h3>
+              <p className="text-sm text-gray-600">{inspector.email}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Telefone</p>
-                <p className="text-sm text-gray-600 truncate">{inspector.telefone}</p>
+            {/* Informações */}
+            <div className="space-y-3 py-3 border-t border-b border-border">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Telefone</p>
+                  <p className="text-sm text-gray-600 truncate">{inspector.telefone}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">CPF</p>
+                  <p className="text-sm text-gray-600 truncate">{inspector.cpf}</p>
+                </div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">CPF</p>
-                <p className="text-sm text-gray-600 truncate">{inspector.cpf}</p>
-              </div>
-              <div className="col-span-2">
                 <p className="text-sm font-medium text-gray-900">Endereço</p>
                 <p className="text-sm text-gray-600">
                   {inspector.endereco.logradouro}, {inspector.endereco.numero}
@@ -318,6 +286,10 @@ export default function InspectorsList(): React.JSX.Element {
                   {inspector.endereco.bairro} - {inspector.endereco.cidade}/{inspector.endereco.estado}
                 </p>
               </div>
+            </div>
+
+            {/* Estatísticas */}
+            <div className="grid grid-cols-2 gap-4 py-3">
               <div>
                 <p className="text-sm font-medium text-gray-900">Vistorias Pendentes</p>
                 <p className="text-sm text-gray-600">{inspector.pendingInspections}</p>
@@ -326,6 +298,28 @@ export default function InspectorsList(): React.JSX.Element {
                 <p className="text-sm font-medium text-gray-900">Vistorias Realizadas</p>
                 <p className="text-sm text-gray-600">{inspector.completedInspections}</p>
               </div>
+            </div>
+
+            {/* Ações */}
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+              <button 
+                className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => {
+                  setSelectedInspector(inspector);
+                  setIsAddModalOpen(true);
+                }}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+              <button 
+                className="p-1.5 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => {
+                  setSelectedInspector(inspector);
+                  setIsDeleteModalOpen(true);
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
         ))}

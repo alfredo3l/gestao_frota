@@ -49,8 +49,8 @@ export default function InspectionsTabBar({ activeTab, onTabChange, onAddInspect
         className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-primary to-primary-light text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
       >
         <Plus className="w-4 h-4" />
-        <span>Add Vistoria</span>
+        <span>Nova Vistoria</span>
       </button>
     </div>
   );
-} 
+}

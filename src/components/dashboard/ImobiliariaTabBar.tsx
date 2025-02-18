@@ -1,8 +1,8 @@
 'use client';
 
-import { Calendar, Loader2, CheckCircle2, Plus } from 'lucide-react';
+import { Calendar, Loader2, CheckCircle2, Plus, Building2 } from 'lucide-react';
 
-export type ImobiliariaInspectionStatus = 'agendadas' | 'andamento' | 'finalizadas';
+export type ImobiliariaInspectionStatus = 'agendadas' | 'andamento' | 'finalizadas' | 'imoveis';
 
 interface ImobiliariaTabBarProps {
   activeTab: ImobiliariaInspectionStatus;
@@ -14,6 +14,7 @@ const tabs = [
   { id: 'agendadas', label: 'Agendadas', icon: Calendar },
   { id: 'andamento', label: 'Em Andamento', icon: Loader2 },
   { id: 'finalizadas', label: 'Finalizadas', icon: CheckCircle2 },
+  { id: 'imoveis', label: 'Imóveis', icon: Building2 },
 ] as const;
 
 export default function ImobiliariaTabBar({ activeTab, onTabChange, onAddInspection }: ImobiliariaTabBarProps) {
@@ -48,8 +49,8 @@ export default function ImobiliariaTabBar({ activeTab, onTabChange, onAddInspect
         className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-primary to-primary-light text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
       >
         <Plus className="w-4 h-4" />
-        <span>Add Vistoria</span>
+        <span>Nova Vistoria</span>
       </button>
     </div>
   );
-} 
+}

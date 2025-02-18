@@ -14,6 +14,7 @@ interface BaseRealEstate {
   cnpj: string;
   logo?: string;
   prazoContestacao: number;
+  status: 'ativo' | 'inativo';
   endereco: {
     cep: string;
     logradouro: string;
@@ -38,6 +39,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '12.345.678/0001-90',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '01234-567',
       logradouro: 'Rua das Flores',
@@ -56,6 +58,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '98.765.432/0001-10',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '04321-765',
       logradouro: 'Av. Principal',
@@ -73,6 +76,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '45.678.901/0001-23',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '05678-901',
       logradouro: 'Rua dos Diamantes',
@@ -91,6 +95,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '34.567.890/0001-12',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '06789-012',
       logradouro: 'Av. das Palmeiras',
@@ -108,6 +113,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '23.456.789/0001-01',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '07890-123',
       logradouro: 'Rua dos Ipês',
@@ -126,6 +132,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '12.345.678/0001-34',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '08901-234',
       logradouro: 'Av. das Araucárias',
@@ -143,6 +150,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '89.012.345/0001-56',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '09012-345',
       logradouro: 'Rua das Esmeraldas',
@@ -161,6 +169,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '78.901.234/0001-78',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '10123-456',
       logradouro: 'Av. dos Rubis',
@@ -178,6 +187,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '67.890.123/0001-45',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '11234-567',
       logradouro: 'Rua dos Cristais',
@@ -196,6 +206,7 @@ const mockRealEstates: RealEstate[] = [
     cnpj: '56.789.012/0001-67',
     logo: 'https://img.freepik.com/vetores-premium/logotipo-imobiliario-amarelo-profissional_919186-1.jpg',
     prazoContestacao: 30,
+    status: 'ativo',
     endereco: {
       cep: '12345-678',
       logradouro: 'Av. das Safiras',
@@ -242,6 +253,24 @@ export default function RealEstateList(): React.JSX.Element {
     }
   };
 
+  const handleToggleStatus = (realEstate: RealEstate) => {
+    const newStatus = realEstate.status === 'ativo' ? 'inativo' : 'ativo';
+    setRealEstates(realEstates.map(re => 
+      re.id === realEstate.id ? { ...re, status: newStatus } : re
+    ));
+  };
+
+  const getStatusColor = (status: RealEstate['status']) => {
+    switch (status) {
+      case 'ativo':
+        return 'bg-green-50 text-green-700 border border-green-100';
+      case 'inativo':
+        return 'bg-red-50 text-red-700 border border-red-100';
+      default:
+        return 'bg-gray-50 text-gray-700 border border-gray-100';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -264,65 +293,41 @@ export default function RealEstateList(): React.JSX.Element {
 
       {/* Lista de Imobiliárias */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {realEstates.map((realEstate) => (
-            <div
-              key={realEstate.id}
+        {realEstates.map((realEstate) => (
+          <div
+            key={realEstate.id}
             className="bg-white rounded-xl border border-border p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="relative w-16 h-16 flex-shrink-0">
-                  {realEstate.logo && (
-                    <Image
+          >
+            {/* Logo e Nome */}
+            <div className="flex flex-col items-center text-center mb-4">
+              <div className="relative w-20 h-20 mb-3">
+                {realEstate.logo && (
+                  <Image
                     src={realEstate.logo}
-                      alt={realEstate.nome}
-                      width={64}
-                      height={64}
-                      className="rounded-lg object-cover border border-border"
-                    />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">{realEstate.nome}</h3>
-                  <p className="text-sm text-gray-600 truncate">{realEstate.email}</p>
-                </div>
+                    alt={realEstate.nome}
+                    width={80}
+                    height={80}
+                    className="rounded-lg object-cover border border-border"
+                  />
+                )}
               </div>
-
-              <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                <button className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors">
-                  <Eye className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => {
-                    setSelectedRealEstate(realEstate);
-                    setIsAddModalOpen(true);
-                  }}
-                  className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => {
-                    setSelectedRealEstate(realEstate);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  className="p-1.5 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{realEstate.nome}</h3>
+              <p className="text-sm text-gray-600">{realEstate.email}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Telefone</p>
-                <p className="text-sm text-gray-600 truncate">{realEstate.telefone}</p>
+            {/* Informações */}
+            <div className="space-y-3 py-3 border-t border-b border-border">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Telefone</p>
+                  <p className="text-sm text-gray-600 truncate">{realEstate.telefone}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">CNPJ</p>
+                  <p className="text-sm text-gray-600 truncate">{realEstate.cnpj}</p>
+                </div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">CNPJ</p>
-                <p className="text-sm text-gray-600 truncate">{realEstate.cnpj}</p>
-              </div>
-              <div className="col-span-2">
                 <p className="text-sm font-medium text-gray-900">Endereço</p>
                 <p className="text-sm text-gray-600">
                   {realEstate.endereco.logradouro}, {realEstate.endereco.numero}
@@ -331,9 +336,58 @@ export default function RealEstateList(): React.JSX.Element {
                   {realEstate.endereco.bairro} - {realEstate.endereco.cidade}/{realEstate.endereco.estado}
                 </p>
               </div>
+            </div>
+
+            {/* Status e Ações */}
+            <div className="flex items-center justify-between pt-3">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    role="switch"
+                    aria-checked={realEstate.status === 'ativo'}
+                    onClick={() => handleToggleStatus(realEstate)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      realEstate.status === 'ativo' ? 'bg-primary' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        realEstate.status === 'ativo' ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                  <span className={`text-xs font-medium ${
+                    realEstate.status === 'ativo' 
+                      ? 'text-green-700' 
+                      : 'text-gray-500'
+                  }`}>
+                    {realEstate.status === 'ativo' ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => {
+                    setSelectedRealEstate(realEstate);
+                    setIsAddModalOpen(true);
+                  }}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button 
+                  className="p-1.5 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => {
+                    setSelectedRealEstate(realEstate);
+                    setIsDeleteModalOpen(true);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
-          ))}
+          </div>
+        ))}
       </div>
 
       {/* Modal de Adicionar/Editar */}

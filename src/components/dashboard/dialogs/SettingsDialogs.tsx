@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { X, Check, Mail, Smartphone, CreditCard, Eye, EyeOff, FileText, Upload, Building2, User, Plus, ChevronDown, Save, Trash2 } from 'lucide-react';
+import { X, Check, Mail, Smartphone, CreditCard, Eye, EyeOff, FileText, Upload, Building2, User, Plus, ChevronDown, Save, Trash2, Edit2 } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import Image from 'next/image';
 
@@ -621,7 +621,8 @@ export function ProfileDialog({ isOpen, onClose }: { isOpen: boolean; onClose: (
     // Dados Pessoais
     name: 'Paulo Morales',
     email: 'paulomorales@gmail.com',
-    phone: '(11) 98765-4321'
+    phone: '(11) 98765-4321',
+    cpf: '123.456.789-00'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -637,6 +638,14 @@ export function ProfileDialog({ isOpen, onClose }: { isOpen: boolean; onClose: (
       if (cepValue.length === 8) {
         fetchAddress(cepValue);
       }
+      return;
+    }
+
+    // Aplicar máscara para CPF
+    if (name === 'cpf') {
+      const cpfValue = value.replace(/\D/g, ''); // Remove não dígitos
+      const cpfMask = cpfValue.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); // Aplica máscara 000.000.000-00
+      setProfile(prev => ({ ...prev, [name]: cpfMask }));
       return;
     }
 
@@ -923,6 +932,22 @@ export function ProfileDialog({ isOpen, onClose }: { isOpen: boolean; onClose: (
                 required
               />
             </div>
+            <div>
+              <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-1">
+                CPF
+              </label>
+              <input
+                type="text"
+                id="cpf"
+                name="cpf"
+                value={profile.cpf}
+                onChange={handleChange}
+                maxLength={14}
+                placeholder="000.000.000-00"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
           </div>
         </div>
 
@@ -946,294 +971,259 @@ export function ProfileDialog({ isOpen, onClose }: { isOpen: boolean; onClose: (
   );
 }
 
-// Diálogo de Configuração de Vistorias
+interface TipoVistoria {
+  nome: string;
+  entendimentoProcesso: string;
+  modeloDocumento?: File | null;
+  modeloDocumentoNome?: string;
+}
+
 export function InspectionConfigDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [tiposVistoria, setTiposVistoria] = useState(['Entrada', 'Saída', 'Periódica']);
-  const [tiposImoveis, setTiposImoveis] = useState(['Apartamento', 'Casa', 'Sala Comercial']);
-  const [showNewVistoriaInput, setShowNewVistoriaInput] = useState(false);
-  const [showNewImovelInput, setShowNewImovelInput] = useState(false);
-  const [newVistoriaValue, setNewVistoriaValue] = useState('');
-  const [newImovelValue, setNewImovelValue] = useState('');
-  const [selectedVistoria, setSelectedVistoria] = useState('');
-  const [selectedImovel, setSelectedImovel] = useState('');
-  const [entendimentoProcesso, setEntendimentoProcesso] = useState('');
+  const [tiposVistoria, setTiposVistoria] = useState<TipoVistoria[]>([
+    { 
+      nome: 'Entrada', 
+      entendimentoProcesso: 'Vistoria realizada no momento em que o inquilino recebe as chaves do imóvel.',
+      modeloDocumentoNome: 'modelo-entrada.pdf'
+    },
+    { 
+      nome: 'Saída', 
+      entendimentoProcesso: 'Vistoria realizada no momento em que o inquilino devolve as chaves do imóvel.',
+      modeloDocumentoNome: 'modelo-saida.pdf'
+    }
+  ]);
+  const [tiposImovel, setTiposImovel] = useState<string[]>(['Casa', 'Apartamento', 'Sala Comercial']);
+  const [novoTipoVistoria, setNovoTipoVistoria] = useState<TipoVistoria>({
+    nome: '',
+    entendimentoProcesso: '',
+    modeloDocumento: null
+  });
+  const [novoTipoImovel, setNovoTipoImovel] = useState('');
+  const [selectedTipoVistoria, setSelectedTipoVistoria] = useState<TipoVistoria | null>(null);
   const [documentos, setDocumentos] = useState<File[]>([]);
-  const documentInputRef = useRef<HTMLInputElement>(null);
+  const [isEditingVistoria, setIsEditingVistoria] = useState(false);
 
   const handleAddTipoVistoria = () => {
-    if (newVistoriaValue.trim()) {
-      setTiposVistoria([...tiposVistoria, newVistoriaValue.trim()]);
-      setNewVistoriaValue('');
-      setShowNewVistoriaInput(false);
+    if (novoTipoVistoria.nome && novoTipoVistoria.entendimentoProcesso) {
+      setTiposVistoria([...tiposVistoria, novoTipoVistoria]);
+      setNovoTipoVistoria({
+        nome: '',
+        entendimentoProcesso: '',
+        modeloDocumento: null
+      });
     }
   };
 
   const handleAddTipoImovel = () => {
-    if (newImovelValue.trim()) {
-      setTiposImoveis([...tiposImoveis, newImovelValue.trim()]);
-      setNewImovelValue('');
-      setShowNewImovelInput(false);
+    if (novoTipoImovel && !tiposImovel.includes(novoTipoImovel)) {
+      setTiposImovel([...tiposImovel, novoTipoImovel]);
+      setNovoTipoImovel('');
     }
   };
 
-  const handleRemoveTipoVistoria = (tipo: string) => {
-    setTiposVistoria(tiposVistoria.filter(t => t !== tipo));
-    if (selectedVistoria === tipo) {
-      setSelectedVistoria('');
-    }
+  const handleRemoveTipoVistoria = (nome: string) => {
+    setTiposVistoria(tiposVistoria.filter(tipo => tipo.nome !== nome));
   };
 
   const handleRemoveTipoImovel = (tipo: string) => {
-    setTiposImoveis(tiposImoveis.filter(t => t !== tipo));
-    if (selectedImovel === tipo) {
-      setSelectedImovel('');
+    setTiposImovel(tiposImovel.filter(t => t !== tipo));
+  };
+
+  const handleDocumentoVistoria = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setNovoTipoVistoria({
+        ...novoTipoVistoria,
+        modeloDocumento: file,
+        modeloDocumentoNome: file.name
+      });
     }
   };
 
-  const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setDocumentos(prev => [...prev, ...files]);
+  const handleEditTipoVistoria = (tipo: TipoVistoria) => {
+    setSelectedTipoVistoria(tipo);
+    setNovoTipoVistoria(tipo);
+    setIsEditingVistoria(true);
   };
 
-  const handleRemoveDocumento = (index: number) => {
-    setDocumentos(prev => prev.filter((_, i) => i !== index));
+  const handleUpdateTipoVistoria = () => {
+    if (selectedTipoVistoria) {
+      setTiposVistoria(tiposVistoria.map(tipo => 
+        tipo.nome === selectedTipoVistoria.nome ? novoTipoVistoria : tipo
+      ));
+      setNovoTipoVistoria({
+        nome: '',
+        entendimentoProcesso: '',
+        modeloDocumento: null
+      });
+      setSelectedTipoVistoria(null);
+      setIsEditingVistoria(false);
+    }
   };
 
   return (
-    <BaseDialog isOpen={isOpen} onClose={onClose} title="Configuração de Vistorias">
+    <BaseDialog isOpen={isOpen} onClose={onClose} title="Configurações de Vistorias">
       <div className="space-y-6">
         {/* Tipos de Vistoria */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Tipos de Vistoria</h3>
-            <button
-              onClick={() => setShowNewVistoriaInput(true)}
-              className="p-1.5 text-primary hover:bg-primary/5 rounded-lg transition-colors"
-              title="Adicionar novo tipo"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {/* Dropdown de Tipos de Vistoria */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowNewVistoriaInput(!showNewVistoriaInput)}
-                className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary flex items-center justify-between"
-              >
-                <span className="text-gray-700">{selectedVistoria || 'Selecione um tipo'}</span>
-                <ChevronDown className="w-5 h-5 text-gray-400" />
-              </button>
-
-              {/* Lista de Opções */}
-              {showNewVistoriaInput && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
-                  {tiposVistoria.map((tipo) => (
-                    <div
-                      key={tipo}
-                      className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 group"
+          <h3 className="text-lg font-medium text-gray-900">Tipos de Vistoria</h3>
+          
+          {/* Lista de Tipos de Vistoria Existentes */}
+          <div className="space-y-4">
+            {tiposVistoria.map((tipo) => (
+              <div key={tipo.nome} className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <h4 className="text-base font-medium text-gray-900">{tipo.nome}</h4>
+                    <p className="text-sm text-gray-600">{tipo.entendimentoProcesso}</p>
+                    {tipo.modeloDocumentoNome && (
+                      <div className="flex items-center gap-2 text-sm text-primary">
+                        <FileText className="w-4 h-4" />
+                        <span>{tipo.modeloDocumentoNome}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleEditTipoVistoria(tipo)}
+                      className="p-1.5 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
                     >
-                      <button
-                        onClick={() => {
-                          setSelectedVistoria(tipo);
-                          setShowNewVistoriaInput(false);
-                        }}
-                        className="flex-1 text-left"
-                      >
-                        <span>{tipo}</span>
-                      </button>
-                      <button
-                        onClick={() => handleRemoveTipoVistoria(tipo)}
-                        className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Remover tipo"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  {/* Campo para adicionar novo tipo */}
-                  <div className="p-2 border-t border-gray-200">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={newVistoriaValue}
-                        onChange={(e) => setNewVistoriaValue(e.target.value)}
-                        placeholder="Adicionar novo tipo..."
-                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
-                      />
-                      <button
-                        onClick={handleAddTipoVistoria}
-                        className="p-1.5 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors"
-                        title="Adicionar novo tipo de vistoria"
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span className="sr-only">Adicionar novo tipo de vistoria</span>
-                      </button>
-                    </div>
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleRemoveTipoVistoria(tipo.nome)}
+                      className="p-1.5 text-gray-600 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-              )}
+              </div>
+            ))}
+          </div>
+
+          {/* Formulário de Novo Tipo de Vistoria */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4">
+            <h4 className="text-base font-medium text-gray-900">
+              {isEditingVistoria ? 'Editar Tipo de Vistoria' : 'Adicionar Novo Tipo de Vistoria'}
+            </h4>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="tipoVistoriaNome" className="block text-sm font-medium text-gray-700">
+                  Nome do Tipo de Vistoria
+                </label>
+                <input
+                  type="text"
+                  id="tipoVistoriaNome"
+                  value={novoTipoVistoria.nome}
+                  onChange={(e) => setNovoTipoVistoria({ ...novoTipoVistoria, nome: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:ring-primary"
+                  placeholder="Ex: Vistoria de Entrada"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="entendimentoProcesso" className="block text-sm font-medium text-gray-700">
+                  Entendimento do Processo
+                </label>
+                <textarea
+                  id="entendimentoProcesso"
+                  value={novoTipoVistoria.entendimentoProcesso}
+                  onChange={(e) => setNovoTipoVistoria({ ...novoTipoVistoria, entendimentoProcesso: e.target.value })}
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:ring-primary"
+                  placeholder="Descreva o processo desta vistoria..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Modelo de Documento
+                </label>
+                <div className="mt-1 flex items-center gap-4">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+                    <Upload className="w-4 h-4" />
+                    Escolher arquivo
+                    <input
+                      type="file"
+                      onChange={handleDocumentoVistoria}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx"
+                    />
+                  </label>
+                  {novoTipoVistoria.modeloDocumentoNome && (
+                    <span className="text-sm text-gray-600">
+                      {novoTipoVistoria.modeloDocumentoNome}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                {isEditingVistoria && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNovoTipoVistoria({
+                        nome: '',
+                        entendimentoProcesso: '',
+                        modeloDocumento: null
+                      });
+                      setSelectedTipoVistoria(null);
+                      setIsEditingVistoria(false);
+                    }}
+                    className="mr-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    Cancelar
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={isEditingVistoria ? handleUpdateTipoVistoria : handleAddTipoVistoria}
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors"
+                >
+                  {isEditingVistoria ? 'Salvar Alterações' : 'Adicionar Tipo de Vistoria'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Entendimento do Processo */}
+        {/* Tipos de Imóvel */}
         <div className="space-y-4 pt-6 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Entendimento do Processo de Vistoria</h3>
-          <textarea
-            value={entendimentoProcesso}
-            onChange={(e) => setEntendimentoProcesso(e.target.value)}
-            placeholder="Descreva o processo de vistoria..."
-            className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
-          />
-        </div>
-
-        {/* Modelos de Documentos */}
-        <div className="space-y-4 pt-6 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Modelos de Documentos</h3>
-            <button
-              onClick={() => documentInputRef.current?.click()}
-              className="p-1.5 text-primary hover:bg-primary/5 rounded-lg transition-colors"
-              title="Adicionar documento"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          </div>
-          <input
-            ref={documentInputRef}
-            type="file"
-            accept=".doc,.docx"
-            onChange={handleDocumentUpload}
-            className="hidden"
-            title="Selecionar documentos"
-            multiple
-          />
+          <h3 className="text-lg font-medium text-gray-900">Tipos de Imóvel</h3>
           
-          {/* Lista de Documentos */}
-          <div className="space-y-2">
-            {documentos.map((doc, index) => (
+          <div className="flex flex-wrap gap-2">
+            {tiposImovel.map((tipo) => (
               <div
-                key={index}
-                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg group hover:border-gray-300"
+                key={tipo}
+                className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
               >
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <span className="text-sm text-gray-700">{doc.name}</span>
-                </div>
+                <span>{tipo}</span>
                 <button
-                  onClick={() => handleRemoveDocumento(index)}
-                  className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Remover documento"
+                  onClick={() => handleRemoveTipoImovel(tipo)}
+                  className="text-gray-400 hover:text-red-500"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             ))}
-            {documentos.length === 0 && (
-              <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                <p className="text-sm text-gray-500">
-                  Clique no botão + para adicionar documentos
-                </p>
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Tipos de Imóveis */}
-        <div className="space-y-4 pt-6 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Tipos de Imóveis</h3>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={novoTipoImovel}
+              onChange={(e) => setNovoTipoImovel(e.target.value)}
+              className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:ring-primary"
+              placeholder="Novo tipo de imóvel..."
+            />
             <button
-              onClick={() => setShowNewImovelInput(true)}
-              className="p-1.5 text-primary hover:bg-primary/5 rounded-lg transition-colors"
-              title="Adicionar novo tipo"
+              onClick={handleAddTipoImovel}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors"
             >
-              <Plus className="w-5 h-5" />
+              Adicionar
             </button>
           </div>
-
-          <div className="space-y-3">
-            {/* Dropdown de Tipos de Imóveis */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowNewImovelInput(!showNewImovelInput)}
-                className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary flex items-center justify-between"
-              >
-                <span className="text-gray-700">{selectedImovel || 'Selecione um tipo'}</span>
-                <ChevronDown className="w-5 h-5 text-gray-400" />
-              </button>
-
-              {/* Lista de Opções */}
-              {showNewImovelInput && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
-                  {tiposImoveis.map((tipo) => (
-                    <div
-                      key={tipo}
-                      className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 group"
-                    >
-                      <button
-                        onClick={() => {
-                          setSelectedImovel(tipo);
-                          setShowNewImovelInput(false);
-                        }}
-                        className="flex-1 text-left"
-                      >
-                        <span>{tipo}</span>
-                      </button>
-                      <button
-                        onClick={() => handleRemoveTipoImovel(tipo)}
-                        className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Remover tipo"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  {/* Campo para adicionar novo tipo */}
-                  <div className="p-2 border-t border-gray-200">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={newImovelValue}
-                        onChange={(e) => setNewImovelValue(e.target.value)}
-                        placeholder="Adicionar novo tipo..."
-                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
-                      />
-                      <button
-                        onClick={handleAddTipoImovel}
-                        className="p-1.5 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors"
-                        title="Adicionar novo tipo de imóvel"
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span className="sr-only">Adicionar novo tipo de imóvel</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Botões de Ação */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-light transition-colors rounded-lg flex items-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            Salvar Configurações
-          </button>
         </div>
       </div>
     </BaseDialog>

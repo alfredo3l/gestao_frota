@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Building2, Users, ClipboardList, AlertCircle, ArrowUpRight, ArrowDownRight, Calendar, MapPin, Clock, Hash, ArrowRight, Search, Trash2, FileText } from 'lucide-react';
+import { Building2, Users, ClipboardList, AlertCircle, ArrowUpRight, ArrowDownRight, Calendar, MapPin, Clock, Hash, ArrowRight, Search, Trash2, FileText, Home } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Sidebar from '../../../components/layout/Sidebar';
 import Charts from '../../../components/dashboard/Charts';
@@ -13,6 +13,7 @@ import SettingsManager from '../../../components/dashboard/SettingsManager';
 import InspectionModal, { InspectionFormData } from '../../../components/modals/InspectionModal';
 import DeleteConfirm from '../../../components/modals/DeleteConfirm';
 import { Inspection } from '@/types/inspection';
+import PropertyList from '@/components/dashboard/PropertyList';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false
@@ -175,6 +176,8 @@ export default function DashGestor() {
         return <RealEstateList />;
       case 'vistoriadores':
         return <InspectorsList />;
+      case 'imóveis':
+        return <PropertyList />;
       case 'vistorias':
         return (
           <div className="space-y-6">
@@ -242,45 +245,45 @@ export default function DashGestor() {
                 </div>
               </div>
 
+              {/* Card - Total de Imóveis */}
+              <div className="bg-white p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all group">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 md:w-12 h-10 md:h-12 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Home className="w-5 md:w-6 h-5 md:h-6 text-primary" />
+                  </div>
+                  <span className="flex items-center gap-1 text-sm font-medium text-green-500">
+                    <ArrowUpRight className="w-4 h-4" />
+                    15.3%
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900">1.247</h3>
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-600 text-sm">Imóveis Cadastrados</p>
+                    <span className="text-xs text-primary bg-primary/5 px-2 py-0.5 rounded-full">
+                      +25 novos
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Card - Vistorias Agendadas */}
               <div className="bg-white p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-10 md:w-12 h-10 md:h-12 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <ClipboardList className="w-5 md:w-6 h-5 md:h-6 text-primary" />
                   </div>
-                  <span className="flex items-center gap-1 text-sm font-medium text-green-500">
-                    <ArrowUpRight className="w-4 h-4" />
-                    23.1%
+                  <span className="flex items-center gap-1 text-sm font-medium text-red-500">
+                    <ArrowDownRight className="w-4 h-4" />
+                    3.8%
                   </span>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900">89</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900">32</h3>
                   <div className="flex items-center justify-between">
                     <p className="text-gray-600 text-sm">Vistorias Agendadas</p>
                     <span className="text-xs text-primary bg-primary/5 px-2 py-0.5 rounded-full">
-                      Hoje: 12
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card - Vistorias Atrasadas */}
-              <div className="bg-white p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all group">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 md:w-12 h-10 md:h-12 bg-gradient-to-br from-red-500/10 to-red-500/5 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <AlertCircle className="w-5 md:w-6 h-5 md:h-6 text-red-500" />
-                  </div>
-                  <span className="flex items-center gap-1 text-sm font-medium text-red-500">
-                    <ArrowDownRight className="w-4 h-4" />
-                    5.4%
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900">12</h3>
-                  <div className="flex items-center justify-between">
-                    <p className="text-gray-600 text-sm">Vistorias Atrasadas</p>
-                    <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
-                      Crítico
+                      Hoje
                     </span>
                   </div>
                 </div>
@@ -350,7 +353,7 @@ export default function DashGestor() {
                     </button>
 
                     {/* Popover de Filtros */}
-                    <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+                    <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-sm font-medium text-gray-900">Filtros</h3>
@@ -484,7 +487,7 @@ export default function DashGestor() {
                 )}
               </div>
               
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto min-h-[400px]">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-50">
