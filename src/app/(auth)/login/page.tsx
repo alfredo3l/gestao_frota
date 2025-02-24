@@ -24,7 +24,7 @@ export default function LoginPage() {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: 'url("https://www.totalconstrucao.com.br/wp-content/uploads/2019/08/Inspe%C3%A7%C3%A3o-predial-capa.jpg")',
+          backgroundImage: 'url("https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/casa-civil-6mb6d1/assets/zc6v3pfnr6yr/HOME.png")',
         }}
       >
         <div className="absolute inset-0 backdrop-blur-sm bg-black/40" />
@@ -35,7 +35,7 @@ export default function LoginPage() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900">Bem-vindo de volta!</h1>
           <p className="mt-2 text-gray-600">
-            Gerencie suas vistorias de forma rápida e eficiente
+           Plataforma de gestão política
           </p>
         </div>
 

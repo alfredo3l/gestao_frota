@@ -12,7 +12,6 @@ export default function RegisterPage() {
   const [passwordError, setPasswordError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
-    company: '',
     document: '',
     email: '',
     password: '',
@@ -73,7 +72,7 @@ export default function RegisterPage() {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: 'url("https://www.totalconstrucao.com.br/wp-content/uploads/2019/08/Inspe%C3%A7%C3%A3o-predial-capa.jpg")',
+          backgroundImage: 'url("https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/casa-civil-6mb6d1/assets/zc6v3pfnr6yr/HOME.png")',
         }}
       >
         <div className="absolute inset-0 backdrop-blur-sm bg-black/40" />
@@ -84,7 +83,7 @@ export default function RegisterPage() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900">Criar Conta</h1>
           <p className="mt-2 text-gray-600">
-            Comece a gerenciar suas vistorias hoje mesmo
+            Realize seu cadastro na plataforna
           </p>
         </div>
 
@@ -117,22 +116,6 @@ export default function RegisterPage() {
                   onChange={handleDocumentChange}
                   placeholder="CPF/CNPJ"
                   maxLength={18}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Building className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  placeholder="Nome da empresa"
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
                   required
                 />
