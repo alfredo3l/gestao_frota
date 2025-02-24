@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const NoSSR = dynamic(() => Promise.resolve(({ children }) => <>{children}</>), {
+  ssr: false
+});
 
 export default function LoginPage() {
   const router = useRouter();
@@ -86,12 +91,16 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-end">
-            <Link
-              href="/forgot-password"
-              className="text-sm text-primary hover:text-primary/80 font-medium"
-            >
-              Esqueceu sua senha?
-            </Link>
+            <NoSSR>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-primary hover:text-primary/80 font-medium"
+                prefetch={false}
+                key="forgot-password-link"
+              >
+                Esqueceu sua senha?
+              </Link>
+            </NoSSR>
           </div>
 
           <button
@@ -103,9 +112,16 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-600">
             Não tem uma conta?{' '}
-            <Link href="/register" className="text-primary hover:text-primary/80 font-medium">
-              Cadastre-se
-            </Link>
+            <NoSSR>
+              <Link 
+                href="/register" 
+                className="text-primary hover:text-primary/80 font-medium"
+                prefetch={false}
+                key="register-link"
+              >
+                Cadastre-se
+              </Link>
+            </NoSSR>
           </p>
         </form>
       </div>

@@ -1,16 +1,17 @@
 # Evolução Vistoria
 
-Sistema de gestão de vistorias imobiliárias desenvolvido com Next.js e TypeScript.
+Sistema de gestão política desenvolvido com Next.js e TypeScript.
 
 ## Sobre o Projeto
 
-O Evolução Vistoria é uma plataforma especializada em gerenciamento de vistorias imobiliárias que atende diferentes perfis de usuários:
+É uma plataforma especializada em gerenciamento de informações políticas que atende diferentes perfis de usuários:
 
 ### Perfis de Usuário
 
-- **Gestor**: Administra o sistema, gerenciando clientes (imobiliárias) e vistoriadores.
-- **Imobiliária**: Solicita e acompanha vistorias de seus imóveis.
-- **Vistoriador**: Realiza as inspeções in loco e documenta as condições dos imóveis.
+- **Admin**: Administra o sistema, gerenciando os usuários e os níveis de acesso.
+- **Coordenador**: Visualiza as informações de acordo com o nível de acesso.
+- **Liderança**: Cadastra as informações de apoiadores vinculado a sua liderança.
+- **Apoiador**: Apenas se cadastra no sistema para alimentar a base de dados.
 
 ## Tecnologias
 
@@ -52,8 +53,9 @@ O projeto utiliza um design system consistente com:
 
 ## Funcionalidades Principais
 
-- Gestão de usuários por perfil
-- Solicitação e acompanhamento de vistorias
+- Consulta resultado de eleições;
+- Cadastramento e controle de coordenadores políticos;
+- Cadastramento e controle de apoiadores;
 - Realização e documentação de inspeções
 - Geração de relatórios
 - Dashboard personalizado por perfil

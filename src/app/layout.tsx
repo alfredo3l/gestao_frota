@@ -10,8 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Evolução Vistoria",
-  description: "Sistema de gestão de vistorias imobiliárias",
+  title: "Plataforma de gestão polítiva",
+  description: "Sistema de dados estratégicos",
 };
 
 type RootLayoutProps = {

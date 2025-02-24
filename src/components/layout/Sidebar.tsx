@@ -80,7 +80,29 @@ export default function Sidebar({ isOpen, onClose, onMenuItemClick, activeItem }
   ];
 
   const handleMenuClick = (item: MenuItem) => {
-    onMenuItemClick(item.name);
+    switch (item.name) {
+      case 'Dashboard':
+        router.push('/dashboard/gestor');
+        break;
+      case 'Eleições':
+        router.push('/dashboard/eleicoes');
+        break;
+      case 'Imóveis':
+        router.push('/dashboard/imoveis');
+        break;
+      case 'Imobiliárias':
+        router.push('/dashboard/imobiliaria');
+        break;
+      case 'Vistoriadores':
+        router.push('/dashboard/vistoriadores');
+        break;
+      case 'Configurações':
+        router.push('/dashboard/configuracoes');
+        break;
+      default:
+        onMenuItemClick(item.name);
+    }
+    
     if (isMobile) {
       onClose();
     }
@@ -115,25 +137,12 @@ export default function Sidebar({ isOpen, onClose, onMenuItemClick, activeItem }
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className={`${isCollapsed ? 'p-4' : 'p-6'}`}>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-primary-light to-primary flex items-center justify-center overflow-hidden shadow-lg">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent"></div>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_transparent_50%,_rgba(255,255,255,0.2)_100%)]"></div>
-                  <span className="text-white font-bold text-xl" style={{ fontFamily: 'var(--font-inter)' }}>EV</span>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-white flex items-center justify-center">
-                  <Sparkles className="w-2 h-2 text-white" />
-                </div>
-              </div>
-              {!isCollapsed && (
-                <div>
-                  <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-                    Evolução
-                  </span>
-                  <span className="block text-sm text-gray-600">Vistoria</span>
-                </div>
-              )}
+            <div className="flex items-center justify-center w-full">
+              <img 
+                src="/LOGO_CASA_CIVIL.png" 
+                alt="Logo Casa Civil"
+                className="w-48 h-auto object-contain"
+              />
             </div>
           </div>
 
