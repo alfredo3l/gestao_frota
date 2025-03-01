@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Home, 
   Users, 
@@ -13,8 +14,25 @@ import {
   Settings, 
   LogOut,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  ChevronLeftCircle,
+  ChevronRightCircle
 } from 'lucide-react';
+
+interface MenuItem {
+  title: string;
+  icon: React.ReactNode;
+  href: string;
+  id: string;
+  submenu?: SubMenuItem[];
+}
+
+interface SubMenuItem {
+  title: string;
+  icon: React.ReactNode;
+  href: string;
+  id: string;
+}
 
 interface SidebarProps {
   isOpen: boolean;
@@ -25,6 +43,16 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Efeito para sincronizar o estado collapsed com isOpen
+  useEffect(() => {
+    if (!isOpen) {
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+    }
+  }, [isOpen]);
 
   const toggleMenu = (menu: string) => {
     setExpandedMenus(prev => ({
@@ -33,7 +61,11 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
     }));
   };
 
-  const menuItems = [
+  const toggleCollapse = () => {
+    setCollapsed(!collapsed);
+  };
+
+  const menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
       icon: <Home className="w-5 h-5" />,
@@ -96,21 +128,43 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 h-full bg-white border-r border-border z-30 transition-all duration-300 pt-16 ${
-          isOpen ? 'w-64 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'
-        }`}
+        className={`fixed top-0 left-0 h-full bg-white border-r border-border z-30 pt-2 ${
+          isOpen ? (collapsed ? 'w-20' : 'w-64') : 'w-0 md:w-20'
+        } ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         <div className="h-full overflow-y-auto">
-          <div className="px-3 py-4">
-            {/* Logo e Nome do Sistema */}
-            <div className="flex items-center justify-center mb-6">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg">
-                EP
+          <div className="px-3 py-2">
+            {/* Logo do Governo de Mato Grosso do Sul */}
+            <div className="flex flex-col items-center justify-center mb-4">
+              <div className={`w-full flex justify-center ${collapsed ? 'px-1' : 'px-2'}`}>
+                <Image 
+                  src="/LOGO_CASA_CIVIL.png" 
+                  alt="Logo do Governo de Mato Grosso do Sul" 
+                  width={collapsed ? 50 : 150} 
+                  height={collapsed ? 50 : 60} 
+                  className="object-contain"
+                  priority
+                />
               </div>
-              <div className={`ml-3 font-semibold text-gray-900 ${!isOpen && 'hidden'}`}>
-                Evolução Política
-              </div>
+              {!collapsed && (
+                <div className="mt-1 font-semibold text-gray-900 text-center">
+                  <div>Secretaria de Estado</div>
+                  <div>da Casa Civil</div>
+                </div>
+              )}
             </div>
+
+            {/* Botão para colapsar/expandir o sidebar */}
+            <button 
+              onClick={toggleCollapse}
+              className="absolute -right-3 top-20 bg-white border border-border rounded-full p-1 text-gray-500 hover:bg-gray-100 shadow-sm"
+              title={collapsed ? "Expandir menu" : "Recolher menu"}
+            >
+              {collapsed ? 
+                <ChevronRightCircle className="w-5 h-5" /> : 
+                <ChevronLeftCircle className="w-5 h-5" />
+              }
+            </button>
 
             {/* Menu de Navegação */}
             <nav className="space-y-1">
@@ -120,37 +174,41 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
                     <div>
                       <button
                         onClick={() => toggleMenu(item.id)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium ${
                           activeItem.startsWith(item.id)
-                            ? 'bg-primary/10 text-primary'
+                            ? 'bg-primary text-white'
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
                         <div className="flex items-center">
-                          <span className="text-gray-500">{item.icon}</span>
-                          <span className={`ml-3 ${!isOpen && 'hidden'}`}>{item.title}</span>
+                          <span className={activeItem.startsWith(item.id) ? 'text-white' : 'text-gray-500'}>
+                            {item.icon}
+                          </span>
+                          <span className={`ml-3 ${collapsed && 'hidden'}`}>{item.title}</span>
                         </div>
-                        {isOpen && (
+                        {!collapsed && (
                           expandedMenus[item.id] ? 
                             <ChevronDown className="w-4 h-4" /> : 
                             <ChevronRight className="w-4 h-4" />
                         )}
                       </button>
                       
-                      {expandedMenus[item.id] && isOpen && (
+                      {expandedMenus[item.id] && !collapsed && item.submenu && (
                         <div className="mt-1 ml-4 space-y-1">
                           {item.submenu.map((subItem) => (
                             <Link
                               key={subItem.id}
                               href={subItem.href}
                               onClick={() => onMenuItemClick(subItem.id)}
-                              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
                                 activeItem === subItem.id
-                                  ? 'bg-primary/10 text-primary'
+                                  ? 'bg-primary text-white'
                                   : 'text-gray-700 hover:bg-gray-100'
                               }`}
                             >
-                              <span className="text-gray-500">{subItem.icon}</span>
+                              <span className={activeItem === subItem.id ? 'text-white' : 'text-gray-500'}>
+                                {subItem.icon}
+                              </span>
                               <span className="ml-3">{subItem.title}</span>
                             </Link>
                           ))}
@@ -161,14 +219,16 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
                     <Link
                       href={item.href}
                       onClick={() => onMenuItemClick(item.id)}
-                      className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
                         activeItem === item.id
-                          ? 'bg-primary/10 text-primary'
+                          ? 'bg-primary text-white'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      <span className="text-gray-500">{item.icon}</span>
-                      <span className={`ml-3 ${!isOpen && 'hidden'}`}>{item.title}</span>
+                      <span className={activeItem === item.id ? 'text-white' : 'text-gray-500'}>
+                        {item.icon}
+                      </span>
+                      <span className={`ml-3 ${collapsed && 'hidden'}`}>{item.title}</span>
                     </Link>
                   )}
                 </div>
@@ -179,10 +239,10 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
           {/* Rodapé do Sidebar */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
             <button
-              className="w-full flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <LogOut className="w-5 h-5 text-gray-500" />
-              <span className={`ml-3 ${!isOpen && 'hidden'}`}>Sair</span>
+              <span className={`ml-3 ${collapsed && 'hidden'}`}>Sair</span>
             </button>
           </div>
         </div>

@@ -65,8 +65,8 @@ export default function Header({ onMenuClick, isMenuOpen }: { onMenuClick: () =>
   ];
 
   return (
-    <header className={`h-16 bg-white border-b border-border fixed top-0 z-10 transition-all duration-300 ${
-      isMobile ? 'left-0' : 'left-64'
+    <header className={`h-14 bg-white border-b border-border fixed top-0 z-10 ${
+      isMenuOpen ? 'left-64' : 'left-0'
     } right-0`}>
       <div className="h-full px-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -74,14 +74,12 @@ export default function Header({ onMenuClick, isMenuOpen }: { onMenuClick: () =>
             <>
               <button
                 onClick={onMenuClick}
-                className="p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                title="Abrir menu"
-                aria-label="Abrir menu de navegação"
+                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
               >
                 <Menu className="w-6 h-6 text-gray-600" />
               </button>
               <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-                Evolução
+                Secretaria de Estado da Casa Civil
               </span>
             </>
           )}

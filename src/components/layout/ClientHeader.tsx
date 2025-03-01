@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Menu, Bell, User, Search, ChevronDown } from 'lucide-react';
+import { Menu, Bell, User, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -18,14 +18,11 @@ export default function ClientHeader({
 }: ClientHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const { usuario } = useUsuario();
   
   const notificationsRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const searchResultsRef = useRef<HTMLDivElement>(null);
 
   // Obter as iniciais do nome do usuário
   const getInitials = (name: string) => {
@@ -55,14 +52,6 @@ export default function ClientHeader({
         !(event.target as Element).closest('[data-user-menu-toggle]')
       ) {
         setShowUserMenu(false);
-      }
-
-      if (
-        searchResultsRef.current && 
-        !searchResultsRef.current.contains(event.target as Node) &&
-        !(event.target as Element).closest('[data-search-input]')
-      ) {
-        setShowSearchResults(false);
       }
     };
 
@@ -94,34 +83,6 @@ export default function ClientHeader({
     }
   ];
 
-  const searchResults = [
-    {
-      id: 1,
-      title: 'Apoiador: Maria Santos',
-      type: 'apoiador',
-      url: '/apoiadores/1'
-    },
-    {
-      id: 2,
-      title: 'Evento: Comício Centro',
-      type: 'evento',
-      url: '/eventos/2'
-    },
-    {
-      id: 3,
-      title: 'Demanda: Infraestrutura Bairro Norte',
-      type: 'demanda',
-      url: '/demandas/3'
-    }
-  ];
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      setShowSearchResults(true);
-    }
-  };
-
   const handleLogout = () => {
     // Fechar o menu do usuário
     setShowUserMenu(false);
@@ -134,8 +95,8 @@ export default function ClientHeader({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-border z-20 pl-0 md:pl-20 lg:pl-64 transition-all duration-300">
-      <div className="h-full flex items-center justify-between px-4">
+    <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-border z-20 pl-0 md:pl-20">
+      <div className="flex items-center justify-between h-full px-4">
         {/* Menu Toggle e Título */}
         <div className="flex items-center gap-4">
           <button 
@@ -145,64 +106,12 @@ export default function ClientHeader({
             <Menu className="w-6 h-6" />
           </button>
           <div className="md:hidden">
-            <h1 className="text-lg font-semibold text-gray-900">Evolução Política</h1>
+            <h1 className="text-lg font-semibold text-gray-900">Secretaria de Estado da Casa Civil</h1>
           </div>
         </div>
 
-        {/* Barra de Pesquisa */}
-        <div className="hidden md:block flex-1 max-w-xl mx-auto relative">
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar apoiadores, eventos, demandas..."
-                className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => searchTerm.trim() && setShowSearchResults(true)}
-                data-search-input
-              />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            </div>
-          </form>
-
-          {/* Resultados da Pesquisa */}
-          {showSearchResults && (
-            <div 
-              ref={searchResultsRef}
-              className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10"
-            >
-              <div className="p-2">
-                <h3 className="text-xs font-medium text-gray-500 uppercase px-3 py-2">Resultados</h3>
-                <div className="space-y-1">
-                  {searchResults.map((result) => (
-                    <Link
-                      key={result.id}
-                      href={result.url}
-                      className="block px-3 py-2 rounded-md hover:bg-gray-50 transition-colors"
-                      onClick={() => setShowSearchResults(false)}
-                    >
-                      <div className="font-medium text-gray-900">{result.title}</div>
-                      <div className="text-xs text-gray-500 capitalize">{result.type}</div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <div className="p-2 border-t border-gray-100">
-                <Link
-                  href={`/busca?q=${encodeURIComponent(searchTerm)}`}
-                  className="block px-3 py-2 text-center text-sm text-primary hover:bg-gray-50 transition-colors"
-                  onClick={() => setShowSearchResults(false)}
-                >
-                  Ver todos os resultados
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Ações do Usuário */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           {/* Notificações */}
           <div className="relative">
             <button

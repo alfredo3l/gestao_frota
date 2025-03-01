@@ -6,7 +6,7 @@ import { UsuarioProvider } from '@/contexts/UsuarioContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Evolução Política - Sistema de Gestão de Campanha',
+  title: 'Secretaria de Estado da Casa Civil',
   description: 'Plataforma completa para gestão de campanhas políticas, apoiadores, demandas e eventos.',
 };
 

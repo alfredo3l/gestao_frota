@@ -20,7 +20,7 @@ const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
 });
 
 export default function DashGestor() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeItem, setActiveItem] = useState('dashboard');
   const [activeInspectionTab, setActiveInspectionTab] = useState<InspectionStatus>('agendadas');
   const [isInspectionModalOpen, setIsInspectionModalOpen] = useState(false);
@@ -39,12 +39,13 @@ export default function DashGestor() {
   const [filterEndDate, setFilterEndDate] = useState<string>('');
 
   useEffect(() => {
-    setIsSidebarOpen(window.innerWidth >= 768);
-    
     const handleResize = () => {
-      setIsSidebarOpen(window.innerWidth >= 768);
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
     };
 
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -598,8 +599,8 @@ export default function DashGestor() {
       />
       <ClientHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
 
-      <main className="pl-0 md:pl-20 lg:pl-64 pt-16 transition-all duration-300">
-        <div className="p-4 md:p-6 space-y-6">
+      <main className={`pl-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'} pt-16 transition-all duration-300`}>
+        <div className="p-6">
           {renderContent()}
         </div>
       </main>

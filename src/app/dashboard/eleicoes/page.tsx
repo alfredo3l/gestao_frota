@@ -26,7 +26,7 @@ interface Eleicao {
 }
 
 export default function PaginaEleicoes() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeItem, setActiveItem] = useState('eleições');
   const [filtroEleito, setFiltroEleito] = useState<boolean | undefined>(undefined);
   const [filterSearchTerm, setFilterSearchTerm] = useState<string>('');
@@ -44,12 +44,13 @@ export default function PaginaEleicoes() {
   } = useEleicoes();
 
   useEffect(() => {
-    setIsSidebarOpen(window.innerWidth >= 768);
-    
     const handleResize = () => {
-      setIsSidebarOpen(window.innerWidth >= 768);
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
     };
 
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -81,8 +82,8 @@ export default function PaginaEleicoes() {
       />
       <ClientHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
 
-      <main className="pl-0 md:pl-20 lg:pl-64 pt-16 transition-all duration-300">
-        <div className="p-4 md:p-6">
+      <main className={`pl-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'} pt-16 transition-all duration-300`}>
+        <div className="p-6">
           {/* Tabela de Eleições */}
           <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
             <div className="p-4 md:p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">

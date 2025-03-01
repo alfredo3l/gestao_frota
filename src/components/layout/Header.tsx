@@ -102,8 +102,8 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
   };
 
   return (
-    <header className={`h-16 bg-white border-b border-border fixed top-0 right-0 z-[900] transition-all duration-300 ${
-      isMobile ? 'left-0' : 'left-64'
+    <header className={`h-14 bg-white border-b border-border fixed top-0 right-0 z-[900] ${
+      isMenuOpen ? 'left-64' : 'left-0'
     }`}>
       <div className="h-full px-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
           {/* Logo visível apenas quando for fullWidth (sem sidebar) */}
           {fullWidth && (
             <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-              Evolução
+              Secretaria de Estado da Casa Civil
             </span>
           )}
         </div>

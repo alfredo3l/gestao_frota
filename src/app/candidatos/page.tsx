@@ -1,33 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, FileText, Loader2, Plus, Filter, Calendar, MapPin } from 'lucide-react';
+import { Search, FileText, Loader2, Plus, Filter, User, MapPin, Users } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/layout/Sidebar';
-import { useEventos } from '@/hooks/useEventos';
 import Link from 'next/link';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false
 });
 
-export default function PaginaEventos() {
+export default function PaginaCandidatos() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeItem, setActiveItem] = useState('eventos');
+  const [activeItem, setActiveItem] = useState('candidatos');
   const [filterSearchTerm, setFilterSearchTerm] = useState<string>('');
+  const [filterPartido, setFilterPartido] = useState<string>('');
+  const [filterCargo, setFilterCargo] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
-  const [filterTipo, setFilterTipo] = useState<string>('');
-  const [filterLocal, setFilterLocal] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
-
-  const {
-    eventos,
-    loading: isLoadingEventos,
-    error: errorEventos,
-    totalCount,
-    fetchEventos
-  } = useEventos();
+  const [isLoadingCandidatos, setIsLoadingCandidatos] = useState(true);
+  const [candidatos, setCandidatos] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [errorCandidatos, setErrorCandidatos] = useState<string | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -42,54 +37,121 @@ export default function PaginaEventos() {
   }, []);
 
   useEffect(() => {
-    fetchEventos(
-      currentPage,
-      10,
-      filterSearchTerm,
-      {
-        status: filterStatus || undefined,
-        tipo: filterTipo || undefined,
-        local: filterLocal || undefined
+    const fetchCandidatos = async () => {
+      setIsLoadingCandidatos(true);
+      setErrorCandidatos(null);
+      
+      try {
+        // Simulação de chamada à API
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Dados mockados que viriam do backend
+        const candidatosMock = [
+          {
+            id: '1',
+            nome: 'João Silva',
+            partido: 'PSD',
+            numero: '12345',
+            cargo: 'Vereador',
+            cidade: 'São Paulo',
+            estado: 'SP',
+            status: 'Ativo',
+            totalApoiadores: 245,
+            metaApoiadores: 500
+          },
+          {
+            id: '2',
+            nome: 'Maria Oliveira',
+            partido: 'PT',
+            numero: '54321',
+            cargo: 'Prefeito',
+            cidade: 'Rio de Janeiro',
+            estado: 'RJ',
+            status: 'Ativo',
+            totalApoiadores: 1250,
+            metaApoiadores: 2000
+          },
+          {
+            id: '3',
+            nome: 'Pedro Santos',
+            partido: 'PSDB',
+            numero: '98765',
+            cargo: 'Vereador',
+            cidade: 'Belo Horizonte',
+            estado: 'MG',
+            status: 'Inativo',
+            totalApoiadores: 120,
+            metaApoiadores: 300
+          },
+          {
+            id: '4',
+            nome: 'Ana Costa',
+            partido: 'MDB',
+            numero: '56789',
+            cargo: 'Deputado Estadual',
+            cidade: 'Salvador',
+            estado: 'BA',
+            status: 'Ativo',
+            totalApoiadores: 780,
+            metaApoiadores: 1500
+          },
+          {
+            id: '5',
+            nome: 'Carlos Ferreira',
+            partido: 'NOVO',
+            numero: '24680',
+            cargo: 'Deputado Federal',
+            cidade: 'Curitiba',
+            estado: 'PR',
+            status: 'Ativo',
+            totalApoiadores: 950,
+            metaApoiadores: 1200
+          }
+        ];
+        
+        // Filtragem dos dados
+        const filteredCandidatos = candidatosMock.filter(candidato => {
+          const matchesSearch = !filterSearchTerm || 
+            candidato.nome.toLowerCase().includes(filterSearchTerm.toLowerCase()) ||
+            candidato.numero.includes(filterSearchTerm);
+          
+          const matchesPartido = !filterPartido || candidato.partido === filterPartido;
+          const matchesCargo = !filterCargo || candidato.cargo === filterCargo;
+          const matchesStatus = !filterStatus || candidato.status === filterStatus;
+          
+          return matchesSearch && matchesPartido && matchesCargo && matchesStatus;
+        });
+        
+        setCandidatos(filteredCandidatos);
+        setTotalCount(filteredCandidatos.length);
+      } catch (error) {
+        console.error('Erro ao carregar candidatos:', error);
+        setErrorCandidatos('Ocorreu um erro ao carregar os candidatos. Tente novamente mais tarde.');
+      } finally {
+        setIsLoadingCandidatos(false);
       }
-    );
-  }, [currentPage, filterSearchTerm, filterStatus, filterTipo, filterLocal]);
+    };
+    
+    fetchCandidatos();
+  }, [filterSearchTerm, filterPartido, filterCargo, filterStatus, currentPage]);
 
   const handleGenerateReport = () => {
-    console.log('Gerando relatório de eventos...');
+    console.log('Gerando relatório de candidatos...');
   };
 
   const totalPages = Math.ceil(totalCount / 10);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Agendado':
-        return 'bg-blue-100 text-blue-800';
-      case 'Em Andamento':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Concluído':
+      case 'Ativo':
         return 'bg-green-100 text-green-800';
-      case 'Cancelado':
-        return 'bg-red-100 text-red-800';
+      case 'Inativo':
+        return 'bg-gray-100 text-gray-800';
+      case 'Pendente':
+        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const formatarData = (dataString: string) => {
-    const data = new Date(dataString);
-    return data.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
-
-  const formatarHora = (dataString: string) => {
-    const data = new Date(dataString);
-    return data.toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   return (
@@ -104,20 +166,20 @@ export default function PaginaEventos() {
 
       <main className={`pl-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'} pt-16 transition-all duration-300`}>
         <div className="p-6">
-          {/* Tabela de Eventos */}
+          {/* Tabela de Candidatos */}
           <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
             <div className="p-4 md:p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Eventos</h2>
-                <p className="text-sm text-gray-600">Gerenciamento de eventos e compromissos</p>
+                <h2 className="text-lg font-semibold text-gray-900">Candidatos</h2>
+                <p className="text-sm text-gray-600">Gerenciamento de candidatos</p>
               </div>
               <div className="flex items-center gap-4">
                 <Link 
-                  href="/eventos/novo"
+                  href="/candidatos/novo"
                   className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  Novo Evento
+                  Novo Candidato
                 </Link>
                 <button 
                   onClick={handleGenerateReport}
@@ -135,7 +197,7 @@ export default function PaginaEventos() {
                 <div className="relative flex-1 max-w-xl">
                   <input 
                     type="text"
-                    placeholder="Buscar evento..."
+                    placeholder="Buscar candidato..."
                     value={filterSearchTerm}
                     onChange={(e) => setFilterSearchTerm(e.target.value)}
                     className="w-full h-10 pl-10 pr-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
@@ -155,9 +217,9 @@ export default function PaginaEventos() {
                 <button
                   onClick={() => {
                     setFilterSearchTerm('');
+                    setFilterPartido('');
+                    setFilterCargo('');
                     setFilterStatus('');
-                    setFilterTipo('');
-                    setFilterLocal('');
                     setCurrentPage(1);
                   }}
                   className="h-10 px-4 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all flex items-center gap-2"
@@ -171,6 +233,42 @@ export default function PaginaEventos() {
 
               {showFilters && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  {/* Filtro de Partido */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Partido</label>
+                    <select
+                      value={filterPartido}
+                      onChange={(e) => setFilterPartido(e.target.value)}
+                      className="w-full h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                    >
+                      <option value="">Todos os partidos</option>
+                      <option value="PT">PT</option>
+                      <option value="PSDB">PSDB</option>
+                      <option value="MDB">MDB</option>
+                      <option value="PSD">PSD</option>
+                      <option value="NOVO">NOVO</option>
+                    </select>
+                  </div>
+
+                  {/* Filtro de Cargo */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                    <select
+                      value={filterCargo}
+                      onChange={(e) => setFilterCargo(e.target.value)}
+                      className="w-full h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                    >
+                      <option value="">Todos os cargos</option>
+                      <option value="Vereador">Vereador</option>
+                      <option value="Prefeito">Prefeito</option>
+                      <option value="Deputado Estadual">Deputado Estadual</option>
+                      <option value="Deputado Federal">Deputado Federal</option>
+                      <option value="Senador">Senador</option>
+                      <option value="Governador">Governador</option>
+                      <option value="Presidente">Presidente</option>
+                    </select>
+                  </div>
+
                   {/* Filtro de Status */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -180,41 +278,10 @@ export default function PaginaEventos() {
                       className="w-full h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
                     >
                       <option value="">Todos os status</option>
-                      <option value="Agendado">Agendado</option>
-                      <option value="Em Andamento">Em Andamento</option>
-                      <option value="Concluído">Concluído</option>
-                      <option value="Cancelado">Cancelado</option>
+                      <option value="Ativo">Ativo</option>
+                      <option value="Inativo">Inativo</option>
+                      <option value="Pendente">Pendente</option>
                     </select>
-                  </div>
-
-                  {/* Filtro de Tipo */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                    <select
-                      value={filterTipo}
-                      onChange={(e) => setFilterTipo(e.target.value)}
-                      className="w-full h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                    >
-                      <option value="">Todos os tipos</option>
-                      <option value="Reunião">Reunião</option>
-                      <option value="Comício">Comício</option>
-                      <option value="Visita">Visita</option>
-                      <option value="Debate">Debate</option>
-                      <option value="Entrevista">Entrevista</option>
-                      <option value="Outro">Outro</option>
-                    </select>
-                  </div>
-
-                  {/* Filtro de Local */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Local</label>
-                    <input
-                      type="text"
-                      placeholder="Filtrar por local..."
-                      value={filterLocal}
-                      onChange={(e) => setFilterLocal(e.target.value)}
-                      className="w-full h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                    />
                   </div>
                 </div>
               )}
@@ -222,35 +289,35 @@ export default function PaginaEventos() {
 
             {/* Tabela */}
             <div className="overflow-x-auto">
-              {errorEventos && (
+              {errorCandidatos && (
                 <div className="p-4 text-center text-red-600">
-                  {errorEventos}
+                  {errorCandidatos}
                 </div>
               )}
               
-              {isLoadingEventos ? (
+              {isLoadingCandidatos ? (
                 <div className="p-8 text-center">
                   <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
-                  <p className="mt-2 text-sm text-gray-600">Carregando eventos...</p>
+                  <p className="mt-2 text-sm text-gray-600">Carregando candidatos...</p>
                 </div>
               ) : (
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-50">
                       <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Título
+                        Candidato
                       </th>
                       <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tipo
+                        Partido/Número
                       </th>
                       <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Data e Hora
+                        Cargo
                       </th>
                       <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Local
+                        Localização
                       </th>
                       <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Participantes
+                        Apoiadores
                       </th>
                       <th className="px-4 md:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -258,46 +325,45 @@ export default function PaginaEventos() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {eventos.map((evento) => (
-                      <tr key={evento.id} className="hover:bg-gray-50">
+                    {candidatos.map((candidato) => (
+                      <tr key={candidato.id} className="hover:bg-gray-50">
                         <td className="px-4 md:px-6 py-4">
-                          <div className="font-medium text-gray-900">{evento.titulo}</div>
-                          <div className="text-sm text-gray-500 truncate max-w-xs">{evento.descricao}</div>
-                        </td>
-                        <td className="px-4 md:px-6 py-4 text-sm text-gray-600">
-                          {evento.tipo}
-                        </td>
-                        <td className="px-4 md:px-6 py-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <span>{formatarData(evento.dataInicio)}</span>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                              <circle cx="12" cy="12" r="10"></circle>
-                              <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            <span>{formatarHora(evento.dataInicio)}</span>
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 mr-3">
+                              <User className="w-4 h-4" />
+                            </div>
+                            <div className="font-medium text-gray-900">{candidato.nome}</div>
                           </div>
                         </td>
                         <td className="px-4 md:px-6 py-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
+                          <div className="font-medium">{candidato.partido}</div>
+                          <div className="text-xs text-gray-500">Nº {candidato.numero}</div>
+                        </td>
+                        <td className="px-4 md:px-6 py-4 text-sm text-gray-600">
+                          {candidato.cargo}
+                        </td>
+                        <td className="px-4 md:px-6 py-4">
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
                             <MapPin className="w-4 h-4 text-gray-400" />
-                            <span>{evento.local}</span>
+                            <span>{candidato.cidade}</span>
                           </div>
-                          {evento.cidade && (
-                            <div className="text-xs text-gray-500 mt-1">{evento.cidade}</div>
-                          )}
+                          <div className="text-sm text-gray-500 mt-1">{candidato.estado}</div>
                         </td>
-                        <td className="px-4 md:px-6 py-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">{evento.participantes?.length || 0}</span>
-                            <span className="text-gray-500">confirmados</span>
+                        <td className="px-4 md:px-6 py-4">
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <Users className="w-4 h-4 text-gray-400" />
+                            <span>{candidato.totalApoiadores} / {candidato.metaApoiadores}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div 
+                              className="bg-primary h-2 rounded-full" 
+                              style={{ width: `${Math.min(100, (candidato.totalApoiadores / candidato.metaApoiadores) * 100)}%` }}
+                            ></div>
                           </div>
                         </td>
                         <td className="px-4 md:px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(evento.status)}`}>
-                            {evento.status}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(candidato.status)}`}>
+                            {candidato.status}
                           </span>
                         </td>
                       </tr>
@@ -307,7 +373,7 @@ export default function PaginaEventos() {
               )}
 
               {/* Paginação */}
-              {!isLoadingEventos && eventos.length > 0 && (
+              {!isLoadingCandidatos && candidatos.length > 0 && (
                 <div className="px-4 md:px-6 py-4 flex items-center justify-between border-t border-border">
                   <div className="text-sm text-gray-600">
                     Mostrando <span className="font-medium">{(currentPage - 1) * 10 + 1}</span> a <span className="font-medium">{Math.min(currentPage * 10, totalCount)}</span> de <span className="font-medium">{totalCount}</span> resultados
@@ -332,9 +398,9 @@ export default function PaginaEventos() {
               )}
 
               {/* Mensagem de nenhum resultado */}
-              {!isLoadingEventos && eventos.length === 0 && (
+              {!isLoadingCandidatos && candidatos.length === 0 && (
                 <div className="p-8 text-center">
-                  <p className="text-gray-500">Nenhum evento encontrado com os filtros aplicados.</p>
+                  <p className="text-gray-500">Nenhum candidato encontrado com os filtros aplicados.</p>
                 </div>
               )}
             </div>

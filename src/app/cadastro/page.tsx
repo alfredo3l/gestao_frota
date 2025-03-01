@@ -24,7 +24,7 @@ export default function Cadastro() {
     <main className="min-h-screen bg-background flex items-center justify-center">
       <div className="w-full max-w-md p-6">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">Evolução Vistoria</h1>
+          <h1 className="text-3xl font-bold text-primary">Secretaria de Estado da Casa Civil</h1>
           <p className="text-foreground/80 mt-2">
             Crie sua conta de gestor
           </p>

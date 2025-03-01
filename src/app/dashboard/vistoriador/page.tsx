@@ -494,7 +494,7 @@ export default function DashVistoriador() {
       />
       <ClientHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
       
-      <main className="md:pl-64 pt-16">
+      <main className={`pl-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'} pt-16 transition-all duration-300`}>
         <div className="max-w-[1600px] mx-auto p-4 md:p-6">
           {!showSettings && (
             <div className="mb-6">

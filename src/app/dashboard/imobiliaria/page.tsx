@@ -131,6 +131,7 @@ export default function DashImobiliaria() {
   const [isContestacao, setIsContestacao] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleAddInspection = () => {
     setIsModalOpen(true);
@@ -172,10 +173,10 @@ export default function DashImobiliaria() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <ClientHeader onMenuClick={() => setIsMenuOpen(!isMenuOpen)} isMenuOpen={isMenuOpen} />
+      <ClientHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isMenuOpen={isSidebarOpen} />
 
-      <main className="pt-16 transition-all duration-300">
-        <div className="p-4 md:p-6 space-y-6">
+      <main className={`pl-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'} pt-16 transition-all duration-300`}>
+        <div className="p-6">
           {/* Barra de Tabs */}
           <ImobiliariaTabBar
             activeTab={activeTab}

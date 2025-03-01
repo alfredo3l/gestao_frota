@@ -12,7 +12,7 @@ const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
 });
 
 export default function PaginaPerfil() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeItem, setActiveItem] = useState('perfil');
   const [fotoPerfilTemp, setFotoPerfilTemp] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -28,12 +28,13 @@ export default function PaginaPerfil() {
   const { usuario, carregando, erro, atualizarPerfil, removerFotoPerfil } = useUsuario();
 
   useEffect(() => {
-    setIsSidebarOpen(window.innerWidth >= 768);
-    
     const handleResize = () => {
-      setIsSidebarOpen(window.innerWidth >= 768);
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
     };
 
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -130,7 +131,7 @@ export default function PaginaPerfil() {
         isMenuOpen={isSidebarOpen} 
       />
 
-      <main className="pl-0 md:pl-20 lg:pl-64 pt-16 transition-all duration-300">
+      <main className={`pl-0 ${isSidebarOpen ? 'md:pl-64' : 'md:pl-20'} pt-16 transition-all duration-300`}>
         <div className="p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Meu Perfil</h1>
           

@@ -608,7 +608,7 @@ export function ProfileDialog({ isOpen, onClose }: { isOpen: boolean; onClose: (
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [profile, setProfile] = useState({
     // Dados da Empresa
-    companyName: 'Evolução Vistoria',
+    companyName: 'Secretaria de Estado da Casa Civil',
     companyCnpj: '12.345.678/0001-90',
     companyAddress: 'Av. Paulista, 1000',
     companyNumber: '1000',
