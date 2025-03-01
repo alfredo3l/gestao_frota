@@ -30,7 +30,7 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
       setActiveProfile('imobiliaria');
     } else if (pathname?.includes('/dashboard/vistoriador')) {
       setActiveProfile('vistoriador');
-    } else if (pathname?.includes('/dashboard/gestor')) {
+    } else if (pathname?.includes('/dashboard/gestor') || pathname === '/dashboard') {
       setActiveProfile('gestor');
     }
   }, [pathname]);
@@ -94,7 +94,7 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
         router.push('/dashboard/vistoriador');
         break;
       case 'gestor':
-        router.push('/dashboard/gestor');
+        router.push('/dashboard');
         break;
       default:
         break;

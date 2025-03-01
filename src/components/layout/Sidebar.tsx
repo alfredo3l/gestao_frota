@@ -16,7 +16,8 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronLeftCircle,
-  ChevronRightCircle
+  ChevronRightCircle,
+  Award
 } from 'lucide-react';
 
 interface MenuItem {
@@ -85,10 +86,10 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
       id: 'demandas'
     },
     {
-      title: 'Eventos',
+      title: 'Agenda Política',
       icon: <Calendar className="w-5 h-5" />,
-      href: '/eventos',
-      id: 'eventos'
+      href: '/agenda-politica',
+      id: 'agenda-politica'
     },
     {
       title: 'Apoios Políticos',
@@ -103,7 +104,31 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
       id: 'regioes'
     },
     {
-      title: 'Assistente IA',
+      title: 'Candidatos',
+      icon: <UserCheck className="w-5 h-5" />,
+      href: '/candidatos',
+      id: 'candidatos'
+    },
+    {
+      title: 'Coordenadores',
+      icon: <Users className="w-5 h-5" />,
+      href: '/coordenadores',
+      id: 'coordenadores'
+    },
+    {
+      title: 'Lideranças',
+      icon: <Award className="w-5 h-5" />,
+      href: '/liderancas',
+      id: 'liderancas'
+    },
+    {
+      title: 'Resultados Eleições',
+      icon: <FileText className="w-5 h-5" />,
+      href: '/resultados-eleicoes',
+      id: 'resultados-eleicoes'
+    },
+    {
+      title: 'IA Assistente',
       icon: <Bot className="w-5 h-5" />,
       href: '/ia',
       id: 'ia'
@@ -137,14 +162,16 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
             {/* Logo do Governo de Mato Grosso do Sul */}
             <div className="flex flex-col items-center justify-center mb-4">
               <div className={`w-full flex justify-center ${collapsed ? 'px-1' : 'px-2'}`}>
-                <Image 
-                  src="/LOGO_CASA_CIVIL.png" 
-                  alt="Logo do Governo de Mato Grosso do Sul" 
-                  width={collapsed ? 50 : 150} 
-                  height={collapsed ? 50 : 60} 
-                  className="object-contain"
-                  priority
-                />
+                <Link href="/dashboard" className="cursor-pointer transition-opacity hover:opacity-80">
+                  <Image 
+                    src="/LOGO_CASA_CIVIL.png" 
+                    alt="Logo do Governo de Mato Grosso do Sul" 
+                    width={collapsed ? 50 : 150} 
+                    height={collapsed ? 50 : 60} 
+                    className="object-contain"
+                    priority
+                  />
+                </Link>
               </div>
               {!collapsed && (
                 <div className="mt-1 font-semibold text-gray-900 text-center">

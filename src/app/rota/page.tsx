@@ -17,7 +17,7 @@ export default function Rota() {
 
     switch (userProfile) {
       case PROFILES.GESTOR:
-        redirect('/dashboard/gestor');
+        redirect('/dashboard');
         break;
       case PROFILES.VISTORIADOR:
         redirect('/dashboard/vistoriador');

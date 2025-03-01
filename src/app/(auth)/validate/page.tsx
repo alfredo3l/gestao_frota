@@ -9,6 +9,15 @@ export default function ValidatePage() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    // Verificar se o usuário está autenticado
+    const usuarioSalvo = localStorage.getItem('usuario');
+    
+    if (!usuarioSalvo) {
+      // Se não estiver autenticado, redirecionar para o login
+      router.push('/login');
+      return;
+    }
+    
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -20,12 +29,12 @@ export default function ValidatePage() {
     }, 500);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (progress === 100) {
       const redirect = setTimeout(() => {
-        router.push('/dashboard/gestor');
+        router.push('/dashboard');
       }, 100);
       
       return () => clearTimeout(redirect);

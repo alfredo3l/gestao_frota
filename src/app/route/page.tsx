@@ -33,7 +33,7 @@ export default function RoutePage() {
 
     // Redireciona para o dashboard após a animação
     const timer3 = setTimeout(() => {
-      router.push('/dashboard/gestor');
+      router.push('/dashboard');
     }, 3000);
 
     return () => {

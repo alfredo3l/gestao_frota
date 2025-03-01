@@ -20,6 +20,21 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Simular autenticação bem-sucedida
+    const usuarioMock = {
+      id: '1',
+      nome: 'Usuário Teste',
+      email: formData.email,
+      telefone: '(67) 99999-9999',
+      cargo: 'Coordenador de Campanha',
+      fotoPerfil: '/images/avatar-default.svg'
+    };
+    
+    // Salvar dados do usuário no localStorage
+    localStorage.setItem('usuario', JSON.stringify(usuarioMock));
+    
+    // Redirecionar para a página de validação
     router.push('/validate');
   };
 
