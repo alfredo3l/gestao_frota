@@ -1,30 +1,23 @@
 import './globals.css';
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import type { Metadata } from "next";
-import ClientLayout from '@/components/layout/ClientLayout';
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Plataforma de gestão polítiva",
-  description: "Sistema de dados estratégicos",
+  title: 'Evolução Política - Sistema de Gestão de Campanha',
+  description: 'Plataforma completa para gestão de campanhas políticas, apoiadores, demandas e eventos.',
 };
 
-type RootLayoutProps = {
+export default function RootLayout({
+  children,
+}: {
   children: React.ReactNode;
-};
-
-export default function RootLayout({ children }: RootLayoutProps): React.JSX.Element {
+}) {
   return (
-    <html lang="pt-BR" className={`antialiased ${inter.variable}`}>
-      <body className="font-sans" suppressHydrationWarning>
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+    <html lang="pt-BR">
+      <body className={inter.className}>
+        {children}
       </body>
     </html>
   );

@@ -1,4 +1,25 @@
 export default function Cadastro() {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Capturar os dados do formulário
+    const formData = new FormData(e.target);
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+      confirmPassword: formData.get('confirmPassword')
+    };
+
+    // Validar se as senhas coincidem
+    if (data.password !== data.confirmPassword) {
+      alert('As senhas não coincidem');
+      return;
+    }
+
+    // Redirecionar para a página de validação
+    window.location.href = '/validate';
+  };
+
   return (
     <main className="min-h-screen bg-background flex items-center justify-center">
       <div className="w-full max-w-md p-6">
@@ -10,7 +31,7 @@ export default function Cadastro() {
         </div>
 
         <div className="bg-white p-8 rounded-lg border border-border shadow-sm">
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
                 Nome completo
@@ -18,8 +39,10 @@ export default function Cadastro() {
               <input
                 type="text"
                 id="name"
+                name="name"
                 className="w-full px-3 py-2 border border-border rounded-md"
                 placeholder="Seu nome"
+                required
               />
             </div>
 
@@ -30,8 +53,10 @@ export default function Cadastro() {
               <input
                 type="email"
                 id="email"
+                name="email"
                 className="w-full px-3 py-2 border border-border rounded-md"
                 placeholder="seu@email.com"
+                required
               />
             </div>
 
@@ -42,8 +67,10 @@ export default function Cadastro() {
               <input
                 type="password"
                 id="password"
+                name="password"
                 className="w-full px-3 py-2 border border-border rounded-md"
                 placeholder="••••••••"
+                required
               />
             </div>
 
@@ -54,8 +81,10 @@ export default function Cadastro() {
               <input
                 type="password"
                 id="confirmPassword"
+                name="confirmPassword"
                 className="w-full px-3 py-2 border border-border rounded-md"
                 placeholder="••••••••"
+                required
               />
             </div>
 
