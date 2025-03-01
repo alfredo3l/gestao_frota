@@ -8,7 +8,8 @@ const nextConfig = {
       'consultoriodehipnose.com.br',
       'img.freepik.com',
       'storage.googleapis.com',
-      'divulgacandcontas.tse.jus.br'
+      'divulgacandcontas.tse.jus.br',
+      'randomuser.me'
     ],
     remotePatterns: [
       {

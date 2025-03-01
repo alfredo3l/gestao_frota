@@ -3,21 +3,41 @@
 import { useState, useEffect, useRef } from 'react';
 import { Menu, Bell, User, Search, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useUsuario } from '@/contexts/UsuarioContext';
 
 interface ClientHeaderProps {
   onMenuClick: () => void;
   isMenuOpen: boolean;
 }
 
-export default function ClientHeader({ onMenuClick, isMenuOpen }: ClientHeaderProps) {
+export default function ClientHeader({ 
+  onMenuClick, 
+  isMenuOpen
+}: ClientHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const router = useRouter();
+  const { usuario } = useUsuario();
   
   const notificationsRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchResultsRef = useRef<HTMLDivElement>(null);
+
+  // Obter as iniciais do nome do usuário
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  const userInitials = usuario?.nome ? getInitials(usuario.nome) : 'US';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -100,6 +120,17 @@ export default function ClientHeader({ onMenuClick, isMenuOpen }: ClientHeaderPr
     if (searchTerm.trim()) {
       setShowSearchResults(true);
     }
+  };
+
+  const handleLogout = () => {
+    // Fechar o menu do usuário
+    setShowUserMenu(false);
+    
+    // Simulação de logout - em uma aplicação real, você chamaria uma API de logout
+    localStorage.removeItem('usuario');
+    
+    // Redirecionar para a página inicial
+    router.push('/');
   };
 
   return (
@@ -234,10 +265,22 @@ export default function ClientHeader({ onMenuClick, isMenuOpen }: ClientHeaderPr
               onClick={() => setShowUserMenu(!showUserMenu)}
               data-user-menu-toggle
             >
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-medium">
-                JS
-              </div>
-              <span className="hidden md:block text-sm font-medium">João Silva</span>
+              {usuario?.fotoPerfil ? (
+                <div className="w-8 h-8 rounded-full overflow-hidden">
+                  <Image
+                    src={usuario.fotoPerfil}
+                    alt={usuario.nome}
+                    width={32}
+                    height={32}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-medium">
+                  {userInitials}
+                </div>
+              )}
+              <span className="hidden md:block text-sm font-medium">{usuario?.nome || 'Usuário'}</span>
               <ChevronDown className="hidden md:block w-4 h-4 text-gray-400" />
             </button>
 
@@ -248,8 +291,27 @@ export default function ClientHeader({ onMenuClick, isMenuOpen }: ClientHeaderPr
                 className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10"
               >
                 <div className="p-3 border-b border-gray-100">
-                  <div className="font-medium text-gray-900">João Silva</div>
-                  <div className="text-sm text-gray-600">joao.silva@exemplo.com</div>
+                  <div className="flex items-center gap-3 mb-2">
+                    {usuario?.fotoPerfil ? (
+                      <div className="w-10 h-10 rounded-full overflow-hidden">
+                        <Image
+                          src={usuario.fotoPerfil}
+                          alt={usuario.nome}
+                          width={40}
+                          height={40}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-medium">
+                        {userInitials}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-medium text-gray-900">{usuario?.nome || 'Usuário'}</div>
+                      <div className="text-sm text-gray-600">{usuario?.email || 'usuario@exemplo.com'}</div>
+                    </div>
+                  </div>
                 </div>
                 <div className="py-1">
                   <Link
@@ -275,7 +337,7 @@ export default function ClientHeader({ onMenuClick, isMenuOpen }: ClientHeaderPr
                 <div className="py-1 border-t border-gray-100">
                   <button
                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full text-left"
-                    onClick={() => setShowUserMenu(false)}
+                    onClick={handleLogout}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
