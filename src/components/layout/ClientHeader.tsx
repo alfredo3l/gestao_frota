@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Menu, Bell, User, ChevronDown } from 'lucide-react';
+import { Menu, User, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useUsuario } from '@/contexts/UsuarioContext';
+import NotificacoesDropdown from '@/components/ui/NotificacoesDropdown';
 
 interface ClientHeaderProps {
   onMenuClick: () => void;
@@ -16,12 +17,10 @@ export default function ClientHeader({
   onMenuClick, 
   isMenuOpen
 }: ClientHeaderProps) {
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
   const { usuario } = useUsuario();
   
-  const notificationsRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Obter as iniciais do nome do usuário
@@ -39,14 +38,6 @@ export default function ClientHeader({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        notificationsRef.current && 
-        !notificationsRef.current.contains(event.target as Node) &&
-        !(event.target as Element).closest('[data-notifications-toggle]')
-      ) {
-        setShowNotifications(false);
-      }
-
-      if (
         userMenuRef.current && 
         !userMenuRef.current.contains(event.target as Node) &&
         !(event.target as Element).closest('[data-user-menu-toggle]')
@@ -58,30 +49,6 @@ export default function ClientHeader({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const notifications = [
-    {
-      id: 1,
-      title: 'Novo apoiador registrado',
-      message: 'João Silva foi adicionado como apoiador.',
-      time: '5 minutos atrás',
-      read: false
-    },
-    {
-      id: 2,
-      title: 'Evento atualizado',
-      message: 'O evento "Reunião com lideranças" foi atualizado.',
-      time: '1 hora atrás',
-      read: false
-    },
-    {
-      id: 3,
-      title: 'Demanda concluída',
-      message: 'A demanda #123 foi marcada como concluída.',
-      time: '3 horas atrás',
-      read: true
-    }
-  ];
 
   const handleLogout = () => {
     // Fechar o menu do usuário
@@ -113,59 +80,7 @@ export default function ClientHeader({
         {/* Ações do Usuário */}
         <div className="flex items-center gap-2 ml-auto">
           {/* Notificações */}
-          <div className="relative">
-            <button
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors relative"
-              onClick={() => setShowNotifications(!showNotifications)}
-              data-notifications-toggle
-            >
-              <Bell className="w-5 h-5" />
-              {notifications.some(n => !n.read) && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-              )}
-            </button>
-
-            {/* Dropdown de Notificações */}
-            {showNotifications && (
-              <div 
-                ref={notificationsRef}
-                className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10"
-              >
-                <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-medium text-gray-900">Notificações</h3>
-                  <button className="text-xs text-primary hover:text-primary-dark transition-colors">
-                    Marcar todas como lidas
-                  </button>
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {notifications.map((notification) => (
-                    <div 
-                      key={notification.id}
-                      className={`p-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50/50' : ''}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-2 h-2 rounded-full mt-2 ${!notification.read ? 'bg-primary' : 'bg-gray-300'}`}></div>
-                        <div>
-                          <div className="font-medium text-gray-900">{notification.title}</div>
-                          <p className="text-sm text-gray-600 mt-0.5">{notification.message}</p>
-                          <div className="text-xs text-gray-500 mt-1">{notification.time}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-3 border-t border-gray-100">
-                  <Link
-                    href="/notificacoes"
-                    className="block text-center text-sm text-primary hover:text-primary-dark transition-colors"
-                    onClick={() => setShowNotifications(false)}
-                  >
-                    Ver todas as notificações
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
+          <NotificacoesDropdown />
 
           {/* Menu do Usuário */}
           <div className="relative">

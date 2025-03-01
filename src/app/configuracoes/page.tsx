@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Lock, User, Palette, Save, Upload, X } from 'lucide-react';
+import { Bell, Lock, User, Palette, Save, Upload, X, Plus, Trash2, AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/layout/Sidebar';
 import Image from 'next/image';
 import { useUsuario } from '@/contexts/UsuarioContext';
+import { useTema } from '@/contexts/TemaContext';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false
@@ -25,8 +26,36 @@ export default function PaginaConfiguracoes() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [corRapida, setCorRapida] = useState('');
   
   const { usuario, carregando, erro, atualizarPerfil, removerFotoPerfil } = useUsuario();
+  const { temaAtual, temas, alterarTema, adicionarTema, removerTema } = useTema();
+  
+  const [novoTema, setNovoTema] = useState({
+    nome: '',
+    cores: {
+      background: '#ffffff',
+      foreground: '#171717',
+      primary: '#0F509C',
+      primaryLight: '#0F509C',
+      border: '#e5e5e5',
+    }
+  });
+  
+  const [mostrarFormNovoTema, setMostrarFormNovoTema] = useState(false);
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [temaOriginal, setTemaOriginal] = useState('');
+
+  const coresPredefinidas = [
+    { nome: 'Azul', valor: '#0F509C' },
+    { nome: 'Verde', valor: '#10B981' },
+    { nome: 'Vermelho', valor: '#EF4444' },
+    { nome: 'Roxo', valor: '#8B5CF6' },
+    { nome: 'Laranja', valor: '#F97316' },
+    { nome: 'Rosa', valor: '#EC4899' },
+    { nome: 'Amarelo', valor: '#F59E0B' },
+    { nome: 'Cinza', valor: '#6B7280' },
+  ];
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,6 +84,13 @@ export default function PaginaConfiguracoes() {
       }
     }
   }, [usuario]);
+
+  useEffect(() => {
+    // Inicializar a cor rápida com a cor primária do tema atual
+    if (temaAtual) {
+      setCorRapida(temaAtual.cores.primary);
+    }
+  }, [temaAtual]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -117,6 +153,69 @@ export default function PaginaConfiguracoes() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const iniciarEdicaoTema = (tema) => {
+    setNovoTema({...tema});
+    setModoEdicao(true);
+    setTemaOriginal(tema.nome);
+    setMostrarFormNovoTema(true);
+  };
+  
+  const cancelarEdicao = () => {
+    setNovoTema({
+      nome: '',
+      cores: {
+        background: '#ffffff',
+        foreground: '#171717',
+        primary: '#0F509C',
+        primaryLight: '#0F509C',
+        border: '#e5e5e5',
+      }
+    });
+    setModoEdicao(false);
+    setTemaOriginal('');
+    setMostrarFormNovoTema(false);
+  };
+  
+  const salvarTema = () => {
+    if (novoTema.nome.trim() === '') {
+      alert('Por favor, informe um nome para o tema');
+      return;
+    }
+    
+    if (modoEdicao) {
+      // Remover o tema original
+      const novosTemas = temas.filter(tema => tema.nome !== temaOriginal);
+      // Adicionar o tema editado
+      const temasAtualizados = [...novosTemas, novoTema];
+      localStorage.setItem('temas', JSON.stringify(temasAtualizados));
+      
+      // Atualizar o tema atual se for o que está sendo editado
+      if (temaAtual.nome === temaOriginal) {
+        alterarTema(novoTema);
+      }
+      
+      // Atualizar a lista de temas
+      setTemas(temasAtualizados);
+    } else {
+      adicionarTema(novoTema);
+    }
+    
+    // Resetar o formulário
+    setNovoTema({
+      nome: '',
+      cores: {
+        background: '#ffffff',
+        foreground: '#171717',
+        primary: '#0F509C',
+        primaryLight: '#0F509C',
+        border: '#e5e5e5',
+      }
+    });
+    setModoEdicao(false);
+    setTemaOriginal('');
+    setMostrarFormNovoTema(false);
   };
 
   const renderTabContent = () => {
@@ -369,31 +468,426 @@ export default function PaginaConfiguracoes() {
               <div className="space-y-4">
                 <h4 className="font-medium text-gray-900">Tema</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="border border-primary rounded-lg p-4 bg-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-medium text-gray-900">Claro</span>
-                      <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
-                        <div className="w-3 h-3 rounded-full bg-primary"></div>
+                  {temas.map((tema) => (
+                    <div 
+                      key={tema.nome}
+                      className={`border rounded-lg p-4 bg-white cursor-pointer transition-all hover:shadow-md ${
+                        temaAtual.nome === tema.nome ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => alterarTema(tema)}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium text-gray-900">{tema.nome}</span>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          temaAtual.nome === tema.nome ? 'border-primary' : 'border-gray-300'
+                        }`}>
+                          {temaAtual.nome === tema.nome && (
+                            <div className="w-3 h-3 rounded-full bg-primary"></div>
+                          )}
+                        </div>
                       </div>
+                      
+                      <div className="p-3 rounded-md mb-3" style={{ 
+                        backgroundColor: tema.cores.background,
+                        border: `1px solid ${tema.cores.border}`
+                      }}>
+                        <div className="h-6 rounded-md mb-2 flex items-center justify-center text-white text-xs" style={{ backgroundColor: tema.cores.primary }}>
+                          Botão
+                        </div>
+                        <p className="text-xs" style={{ color: tema.cores.foreground }}>
+                          Exemplo de texto
+                        </p>
+                      </div>
+                      
+                      <div className="flex space-x-2 mb-2">
+                        <div className="flex-1">
+                          <div className="text-xs text-gray-500 mb-1">Cor primária</div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: tema.cores.primary }}></div>
+                            <span className="text-xs text-gray-700">{tema.cores.primary}</span>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-xs text-gray-500 mb-1">Cor de texto</div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: tema.cores.foreground }}></div>
+                            <span className="text-xs text-gray-700">{tema.cores.foreground}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {usuario?.isAdmin && (
+                        <div className="mt-2 flex justify-between">
+                          {tema.nome !== 'Padrão' && (
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removerTema(tema.nome);
+                              }}
+                              className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Remover
+                            </button>
+                          )}
+                          
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              iniciarEdicaoTema(tema);
+                            }}
+                            className="text-xs text-primary hover:text-primary-dark flex items-center gap-1 ml-auto"
+                          >
+                            <Palette className="w-3 h-3" />
+                            Editar
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <div className="h-20 bg-gray-100 rounded-md border border-gray-200"></div>
-                  </div>
-                  <div className="border border-gray-200 rounded-lg p-4 bg-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-medium text-gray-900">Escuro</span>
-                      <div className="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                    </div>
-                    <div className="h-20 bg-gray-800 rounded-md"></div>
-                  </div>
-                  <div className="border border-gray-200 rounded-lg p-4 bg-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-medium text-gray-900">Sistema</span>
-                      <div className="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                    </div>
-                    <div className="h-20 bg-gradient-to-r from-gray-100 to-gray-800 rounded-md"></div>
-                  </div>
+                  ))}
                 </div>
               </div>
+              
+              {usuario?.isAdmin && (
+                <div className="border-t border-gray-200 pt-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-gray-900">Personalizar Cores</h4>
+                    {!mostrarFormNovoTema ? (
+                      <button 
+                        onClick={() => {
+                          setModoEdicao(false);
+                          setMostrarFormNovoTema(true);
+                        }}
+                        className="text-sm flex items-center gap-1 text-primary hover:text-primary-dark"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Novo Tema
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={cancelarEdicao}
+                        className="text-sm flex items-center gap-1 text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                        Cancelar
+                      </button>
+                    )}
+                  </div>
+                  
+                  {!mostrarFormNovoTema && (
+                    <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+                      <h5 className="text-sm font-medium mb-3">Aplicar Cor Rápida</h5>
+                      <p className="text-xs text-gray-600 mb-3">
+                        Escolha uma cor primária e aplique-a ao tema atual sem criar um novo tema.
+                      </p>
+                      
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          id="cor-rapida"
+                          className="h-10 w-14 border border-gray-200 rounded cursor-pointer"
+                          value={corRapida}
+                          onChange={(e) => {
+                            setCorRapida(e.target.value);
+                            const corInput = document.getElementById('cor-rapida-texto') as HTMLInputElement;
+                            corInput.value = e.target.value;
+                          }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Digite um código de cor (#RRGGBB)"
+                          className="flex-1 h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                          value={corRapida}
+                          id="cor-rapida-texto"
+                          onChange={(e) => {
+                            setCorRapida(e.target.value);
+                            // Tentar atualizar o seletor de cor apenas se for um valor hexadecimal válido
+                            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                              const corPicker = document.getElementById('cor-rapida') as HTMLInputElement;
+                              corPicker.value = e.target.value;
+                            }
+                          }}
+                        />
+                        <button 
+                          onClick={() => {
+                            // Validar se é uma cor hexadecimal válida
+                            if (!/^#[0-9A-F]{6}$/i.test(corRapida)) {
+                              alert('Por favor, insira um código de cor hexadecimal válido (ex: #FF0000)');
+                              return;
+                            }
+                            
+                            // Criar um novo tema baseado no tema atual, mas com a cor primária alterada
+                            const novoTemaRapido = {
+                              ...temaAtual,
+                              nome: `${temaAtual.nome} (Modificado)`,
+                              cores: {
+                                ...temaAtual.cores,
+                                primary: corRapida,
+                                primaryLight: corRapida
+                              }
+                            };
+                            
+                            // Aplicar o tema
+                            alterarTema(novoTemaRapido);
+                          }}
+                          className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                        >
+                          Aplicar
+                        </button>
+                      </div>
+                      
+                      <div className="mt-3">
+                        <p className="text-xs text-gray-600 mb-2">Cores predefinidas:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {coresPredefinidas.map((cor) => (
+                            <button
+                              key={cor.valor}
+                              className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center overflow-hidden tooltip-container"
+                              style={{ backgroundColor: cor.valor }}
+                              onClick={() => setCorRapida(cor.valor)}
+                              title={cor.nome}
+                            >
+                              {corRapida === cor.valor && (
+                                <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center">
+                                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cor.valor }}></div>
+                                </div>
+                              )}
+                              <span className="tooltip">{cor.nome}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3 p-3 border border-gray-200 rounded-lg">
+                        <h6 className="text-xs font-medium mb-2">Visualização:</h6>
+                        <div className="flex space-x-2">
+                          <button 
+                            className="px-3 py-1.5 rounded text-white text-xs font-medium"
+                            style={{ backgroundColor: corRapida }}
+                          >
+                            Botão Primário
+                          </button>
+                          <div 
+                            className="px-3 py-1.5 rounded text-xs font-medium flex-1 text-center"
+                            style={{ 
+                              backgroundColor: 'white',
+                              color: corRapida,
+                              border: `1px solid ${corRapida}`
+                            }}
+                          >
+                            Texto Colorido
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center mt-3">
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center bg-gray-100 text-gray-500 mr-2">
+                          <AlertCircle className="w-3 h-3" />
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          Esta alteração não será salva como um novo tema
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {mostrarFormNovoTema && (
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-sm font-medium text-gray-900">
+                          {modoEdicao ? `Editando: ${temaOriginal}` : 'Novo Tema'}
+                        </h5>
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="nome-tema" className="block text-sm font-medium text-gray-700 mb-1">
+                          Nome do Tema
+                        </label>
+                        <input
+                          type="text"
+                          id="nome-tema"
+                          className="w-full h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                          value={novoTema.nome}
+                          onChange={(e) => setNovoTema({...novoTema, nome: e.target.value})}
+                          placeholder="Ex: Tema Personalizado"
+                        />
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="cor-primary" className="block text-sm font-medium text-gray-700 mb-1">
+                            Cor Primária (botões e elementos de destaque)
+                          </label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              id="cor-primary"
+                              className="h-10 w-14 border border-gray-200 rounded cursor-pointer"
+                              value={novoTema.cores.primary}
+                              onChange={(e) => setNovoTema({
+                                ...novoTema, 
+                                cores: {...novoTema.cores, primary: e.target.value, primaryLight: e.target.value}
+                              })}
+                            />
+                            <input
+                              type="text"
+                              className="flex-1 h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                              value={novoTema.cores.primary}
+                              onChange={(e) => setNovoTema({
+                                ...novoTema, 
+                                cores: {...novoTema.cores, primary: e.target.value, primaryLight: e.target.value}
+                              })}
+                              placeholder="#0F509C"
+                            />
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Esta cor será usada em botões, links e elementos de destaque
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="cor-background" className="block text-sm font-medium text-gray-700 mb-1">
+                            Cor de Fundo
+                          </label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              id="cor-background"
+                              className="h-10 w-14 border border-gray-200 rounded cursor-pointer"
+                              value={novoTema.cores.background}
+                              onChange={(e) => setNovoTema({
+                                ...novoTema, 
+                                cores: {...novoTema.cores, background: e.target.value}
+                              })}
+                            />
+                            <input
+                              type="text"
+                              className="flex-1 h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                              value={novoTema.cores.background}
+                              onChange={(e) => setNovoTema({
+                                ...novoTema, 
+                                cores: {...novoTema.cores, background: e.target.value}
+                              })}
+                              placeholder="#ffffff"
+                            />
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Esta cor será usada como fundo principal do sistema
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="cor-foreground" className="block text-sm font-medium text-gray-700 mb-1">
+                            Cor do Texto
+                          </label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              id="cor-foreground"
+                              className="h-10 w-14 border border-gray-200 rounded cursor-pointer"
+                              value={novoTema.cores.foreground}
+                              onChange={(e) => setNovoTema({
+                                ...novoTema, 
+                                cores: {...novoTema.cores, foreground: e.target.value}
+                              })}
+                            />
+                            <input
+                              type="text"
+                              className="flex-1 h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                              value={novoTema.cores.foreground}
+                              onChange={(e) => setNovoTema({
+                                ...novoTema, 
+                                cores: {...novoTema.cores, foreground: e.target.value}
+                              })}
+                              placeholder="#171717"
+                            />
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Esta cor será usada para textos e ícones
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="cor-border" className="block text-sm font-medium text-gray-700 mb-1">
+                            Cor da Borda
+                          </label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              id="cor-border"
+                              className="h-10 w-14 border border-gray-200 rounded cursor-pointer"
+                              value={novoTema.cores.border}
+                              onChange={(e) => setNovoTema({
+                                ...novoTema, 
+                                cores: {...novoTema.cores, border: e.target.value}
+                              })}
+                            />
+                            <input
+                              type="text"
+                              className="flex-1 h-10 px-4 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                              value={novoTema.cores.border}
+                              onChange={(e) => setNovoTema({
+                                ...novoTema, 
+                                cores: {...novoTema.cores, border: e.target.value}
+                              })}
+                              placeholder="#e5e5e5"
+                            />
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            Esta cor será usada para bordas de cards e separadores
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-6 p-4 border border-gray-200 rounded-lg">
+                        <h5 className="text-sm font-medium mb-3">Visualização:</h5>
+                        <div className="space-y-3">
+                          <div className="h-10 rounded-md flex items-center justify-center text-white text-sm font-medium" style={{ backgroundColor: novoTema.cores.primary }}>
+                            Botão Primário
+                          </div>
+                          <div className="p-4 rounded-md" style={{ 
+                            backgroundColor: novoTema.cores.background,
+                            color: novoTema.cores.foreground,
+                            border: `1px solid ${novoTema.cores.border}`
+                          }}>
+                            <h6 className="font-medium mb-2" style={{ color: novoTema.cores.foreground }}>Exemplo de Card</h6>
+                            <p className="text-sm" style={{ color: novoTema.cores.foreground }}>
+                              Este é um exemplo de como o texto e os elementos ficarão com as cores selecionadas.
+                            </p>
+                            <div className="mt-3">
+                              <button className="px-3 py-1 text-xs rounded" style={{ 
+                                backgroundColor: novoTema.cores.primary,
+                                color: '#ffffff'
+                              }}>
+                                Ação
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-4 flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-500 mr-2">
+                            <AlertCircle className="w-4 h-4" />
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            Você pode inserir códigos de cores em formato hexadecimal (#RRGGBB)
+                          </span>
+                        </div>
+                        <button 
+                          onClick={salvarTema}
+                          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+                        >
+                          <Save className="w-4 h-4" />
+                          {modoEdicao ? 'Atualizar Tema' : 'Salvar Tema'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="border-t border-gray-200 pt-6 space-y-4">
                 <h4 className="font-medium text-gray-900">Densidade</h4>
                 <div className="flex items-center space-x-4">
@@ -407,6 +901,21 @@ export default function PaginaConfiguracoes() {
                   </label>
                 </div>
               </div>
+              
+              {!usuario?.isAdmin && (
+                <div className="border-t border-gray-200 pt-6">
+                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h5 className="font-medium text-yellow-800 mb-1">Acesso restrito</h5>
+                      <p className="text-sm text-yellow-700">
+                        A personalização de cores está disponível apenas para administradores do sistema.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="pt-4">
                 <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2">
                   <Save className="w-4 h-4" />
@@ -423,6 +932,31 @@ export default function PaginaConfiguracoes() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      <style jsx global>{`
+        .tooltip-container {
+          position: relative;
+        }
+        
+        .tooltip {
+          visibility: hidden;
+          position: absolute;
+          bottom: -30px;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 10px;
+          white-space: nowrap;
+          z-index: 10;
+        }
+        
+        .tooltip-container:hover .tooltip {
+          visibility: visible;
+        }
+      `}</style>
+      
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}

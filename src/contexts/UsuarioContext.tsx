@@ -9,6 +9,7 @@ interface PerfilUsuario {
   telefone: string;
   cargo: string;
   fotoPerfil?: string;
+  isAdmin?: boolean;
 }
 
 interface AtualizarPerfilParams {
@@ -51,7 +52,8 @@ export function UsuarioProvider({ children }: { children: ReactNode }) {
           email: 'joao.silva@exemplo.com',
           telefone: '(11) 98765-4321',
           cargo: 'Coordenador de Campanha',
-          fotoPerfil: '/images/avatar-default.svg'
+          fotoPerfil: '/images/avatar-default.svg',
+          isAdmin: true // Para fins de teste, definimos o usuário como administrador
         };
         
         // Salvar no localStorage para persistência

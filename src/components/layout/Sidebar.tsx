@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAutorizacao } from '@/hooks/useAutorizacao';
 import { 
   Home, 
   Users, 
@@ -17,7 +18,9 @@ import {
   ChevronRight,
   ChevronLeftCircle,
   ChevronRightCircle,
-  Award
+  Award,
+  Shield,
+  ClipboardList
 } from 'lucide-react';
 
 interface MenuItem {
@@ -45,6 +48,7 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [collapsed, setCollapsed] = useState(false);
+  const { verificarPermissao, carregando, usuarioAtual, isSuperAdmin, isAdmin, getPerfilUsuario } = useAutorizacao();
 
   // Efeito para sincronizar o estado collapsed com isOpen
   useEffect(() => {
@@ -66,6 +70,17 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
     setCollapsed(!collapsed);
   };
 
+  // Verificar se o usuário tem permissão para acessar um recurso
+  const temPermissao = (recurso: string): boolean => {
+    if (carregando) return false;
+    
+    return verificarPermissao({
+      recurso,
+      acao: 'ler',
+      redirecionarSeNaoAutorizado: false
+    });
+  };
+
   const menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
@@ -74,40 +89,10 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
       id: 'dashboard'
     },
     {
-      title: 'Apoiadores',
-      icon: <Users className="w-5 h-5" />,
-      href: '/apoiadores',
-      id: 'apoiadores'
-    },
-    {
-      title: 'Demandas',
-      icon: <FileText className="w-5 h-5" />,
-      href: '/demandas',
-      id: 'demandas'
-    },
-    {
       title: 'Agenda Política',
       icon: <Calendar className="w-5 h-5" />,
       href: '/agenda-politica',
       id: 'agenda-politica'
-    },
-    {
-      title: 'Apoios Políticos',
-      icon: <UserCheck className="w-5 h-5" />,
-      href: '/apoios',
-      id: 'apoios'
-    },
-    {
-      title: 'Regiões',
-      icon: <Map className="w-5 h-5" />,
-      href: '/regioes',
-      id: 'regioes'
-    },
-    {
-      title: 'Candidatos',
-      icon: <UserCheck className="w-5 h-5" />,
-      href: '/candidatos',
-      id: 'candidatos'
     },
     {
       title: 'Coordenadores',
@@ -122,10 +107,28 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
       id: 'liderancas'
     },
     {
+      title: 'Apoiadores',
+      icon: <Users className="w-5 h-5" />,
+      href: '/apoiadores',
+      id: 'apoiadores'
+    },
+    {
+      title: 'Regiões',
+      icon: <Map className="w-5 h-5" />,
+      href: '/regioes',
+      id: 'regioes'
+    },
+    {
       title: 'Resultados Eleições',
       icon: <FileText className="w-5 h-5" />,
       href: '/resultados-eleicoes',
       id: 'resultados-eleicoes'
+    },
+    {
+      title: 'Candidatos',
+      icon: <UserCheck className="w-5 h-5" />,
+      href: '/candidatos',
+      id: 'candidatos'
     },
     {
       title: 'IA Assistente',
@@ -138,8 +141,54 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
       icon: <Settings className="w-5 h-5" />,
       href: '/configuracoes',
       id: 'configuracoes'
+    },
+    {
+      title: 'Demandas',
+      icon: <FileText className="w-5 h-5" />,
+      href: '/demandas',
+      id: 'demandas'
+    },
+    {
+      title: 'Apoios Políticos',
+      icon: <UserCheck className="w-5 h-5" />,
+      href: '/apoios',
+      id: 'apoios'
     }
   ];
+
+  // Definindo o item de Administração separadamente para usar no rodapé
+  const adminMenuItem: MenuItem = {
+    title: 'Administração',
+    icon: <Shield className="w-5 h-5" />,
+    href: '/admin',
+    id: 'admin',
+    submenu: [
+      {
+        title: 'Usuários',
+        icon: <Users className="w-5 h-5" />,
+        href: '/admin',
+        id: 'admin-usuarios'
+      },
+      {
+        title: 'Logs de Atividades',
+        icon: <ClipboardList className="w-5 h-5" />,
+        href: '/admin/logs',
+        id: 'admin-logs'
+      }
+    ]
+  };
+
+  // Filtrar itens do menu com base nas permissões do usuário
+  const menuItemsFiltrados = menuItems.filter(item => {
+    // Sempre mostrar o Dashboard
+    if (item.id === 'dashboard') return true;
+    
+    // Verificar permissão para os demais itens
+    return temPermissao(item.id);
+  });
+
+  // Verificar se o usuário tem permissão para o item de administração
+  const temPermissaoAdmin = temPermissao('admin');
 
   return (
     <>
@@ -195,7 +244,7 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
 
             {/* Menu de Navegação */}
             <nav className="space-y-1">
-              {menuItems.map((item) => (
+              {menuItemsFiltrados.map((item) => (
                 <div key={item.id}>
                   {item.submenu ? (
                     <div>
@@ -265,6 +314,71 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick }
 
           {/* Rodapé do Sidebar */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+            {temPermissaoAdmin && (
+              <div className="mb-2">
+                {adminMenuItem.submenu ? (
+                  <div>
+                    <button
+                      onClick={() => toggleMenu(adminMenuItem.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium ${
+                        activeItem.startsWith(adminMenuItem.id)
+                          ? 'bg-primary text-white'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <span className={activeItem.startsWith(adminMenuItem.id) ? 'text-white' : 'text-gray-500'}>
+                          {adminMenuItem.icon}
+                        </span>
+                        <span className={`ml-3 ${collapsed && 'hidden'}`}>{adminMenuItem.title}</span>
+                      </div>
+                      {!collapsed && (
+                        expandedMenus[adminMenuItem.id] ? 
+                          <ChevronDown className="w-4 h-4" /> : 
+                          <ChevronRight className="w-4 h-4" />
+                      )}
+                    </button>
+                    
+                    {expandedMenus[adminMenuItem.id] && !collapsed && adminMenuItem.submenu && (
+                      <div className="mt-1 ml-4 space-y-1">
+                        {adminMenuItem.submenu.map((subItem) => (
+                          <Link
+                            key={subItem.id}
+                            href={subItem.href}
+                            onClick={() => onMenuItemClick(subItem.id)}
+                            className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+                              activeItem === subItem.id
+                                ? 'bg-primary text-white'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            <span className={activeItem === subItem.id ? 'text-white' : 'text-gray-500'}>
+                              {subItem.icon}
+                            </span>
+                            <span className="ml-3">{subItem.title}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href={adminMenuItem.href}
+                    onClick={() => onMenuItemClick(adminMenuItem.id)}
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+                      activeItem === adminMenuItem.id
+                        ? 'bg-primary text-white'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className={activeItem === adminMenuItem.id ? 'text-white' : 'text-gray-500'}>
+                      {adminMenuItem.icon}
+                    </span>
+                    <span className={`ml-3 ${collapsed && 'hidden'}`}>{adminMenuItem.title}</span>
+                  </Link>
+                )}
+              </div>
+            )}
             <button
               className="w-full flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
