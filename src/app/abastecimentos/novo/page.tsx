@@ -33,7 +33,7 @@ export default function NovoAbastecimentoPage() {
     valor_total: 0,
     tipo_combustivel: '',
     quilometragem: 0,
-    cupom_fiscal_file: undefined
+    cupom_fiscal_file: null
   });
 
   // Lista de tipos de combustível
