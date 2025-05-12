@@ -260,7 +260,7 @@ export default function Abastecimentos() {
       kmAtual: data.quilometragem,
       kmAnterior: data.quilometragem - 300, // Mock: simular km anterior
       kmRodados: 300, // Mock: simular km rodados
-      consumoMedio: (300 / data.litros).toFixed(2), // Mock: calcular consumo médio
+      consumoMedio: Number((300 / data.litros).toFixed(2)), // Mock: calcular consumo médio
       cupomFiscal: Boolean(data.cupom_fiscal_file),
       secretaria: 'Administração', // Mock
       observacoes: ''
