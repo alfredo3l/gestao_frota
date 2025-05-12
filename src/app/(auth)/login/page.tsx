@@ -6,7 +6,11 @@ import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
-const NoSSR = dynamic(() => Promise.resolve(({ children }) => <>{children}</>), {
+interface NoSSRProps {
+  children: React.ReactNode;
+}
+
+const NoSSR = dynamic(() => Promise.resolve((props: NoSSRProps) => <>{props.children}</>), {
   ssr: false
 });
 
