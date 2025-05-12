@@ -7,129 +7,201 @@ import {
   Calendar, 
   Activity, 
   Database,
-  UserCheck,
-  Map,
-  Award,
-  Bot,
   Settings,
   Shield,
-  BarChart2,
-  PieChart,
+  ArrowRight,
+  Car,
+  Fuel,
+  Wrench,
+  AlertTriangle,
+  FileBarChart,
+  ClipboardList,
   TrendingUp,
-  ArrowRight
+  TrendingDown,
+  Map,
+  Building,
+  Clock
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Link from 'next/link';
-import LayoutProtegido from '@/components/layout/LayoutProtegido';
 import Carregando from '@/components/ui/Carregando';
 import { useLogs, LogAtividade } from '@/hooks/useLogs';
 import { usePermissoes } from '@/hooks/usePermissoes';
 import { useAutorizacao } from '@/hooks/useAutorizacao';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line
+} from 'recharts';
 
 export default function Dashboard() {
   const { logs, carregando: carregandoLogs, erro: erroLogs } = useLogs();
   const { verificarPermissao } = useAutorizacao();
   
   // Dados fictícios para os gráficos
-  const dadosApoiadoresPorRegiao = [
-    { regiao: 'Norte', quantidade: 320 },
-    { regiao: 'Sul', quantidade: 480 },
-    { regiao: 'Leste', quantidade: 280 },
-    { regiao: 'Oeste', quantidade: 390 },
-    { regiao: 'Centro', quantidade: 520 }
+  const dadosConsumoVeiculos = [
+    { veiculo: 'Toyota Corolla', consumo: 12.5, distancia: 1250, custo: 2800 },
+    { veiculo: 'Fiat Strada', consumo: 8.7, distancia: 1800, custo: 4100 },
+    { veiculo: 'VW Gol', consumo: 11.2, distancia: 950, custo: 1900 },
+    { veiculo: 'Chevrolet S10', consumo: 7.5, distancia: 2100, custo: 5200 },
+    { veiculo: 'Renault Duster', consumo: 9.8, distancia: 1460, custo: 3400 }
   ];
   
-  const dadosDemandasPorCategoria = [
-    { categoria: 'Infraestrutura', quantidade: 120 },
-    { categoria: 'Saúde', quantidade: 80 },
-    { categoria: 'Educação', quantidade: 60 },
-    { categoria: 'Segurança', quantidade: 40 },
-    { categoria: 'Outros', quantidade: 20 }
+  const dadosManutencoesPorTipo = [
+    { tipo: 'Preventiva', quantidade: 18, custo: 6800 },
+    { tipo: 'Corretiva', quantidade: 12, custo: 15400 },
+    { tipo: 'Revisão', quantidade: 25, custo: 3500 },
+    { tipo: 'Emergencial', quantidade: 5, custo: 8700 },
+    { tipo: 'Regularização', quantidade: 3, custo: 1200 }
+  ];
+
+  const dadosGastoPorSecretaria = [
+    { secretaria: 'Administração', gasto: 12500 },
+    { secretaria: 'Saúde', gasto: 18000 },
+    { secretaria: 'Educação', gasto: 9500 },
+    { secretaria: 'Obras', gasto: 21000 },
+    { secretaria: 'Agricultura', gasto: 7600 }
+  ];
+
+  const dadosConsumoCombustivel = [
+    { mes: 'Jan', valor: 8500 },
+    { mes: 'Fev', valor: 7900 },
+    { mes: 'Mar', valor: 9200 },
+    { mes: 'Abr', valor: 8700 },
+    { mes: 'Mai', valor: 9500 },
+    { mes: 'Jun', valor: 9100 }
+  ];
+
+  // Cards de resumo
+  const cardsResumo = [
+    { 
+      titulo: 'Veículos Ativos', 
+      valor: '32', 
+      descricao: '3 em manutenção', 
+      icone: <Car className="w-8 h-8 text-blue-600" />, 
+      cor: 'bg-blue-50'
+    },
+    { 
+      titulo: 'Motoristas Disponíveis', 
+      valor: '28', 
+      descricao: '5 com CNH a vencer', 
+      icone: <Users className="w-8 h-8 text-indigo-600" />, 
+      cor: 'bg-indigo-50'
+    },
+    { 
+      titulo: 'KM Rodados (Mês)', 
+      valor: '15.420', 
+      descricao: '+12% vs mês anterior', 
+      icone: <TrendingUp className="w-8 h-8 text-green-600" />, 
+      cor: 'bg-green-50'
+    },
+    { 
+      titulo: 'Custo de Manutenção', 
+      valor: 'R$ 23.800', 
+      descricao: '8 manutenções pendentes', 
+      icone: <Wrench className="w-8 h-8 text-amber-600" />, 
+      cor: 'bg-amber-50'
+    },
+    { 
+      titulo: 'Consumo Total (Mês)', 
+      valor: 'R$ 36.400', 
+      descricao: 'Combustível e lubrificantes', 
+      icone: <Fuel className="w-8 h-8 text-red-600" />, 
+      cor: 'bg-red-50'
+    },
+    { 
+      titulo: 'Solicitações Ativas', 
+      valor: '18', 
+      descricao: '5 aguardando aprovação', 
+      icone: <ClipboardList className="w-8 h-8 text-purple-600" />, 
+      cor: 'bg-purple-50'
+    },
   ];
   
   // Cards de navegação
   const cardsNavegacao = [
     { 
-      titulo: 'Apoiadores', 
-      descricao: 'Gerenciar cadastro de apoiadores', 
-      icone: <Users className="w-6 h-6 text-blue-600" />, 
+      titulo: 'Veículos', 
+      descricao: 'Gerenciar frota, documentos e status', 
+      icone: <Car className="w-6 h-6 text-blue-600" />, 
       cor: 'bg-blue-50 border-blue-100', 
-      link: '/apoiadores',
-      estatistica: '1.250',
-      detalhe: 'Crescimento de 12% no último mês'
+      link: '/veiculos',
+      estatistica: '32',
+      detalhe: '28 ativos, 3 em manutenção, 1 inativo'
     },
     { 
-      titulo: 'Demandas', 
-      descricao: 'Acompanhar demandas e solicitações', 
-      icone: <FileText className="w-6 h-6 text-amber-600" />, 
-      cor: 'bg-amber-50 border-amber-100', 
-      link: '/demandas',
-      estatistica: '320',
-      detalhe: '120 pendentes, 200 concluídas'
-    },
-    { 
-      titulo: 'Agenda Política', 
-      descricao: 'Eventos e compromissos agendados', 
-      icone: <Calendar className="w-6 h-6 text-green-600" />, 
-      cor: 'bg-green-50 border-green-100', 
-      link: '/agenda-politica',
-      estatistica: '45',
-      detalhe: '15 eventos nos próximos 7 dias'
-    },
-    { 
-      titulo: 'Apoios Políticos', 
-      descricao: 'Gerenciar apoios e alianças', 
-      icone: <UserCheck className="w-6 h-6 text-purple-600" />, 
-      cor: 'bg-purple-50 border-purple-100', 
-      link: '/apoios',
-      estatistica: '78',
-      detalhe: '23 novos apoios este mês'
-    },
-    { 
-      titulo: 'Regiões', 
-      descricao: 'Mapeamento territorial', 
-      icone: <Map className="w-6 h-6 text-indigo-600" />, 
+      titulo: 'Motoristas', 
+      descricao: 'Gerenciar cadastros de motoristas', 
+      icone: <Users className="w-6 h-6 text-indigo-600" />, 
       cor: 'bg-indigo-50 border-indigo-100', 
-      link: '/regioes',
-      estatistica: '15',
-      detalhe: '5 regiões prioritárias'
+      link: '/motoristas',
+      estatistica: '28',
+      detalhe: '5 motoristas com CNH a vencer'
     },
     { 
-      titulo: 'Lideranças', 
-      descricao: 'Gerenciar lideranças regionais', 
-      icone: <Award className="w-6 h-6 text-rose-600" />, 
-      cor: 'bg-rose-50 border-rose-100', 
-      link: '/liderancas',
-      estatistica: '42',
-      detalhe: '8 novas lideranças este mês'
+      titulo: 'Abastecimentos', 
+      descricao: 'Registros de abastecimento e consumo', 
+      icone: <Fuel className="w-6 h-6 text-green-600" />, 
+      cor: 'bg-green-50 border-green-100', 
+      link: '/abastecimentos',
+      estatistica: '125',
+      detalhe: '32 abastecimentos este mês'
     },
     { 
-      titulo: 'Coordenadores', 
-      descricao: 'Equipe de coordenação', 
-      icone: <Users className="w-6 h-6 text-cyan-600" />, 
-      cor: 'bg-cyan-50 border-cyan-100', 
-      link: '/coordenadores',
+      titulo: 'Manutenções', 
+      descricao: 'Controle de manutenções e revisões', 
+      icone: <Wrench className="w-6 h-6 text-amber-600" />, 
+      cor: 'bg-amber-50 border-amber-100', 
+      link: '/manutencoes',
+      estatistica: '63',
+      detalhe: '8 manutenções agendadas'
+    },
+    { 
+      titulo: 'Solicitações', 
+      descricao: 'Requisições de uso de veículos', 
+      icone: <ClipboardList className="w-6 h-6 text-purple-600" />, 
+      cor: 'bg-purple-50 border-purple-100', 
+      link: '/solicitacoes',
       estatistica: '18',
-      detalhe: 'Coordenadores em 12 regiões'
+      detalhe: '5 pendentes, 13 aprovadas'
     },
     { 
-      titulo: 'Resultados Eleições', 
-      descricao: 'Análise de resultados eleitorais', 
-      icone: <BarChart2 className="w-6 h-6 text-red-600" />, 
+      titulo: 'Relatórios', 
+      descricao: 'Análises de consumo e custos', 
+      icone: <FileBarChart className="w-6 h-6 text-red-600" />, 
       cor: 'bg-red-50 border-red-100', 
-      link: '/resultados-eleicoes',
-      estatistica: '85%',
-      detalhe: 'Taxa de sucesso nas últimas eleições'
+      link: '/relatorios',
+      estatistica: '',
+      detalhe: 'Gráficos e dados analíticos'
     },
     { 
-      titulo: 'IA Assistente', 
-      descricao: 'Assistente inteligente', 
-      icone: <Bot className="w-6 h-6 text-emerald-600" />, 
+      titulo: 'Rotas', 
+      descricao: 'Mapeamento de trajetos frequentes', 
+      icone: <Map className="w-6 h-6 text-emerald-600" />, 
       cor: 'bg-emerald-50 border-emerald-100', 
-      link: '/ia',
-      estatistica: '24/7',
-      detalhe: 'Disponível a qualquer momento'
+      link: '/rotas',
+      estatistica: '23',
+      detalhe: 'Rotas mapeadas e otimizadas'
+    },
+    { 
+      titulo: 'Secretarias', 
+      descricao: 'Departamentos e setores', 
+      icone: <Building className="w-6 h-6 text-cyan-600" />, 
+      cor: 'bg-cyan-50 border-cyan-100', 
+      link: '/secretarias',
+      estatistica: '8',
+      detalhe: 'Secretarias com veículos alocados'
     },
     { 
       titulo: 'Administração', 
@@ -171,245 +243,311 @@ export default function Dashboard() {
     // Verificar permissão para os demais recursos
     return temPermissao(recursoId);
   });
+
+  // Cores para gráficos
+  const CORES = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899'];
   
-  // Renderizar gráfico de barras para apoiadores por região
-  const renderGraficoApoiadores = () => {
-    const maximo = Math.max(...dadosApoiadoresPorRegiao.map(d => d.quantidade));
-    
+  // Renderizar gráfico de barras para consumo de veículos
+  const renderGraficoConsumo = () => {
     return (
-      <div className="mt-4">
-        {dadosApoiadoresPorRegiao.map((item, index) => (
-          <div key={index} className="mb-3">
-            <div className="flex justify-between mb-1">
-              <span className="text-sm font-medium text-gray-700">{item.regiao}</span>
-              <span className="text-sm text-gray-500">{item.quantidade}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="bg-blue-600 h-2.5 rounded-full" 
-                style={{ width: `${(item.quantidade / maximo) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart
+          data={dadosConsumoVeiculos}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="veiculo" tick={{ fontSize: 12 }} />
+          <YAxis />
+          <Tooltip formatter={(value) => `${value} km/L`} />
+          <Legend />
+          <Bar dataKey="consumo" name="Consumo (km/L)" fill="#3b82f6" />
+        </BarChart>
+      </ResponsiveContainer>
     );
   };
   
-  // Renderizar gráfico de pizza para demandas por categoria
-  const renderGraficoDemandas = () => {
-    const total = dadosDemandasPorCategoria.reduce((acc, item) => acc + item.quantidade, 0);
-    const cores = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
-    
+  // Renderizar gráfico de pizza para manutenções por tipo
+  const renderGraficoManutencoes = () => {
     return (
-      <div className="mt-4 flex flex-col items-center">
-        <div className="relative w-48 h-48 mb-4">
-          {dadosDemandasPorCategoria.map((item, index) => {
-            const porcentagem = (item.quantidade / total) * 100;
-            const angulo = (porcentagem / 100) * 360;
-            const rotacao = index > 0 
-              ? dadosDemandasPorCategoria
-                  .slice(0, index)
-                  .reduce((acc, i) => acc + (i.quantidade / total) * 360, 0) 
-              : 0;
-            
-            return (
-              <div 
-                key={index}
-                className="absolute top-0 left-0 w-full h-full"
-                style={{
-                  background: `conic-gradient(${cores[index]} ${angulo}deg, transparent 0)`,
-                  transform: `rotate(${rotacao}deg)`,
-                  borderRadius: '50%',
-                  clipPath: 'circle(50%)'
-                }}
-              ></div>
-            );
-          })}
-        </div>
-        
-        <div className="grid grid-cols-2 gap-2 w-full">
-          {dadosDemandasPorCategoria.map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-full" 
-                style={{ backgroundColor: cores[index] }}
-              ></div>
-              <span className="text-xs text-gray-700">{item.categoria} ({Math.round((item.quantidade / total) * 100)}%)</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
+          <Pie
+            data={dadosManutencoesPorTipo}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={100}
+            dataKey="custo"
+            nameKey="tipo"
+            label={({ tipo, custo, percent }) => `${tipo}: ${(percent * 100).toFixed(0)}%`}
+          >
+            {dadosManutencoesPorTipo.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={CORES[index % CORES.length]} />
+            ))}
+          </Pie>
+          <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    );
+  };
+
+  // Renderizar gráfico de barras para gastos por secretaria
+  const renderGraficoGastosSecretaria = () => {
+    return (
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart
+          data={dadosGastoPorSecretaria}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="secretaria" tick={{ fontSize: 12 }} />
+          <YAxis />
+          <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+          <Legend />
+          <Bar dataKey="gasto" name="Gastos Totais (R$)" fill="#10b981" />
+        </BarChart>
+      </ResponsiveContainer>
+    );
+  };
+
+  // Renderizar gráfico de linha para consumo mensal de combustível
+  const renderGraficoConsumoCombustivel = () => {
+    return (
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart
+          data={dadosConsumoCombustivel}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="mes" />
+          <YAxis />
+          <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+          <Legend />
+          <Line 
+            type="monotone" 
+            dataKey="valor" 
+            name="Gastos com Combustível (R$)" 
+            stroke="#ef4444" 
+            activeDot={{ r: 8 }} 
+          />
+        </LineChart>
+      </ResponsiveContainer>
     );
   };
   
-  // Renderizar ícone de ação
   const renderIconeAcao = (acao: LogAtividade['acao']) => {
     switch (acao) {
       case 'criar':
-        return <span className="bg-green-100 text-green-800 p-1 rounded text-xs">Criar</span>;
+        return <Database className="w-5 h-5 text-green-500" />;
       case 'editar':
-        return <span className="bg-blue-100 text-blue-800 p-1 rounded text-xs">Editar</span>;
+        return <FileText className="w-5 h-5 text-amber-500" />;
       case 'excluir':
-        return <span className="bg-red-100 text-red-800 p-1 rounded text-xs">Excluir</span>;
+        return <AlertTriangle className="w-5 h-5 text-red-500" />;
       case 'login':
-        return <span className="bg-purple-100 text-purple-800 p-1 rounded text-xs">Login</span>;
-      case 'logout':
-        return <span className="bg-gray-100 text-gray-800 p-1 rounded text-xs">Logout</span>;
-      case 'alterar_permissao':
-        return <span className="bg-indigo-100 text-indigo-800 p-1 rounded text-xs">Alterar Permissão</span>;
-      case 'alterar_status':
-        return <span className="bg-yellow-100 text-yellow-800 p-1 rounded text-xs">Alterar Status</span>;
-      case 'alterar_perfil':
-        return <span className="bg-cyan-100 text-cyan-800 p-1 rounded text-xs">Alterar Perfil</span>;
+        return <Users className="w-5 h-5 text-blue-500" />;
       default:
-        return <span className="bg-gray-100 text-gray-800 p-1 rounded text-xs">{acao}</span>;
+        return <Activity className="w-5 h-5 text-gray-500" />;
     }
   };
   
-  // Formatar tempo relativo
   const formatarTempoRelativo = (data: Date) => {
     const agora = new Date();
-    const diffMs = agora.getTime() - data.getTime();
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
-    const diffHour = Math.floor(diffMin / 60);
-    const diffDay = Math.floor(diffHour / 24);
+    const diferencaMs = agora.getTime() - data.getTime();
     
-    if (diffSec < 60) {
-      return 'Agora mesmo';
-    } else if (diffMin < 60) {
-      return `${diffMin} ${diffMin === 1 ? 'minuto' : 'minutos'} atrás`;
-    } else if (diffHour < 24) {
-      return `${diffHour} ${diffHour === 1 ? 'hora' : 'horas'} atrás`;
-    } else if (diffDay < 7) {
-      return `${diffDay} ${diffDay === 1 ? 'dia' : 'dias'} atrás`;
+    const minutos = Math.floor(diferencaMs / (1000 * 60));
+    const horas = Math.floor(diferencaMs / (1000 * 60 * 60));
+    const dias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+    
+    if (minutos < 60) {
+      return `${minutos} min atrás`;
+    } else if (horas < 24) {
+      return `${horas} h atrás`;
+    } else if (dias < 30) {
+      return `${dias} dias atrás`;
     } else {
       return format(data, 'dd/MM/yyyy', { locale: ptBR });
     }
   };
-  
+
+  if (carregandoLogs) {
+    return <Carregando />;
+  }
+
   return (
-    <LayoutProtegido>
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
-        
-        {/* Cards de Navegação */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-          {cardsNavegacaoFiltrados.map((card, index) => (
-            <Link 
-              href={card.link} 
-              key={index}
-              className={`block bg-white rounded-xl border ${card.cor} shadow-sm p-4 hover:shadow-md transition-shadow`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2 rounded-lg bg-white">
-                  {card.icone}
-                </div>
-                <ArrowRight className="w-5 h-5 text-gray-400" />
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Dashboard
+        </h1>
+        <p className="text-gray-600">
+          Visão geral e principais indicadores do sistema de gestão de frotas
+        </p>
+      </div>
+
+      {/* Cards de resumo */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {cardsResumo.map((card, index) => (
+          <div key={index} className={`p-4 rounded-lg border ${card.cor}`}>
+            <div className="flex justify-between">
+              <div>
+                <h3 className="font-medium text-gray-500 text-sm">{card.titulo}</h3>
+                <p className="text-2xl font-bold mt-1">{card.valor}</p>
+                <p className="text-sm text-gray-500 mt-1">{card.descricao}</p>
               </div>
-              <h3 className="font-semibold text-gray-900">{card.titulo}</h3>
-              <p className="text-sm text-gray-600 mt-1 mb-3">{card.descricao}</p>
-              {card.estatistica && (
-                <>
-                  <div className="text-xl font-bold text-gray-900">{card.estatistica}</div>
-                  <div className="text-xs text-gray-500 mt-1">{card.detalhe}</div>
-                </>
-              )}
-            </Link>
-          ))}
+              <div className="flex items-center justify-center">
+                {card.icone}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Gráficos - primeira linha */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <h2 className="text-lg font-semibold mb-4">Consumo Médio por Veículo (km/L)</h2>
+          {renderGraficoConsumo()}
         </div>
-        
-        {/* Gráficos e Estatísticas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Distribuição de Apoiadores por Região</h3>
-              <div className="bg-blue-50 p-2 rounded-lg">
-                <BarChart2 className="w-5 h-5 text-blue-600" />
-              </div>
-            </div>
-            {renderGraficoApoiadores()}
-          </div>
-          
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Demandas por Categoria</h3>
-              <div className="bg-amber-50 p-2 rounded-lg">
-                <PieChart className="w-5 h-5 text-amber-600" />
-              </div>
-            </div>
-            {renderGraficoDemandas()}
-          </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <h2 className="text-lg font-semibold mb-4">Custos de Manutenção por Tipo</h2>
+          {renderGraficoManutencoes()}
         </div>
-        
-        {/* Atividades Recentes */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Atividades Recentes</h2>
-              <a href="/admin/logs" className="text-sm text-primary hover:text-primary-dark">
-                Ver todas
-              </a>
+      </div>
+
+      {/* Gráficos - segunda linha */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <h2 className="text-lg font-semibold mb-4">Gastos por Secretaria</h2>
+          {renderGraficoGastosSecretaria()}
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <h2 className="text-lg font-semibold mb-4">Consumo de Combustível (Últimos 6 meses)</h2>
+          {renderGraficoConsumoCombustivel()}
+        </div>
+      </div>
+
+      {/* Alertas e Lembretes */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Alertas e Lembretes</h2>
+          <Link href="/notificacoes" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+            Ver todos
+          </Link>
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 pb-3 border-b border-gray-100">
+            <div className="p-2 bg-amber-100 rounded-full text-amber-700">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-medium">5 CNHs próximas de vencer</h3>
+              <p className="text-sm text-gray-600 mt-1">Verifique os motoristas que precisam renovar a CNH nos próximos 30 dias</p>
             </div>
           </div>
-          
-          <div>
-            {carregandoLogs ? (
-              <div className="p-8 flex justify-center">
-                <Carregando tamanhoCompleto={false} mensagem="Carregando atividades..." />
-              </div>
-            ) : erroLogs ? (
-              <div className="p-8 text-center">
-                <p className="text-red-500">{erroLogs}</p>
-                <button className="mt-4 px-4 py-2 bg-primary text-white rounded-lg">
-                  Tentar novamente
-                </button>
-              </div>
-            ) : logs.length === 0 ? (
-              <div className="p-8 text-center">
-                <Activity className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                <p className="text-gray-500">Nenhuma atividade registrada</p>
-              </div>
-            ) : (
-              <ul className="divide-y divide-gray-100">
-                {logs.slice(0, 5).map((log) => (
-                  <li key={log.id} className="p-4 hover:bg-gray-50">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 mt-1">
-                        <Database className="w-4 h-4 text-gray-400" />
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-gray-900">
-                                {log.usuarioNome}
-                              </span>
-                              {renderIconeAcao(log.acao)}
-                              <span className="text-sm text-gray-600 capitalize">
-                                {log.recurso}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {log.detalhes}
-                            </p>
-                          </div>
-                          
-                          <div className="text-xs text-gray-500">
-                            {formatarTempoRelativo(log.timestamp)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="flex items-start gap-3 pb-3 border-b border-gray-100">
+            <div className="p-2 bg-red-100 rounded-full text-red-700">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-medium">3 veículos com manutenção atrasada</h3>
+              <p className="text-sm text-gray-600 mt-1">Veículos com manutenção preventiva programada vencida</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 pb-3 border-b border-gray-100">
+            <div className="p-2 bg-blue-100 rounded-full text-blue-700">
+              <Fuel className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-medium">Consumo acima da média</h3>
+              <p className="text-sm text-gray-600 mt-1">2 veículos apresentando consumo de combustível acima do esperado</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-green-100 rounded-full text-green-700">
+              <Wrench className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-medium">Revisões programadas</h3>
+              <p className="text-sm text-gray-600 mt-1">8 veículos com revisão programada para os próximos 15 dias</p>
+            </div>
           </div>
         </div>
       </div>
-    </LayoutProtegido>
+
+      {/* Links de acesso rápido */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        {cardsNavegacaoFiltrados.map((card, index) => (
+          <Link
+            key={index}
+            href={card.link}
+            className={`flex flex-col p-4 rounded-lg border ${card.cor} hover:bg-opacity-80 transition-all`}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div className="p-2 rounded-lg bg-white bg-opacity-50">
+                {card.icone}
+              </div>
+              {card.estatistica && (
+                <span className="text-lg font-bold">{card.estatistica}</span>
+              )}
+            </div>
+            <h3 className="font-semibold mt-2">{card.titulo}</h3>
+            <p className="text-sm text-gray-600 mt-1 mb-2">{card.descricao}</p>
+            {card.detalhe && (
+              <p className="text-xs text-gray-500 mt-auto">{card.detalhe}</p>
+            )}
+          </Link>
+        ))}
+      </div>
+
+      {/* Atividades recentes */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Atividades Recentes</h2>
+          <Link href="/admin/logs" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+            Ver todas
+          </Link>
+        </div>
+        <div className="overflow-hidden">
+          {logs && logs.length > 0 ? (
+            <div className="space-y-4">
+              {logs.slice(0, 5).map((log, index) => (
+                <div key={index} className="flex items-start pb-4 border-b border-gray-100 last:border-0">
+                  <div className="mr-3">
+                    {renderIconeAcao(log.acao)}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm">
+                      <span className="font-medium">{log.usuarioNome}</span>
+                      <span className="text-gray-600"> {log.detalhes || `${log.acao} ${log.recurso}`}</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatarTempoRelativo(new Date(log.timestamp))}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 py-4 text-center">Nenhuma atividade recente registrada.</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 } 

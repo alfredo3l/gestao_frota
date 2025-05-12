@@ -44,7 +44,7 @@ export default function LoginPage() {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: 'url("https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/casa-civil-6mb6d1/assets/zc6v3pfnr6yr/HOME.png")',
+          backgroundImage: 'url("https://asmontech.com.br/wp-content/uploads/2020/07/gestao-de-frotas.jpg")',
         }}
       >
         <div className="absolute inset-0 backdrop-blur-sm bg-black/40" />
@@ -55,7 +55,7 @@ export default function LoginPage() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900">Bem-vindo de volta!</h1>
           <p className="mt-2 text-gray-600">
-           Plataforma de gestão política
+           Plataforma de gestão de frota
           </p>
         </div>
 

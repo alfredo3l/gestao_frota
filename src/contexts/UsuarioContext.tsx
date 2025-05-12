@@ -10,6 +10,7 @@ interface PerfilUsuario {
   cargo: string;
   fotoPerfil?: string;
   isAdmin?: boolean;
+  role?: 'admin' | 'gestor_frota' | 'motorista' | 'usuario';
 }
 
 interface AtualizarPerfilParams {
@@ -53,7 +54,8 @@ export function UsuarioProvider({ children }: { children: ReactNode }) {
           telefone: '(11) 98765-4321',
           cargo: 'Coordenador de Campanha',
           fotoPerfil: '/images/avatar-default.svg',
-          isAdmin: true // Para fins de teste, definimos o usuário como administrador
+          isAdmin: true, // Para fins de teste, definimos o usuário como administrador
+          role: 'admin'
         };
         
         // Salvar no localStorage para persistência

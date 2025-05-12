@@ -102,26 +102,23 @@ export function Header({ onMenuClick, fullWidth = false, isMenuOpen = false, isM
   };
 
   return (
-    <header className={`h-14 bg-white border-b border-border fixed top-0 right-0 z-[900] ${
-      isMenuOpen ? 'left-64' : 'left-0'
-    }`}>
-      <div className="h-full px-6 flex items-center justify-between">
+    <header className={`h-14 bg-white border-b border-border fixed top-0 right-0 z-[900] transition-all duration-300 ${
+      isMenuOpen ? 'md:left-64' : 'md:left-20'
+    } left-0`}>
+      <div className="h-full px-4 sm:px-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {/* Mostra o menu apenas quando não for fullWidth e estiver em mobile */}
-          {isMobile && (
-            <button
-              onClick={onMenuClick}
-              className="p-2 rounded-lg hover:bg-gray-50 transition-colors"
-              aria-label="Alternar menu lateral"
-              title="Alternar menu lateral"
-            >
-              <Menu className="w-6 h-6 text-gray-600" />
-            </button>
-          )}
+          <button
+            onClick={onMenuClick}
+            className="p-2 rounded-lg hover:bg-gray-50 transition-colors"
+            aria-label={isMenuOpen ? "Recolher menu" : "Expandir menu"}
+            title={isMenuOpen ? "Recolher menu" : "Expandir menu"}
+          >
+            <Menu className="w-6 h-6 text-gray-600" />
+          </button>
           {/* Logo visível apenas quando for fullWidth (sem sidebar) */}
           {fullWidth && (
             <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-              Secretaria de Estado da Casa Civil
+              Sistema de Gestão de Frotas
             </span>
           )}
         </div>

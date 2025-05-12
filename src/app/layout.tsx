@@ -7,8 +7,8 @@ import { TemaProvider } from '@/contexts/TemaContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Secretaria de Estado da Casa Civil',
-  description: 'Plataforma completa para gestão de campanhas políticas, apoiadores, demandas e eventos.',
+  title: 'Plataforma de Gestão de Frota',
+  description: 'Plataforma de Gestão de Frota.',
 };
 
 export default function RootLayout({
