@@ -89,3 +89,7 @@ Os hooks são responsáveis pela lógica de negócio e comunicação com o backe
 ## Licença
 
 Este projeto é proprietário e confidencial. Todos os direitos reservados.
+
+## Atualização
+
+Configuração de usuário Git adicionada em 10/07/2024.
