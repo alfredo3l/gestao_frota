@@ -79,7 +79,7 @@ export function useVeiculos() {
       if (error) throw error;
 
       // Processar dados para incluir o nome da secretaria
-      const veiculosProcessados = Array.isArray(data) ? data.map(veiculo => ({
+      const veiculosProcessados = Array.isArray(data) ? (data as any[]).map(veiculo => ({
         ...veiculo,
         secretaria_nome: veiculo.secretarias?.nome || 'N/A'
       })) : [];
