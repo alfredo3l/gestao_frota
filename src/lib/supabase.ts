@@ -20,7 +20,7 @@ const supabaseClient = createClient<Database>(testSupabaseUrl, testSupabaseAnonK
 });
 
 // Exportar o cliente apropriado (mock ou real)
-export const supabase = isUsingMock ? mockSupabaseClient : supabaseClient;
+export const supabase = isUsingMock ? (mockSupabaseClient as any) : supabaseClient;
 
 // Função para verificar se estamos usando o cliente real ou o mock
 export const isRealSupabaseClient = () => !isUsingMock;
