@@ -7,6 +7,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Image from 'next/image';
 import { useUsuario } from '@/contexts/UsuarioContext';
 import { useTema } from '@/contexts/TemaContext';
+import type { Tema } from '@/contexts/TemaContext';
 
 const ClientHeader = dynamic(() => import('@/components/layout/ClientHeader'), {
   ssr: false
@@ -31,7 +32,7 @@ export default function PaginaConfiguracoes() {
   const { usuario, carregando, erro, atualizarPerfil, removerFotoPerfil } = useUsuario();
   const { temaAtual, temas, alterarTema, adicionarTema, removerTema } = useTema();
   
-  const [novoTema, setNovoTema] = useState({
+  const [novoTema, setNovoTema] = useState<Tema>({
     nome: '',
     cores: {
       background: '#ffffff',
@@ -155,7 +156,7 @@ export default function PaginaConfiguracoes() {
     }
   };
 
-  const iniciarEdicaoTema = (tema) => {
+  const iniciarEdicaoTema = (tema: Tema) => {
     setNovoTema({...tema});
     setModoEdicao(true);
     setTemaOriginal(tema.nome);
