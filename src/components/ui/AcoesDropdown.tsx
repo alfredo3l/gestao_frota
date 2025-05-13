@@ -56,7 +56,7 @@ export default function AcoesDropdown({ itens, align = 'right' }: AcoesDropdownP
   
   // Manipular ação de excluir
   const handleExcluir = (item: AcaoItem) => {
-    if (item.confirmacao) {
+    if (item.confirmacao?.titulo && item.confirmacao?.mensagem && item.confirmacao?.onConfirm) {
       setConfirmacaoTitulo(item.confirmacao.titulo);
       setConfirmacaoMensagem(item.confirmacao.mensagem);
       setAcaoExcluir(() => item.confirmacao.onConfirm);

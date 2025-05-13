@@ -2,7 +2,6 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { mockSupabaseClient } from './mockSupabase';
-import { Database } from '@/types/supabase';
 
 // Verificar se as variáveis de ambiente estão definidas
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://example.supabase.co';
@@ -25,10 +24,18 @@ const isUsingMock = false;
 const testSupabaseUrl = 'https://pztvnkdesfdemmdeuvmn.supabase.co';
 const testSupabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6dHZua2Rlc2ZkZW1tZGV1dm1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwNjUwMDgsImV4cCI6MjA2MjY0MTAwOH0.e156tShBaatSWsqyZwuA8Affz-iaYjyFAb6ltb-Wn4o';
 
-// Criar o cliente Supabase real com tipagem explícita para evitar problemas de recursão
-const supabaseClient = createClient<any>(
+// Criar o cliente Supabase real usando tipagem explícita com any para resolver o problema de recursão
+// Removendo a importação do tipo Database que pode estar causando problemas de profundidade
+const supabaseClient = createClient(
   supabaseUrl === 'https://example.supabase.co' ? testSupabaseUrl : supabaseUrl, 
-  supabaseAnonKey === 'mocked-key' ? testSupabaseAnonKey : supabaseAnonKey
+  supabaseAnonKey === 'mocked-key' ? testSupabaseAnonKey : supabaseAnonKey,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
 );
 
 // Exportar o cliente apropriado (mock ou real)
