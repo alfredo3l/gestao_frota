@@ -176,6 +176,19 @@ const solicitacoesMock = [
   }
 ];
 
+// Mock de dados para veículos e motoristas (ADICIONADO)
+const veiculosMock = [
+  { id: '1', placa: 'ABC-1234', modelo: 'Toyota Corolla', disponivel: true },
+  { id: '2', placa: 'DEF-5678', modelo: 'Fiat Strada', disponivel: true },
+  { id: '3', placa: 'GHI-9012', modelo: 'VW Gol', disponivel: false },
+];
+
+const motoristasMock = [
+  { id: '1', nome: 'João Silva', disponivel: true },
+  { id: '2', nome: 'Maria Oliveira', disponivel: true },
+  { id: '3', nome: 'Carlos Souza', disponivel: false },
+];
+
 // Opções de filtros
 const statusSolicitacao = ['Todos', 'Pendente', 'Aprovada', 'Em andamento', 'Concluída', 'Cancelada'];
 const prioridades = ['Todas', 'Baixa', 'Normal', 'Alta', 'Urgente'];
@@ -337,24 +350,37 @@ export default function Solicitacoes() {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Adicionar a nova solicitação ao estado local (mock)
-    const novaSolicitacao = {
+    // Ajustar a criação de novaSolicitacao para usar SolicitacaoFormData corretamente
+    // e para corresponder à interface Solicitacao local.
+    const novaSolicitacao: Solicitacao = { // Especificar o tipo aqui para garantir conformidade
       id: `temp-${Date.now()}`,
       numero: `SOL-${Math.floor(Math.random() * 1000)}`,
-      solicitante: {
-        nome: data.solicitante,
-        cargo: 'Funcionário'
+      dataRequisicao: new Date().toISOString().split('T')[0], // Adicionado: data atual
+      solicitante: { // Adicionado: Usar dados placeholder ou do usuário logado
+        id: 'temp-user',
+        nome: 'Usuário Logado', // Placeholder
+        cargo: 'Funcionário', // Placeholder
+        departamento: 'Departamento X' // Placeholder
       },
-      secretaria: 'Administração',
-      dataInicio: data.data_inicio,
-      dataFim: data.data_fim || data.data_inicio,
-      destino: data.destino,
-      motivoViagem: data.motivo,
-      distanciaEstimada: data.distancia_estimada,
-      passageiros: data.passageiros,
-      status: 'Pendente',
-      prioridade: data.prioridade,
-      veiculo: null,
-      motorista: null
+      // Usar data.secretaria_id para encontrar o nome da secretaria se necessário,
+      // ou ajustar a interface Solicitacao para usar secretaria_id
+      secretaria: secretarias.find(s => s === data.secretaria_id) || data.secretaria_id || 'Não informada', // Ajustado
+      dataInicio: data.data_prevista_inicio, // Ajustado
+      dataFim: data.data_prevista_fim || data.data_prevista_inicio, // Ajustado
+      destino: data.destino, // Mantido
+      motivo: data.finalidade, // Ajustado de 'motivoViagem' para 'motivo' e usando 'finalidade'
+      // distanciaEstimada e passageiros não estão em SolicitacaoFormData.
+      // Poderiam ser adicionados ao FormData ou tratados de outra forma.
+      // Por agora, vou colocar valores padrão.
+      distanciaEstimada: 0, // Placeholder
+      passageiros: 1, // Placeholder
+      status: 'Pendente', // Mantido
+      // prioridade não está em SolicitacaoFormData.
+      // Poderia ser adicionado ao FormData ou um valor padrão.
+      prioridade: 'Normal', // Placeholder
+      veiculo: data.veiculo_id ? veiculosMock.find(v => v.id === data.veiculo_id) ? { id: data.veiculo_id, placa: veiculosMock.find(v => v.id === data.veiculo_id)!.placa, modelo: veiculosMock.find(v => v.id === data.veiculo_id)!.modelo } : null : null, // Ajustado
+      motorista: data.motorista_id ? motoristasMock.find(m => m.id === data.motorista_id) ? { id: data.motorista_id, nome: motoristasMock.find(m => m.id === data.motorista_id)!.nome } : null : null, // Ajustado
+      // observacoes: data.observacoes ?? '', // Se observacoes for necessário na interface Solicitacao
     };
     
     setSolicitacoes([novaSolicitacao, ...solicitacoes]);
