@@ -29,7 +29,7 @@ export default function AbastecimentoNovoModal({
     valor_total: 0,
     tipo_combustivel: '',
     quilometragem: 0,
-    cupom_fiscal_file: undefined
+    cupom_fiscal_file: null
   };
 
   const [formData, setFormData] = useState<AbastecimentoFormData>(initialFormData);
