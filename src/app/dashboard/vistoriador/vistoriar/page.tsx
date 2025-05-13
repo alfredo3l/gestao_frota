@@ -164,10 +164,9 @@ export default function VistoriarPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <ClientHeader 
+      <ClientHeader
         onMenuClick={() => setIsMenuOpen(!isMenuOpen)}
         isMenuOpen={isMenuOpen}
-        fullWidth
       />
       
       <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 md:p-6 mt-20">
