@@ -115,7 +115,7 @@ export function useVeiculos() {
         })
         .select('*')
         .single()
-        .then(result => result);
+        .then();
 
       if (error) throw error;
 
@@ -183,7 +183,7 @@ export function useVeiculos() {
           .from('veiculos')
           .update(updates)
           .eq('id', id)
-          .then(result => result);
+          .then();
 
         if (updateError) throw updateError;
       }
@@ -223,7 +223,7 @@ export function useVeiculos() {
           .from('veiculos')
           .update(updates)
           .eq('id', id)
-          .then(result => result);
+          .then();
 
         if (result.error) throw result.error;
       }
@@ -337,12 +337,20 @@ export function useVeiculos() {
         .single());
 
       if (error) throw error;
+      
+      // Verificar se data existe
+      if (!data) {
+        throw new Error('Veículo não encontrado');
+      }
+      
+      // Garantir que data está definido como um objeto
+      const veiculo = data as any;
 
       return { 
         success: true, 
         data: {
-          ...data,
-          secretaria_nome: data.secretarias?.nome || 'N/A'
+          ...veiculo,
+          secretaria_nome: veiculo.secretarias?.nome || 'N/A'
         } 
       };
     } catch (err: any) {

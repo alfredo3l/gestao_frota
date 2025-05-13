@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "dev3001": "next dev -p 3001",
+    "prebuild": "tsc --noEmit",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@geist-ui/core": "^2.3.8",
