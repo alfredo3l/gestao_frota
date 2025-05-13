@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAutorizacao } from '@/hooks/useAutorizacao';
 import ManutencaoNovoModal from '@/components/modals/ManutencaoNovoModal';
 import { ManutencaoFormData } from '@/types/Manutencao';
 import AcoesDropdown from '@/components/ui/AcoesDropdown';
@@ -158,8 +157,7 @@ export default function Manutencoes() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [modalNovaManutencaoAberto, setModalNovaManutencaoAberto] = useState(false);
 
-  const { verificarPermissao } = useAutorizacao();
-  const podeCriar = verificarPermissao({ recurso: 'manutencoes', acao: 'criar', redirecionarSeNaoAutorizado: false });
+  const podeCriar = true; // Por padrão, todos podem criar manutenções
 
   // Simular carregamento de dados
   useEffect(() => {

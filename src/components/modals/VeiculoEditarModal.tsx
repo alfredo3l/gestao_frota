@@ -70,6 +70,10 @@ export default function VeiculoEditarModal({
   // Inicializar o formulário com os dados do veículo quando ele for carregado
   useEffect(() => {
     if (veiculo) {
+      // Determinar o secretaria_id correto
+      // Use secretaria quando secretaria_id não estiver disponível
+      const secretariaIdValue = secretarias.find(s => s.nome === veiculo.secretaria)?.id || '';
+      
       setFormData({
         placa: veiculo.placa,
         modelo: veiculo.modelo,
@@ -78,7 +82,7 @@ export default function VeiculoEditarModal({
         combustivel: veiculo.combustivel,
         status: veiculo.status,
         quilometragem_atual: veiculo.quilometragem_atual,
-        secretaria_id: veiculo.secretaria_id,
+        secretaria_id: secretariaIdValue,
         crlv_file: null,
         seguro_file: null,
         foto_file: null,
@@ -92,7 +96,7 @@ export default function VeiculoEditarModal({
         setFotoPreview(null);
       }
     }
-  }, [veiculo]);
+  }, [veiculo, secretarias]);
 
   if (!isOpen || !veiculo) return null;
 

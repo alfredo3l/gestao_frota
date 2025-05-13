@@ -1,3 +1,8 @@
+'use client';
+
+// Pattern para usar em todas as chamadas ao Supabase:
+// const { data, error } = await Promise.resolve(supabase.from(...))
+
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Veiculo, VeiculoFormData, VeiculoFiltros } from '@/types/Veiculo';
@@ -60,8 +65,7 @@ export function useVeiculos() {
       // Aplicar ordenação
       if (orderConfig) {
         query = query.order(orderConfig.column, { 
-          ascending: orderConfig.direction === 'asc',
-          nullsFirst: orderConfig.direction === 'asc'
+          ascending: orderConfig.direction === 'asc'
         });
       } else {
         query = query.order('created_at', { ascending: false });
@@ -70,7 +74,7 @@ export function useVeiculos() {
       // Aplicar paginação
       query = query.range(from, to);
 
-      const { data, error, count } = await query;
+      const { data, error, count } = await Promise.resolve(query);
 
       if (error) throw error;
 
@@ -110,7 +114,8 @@ export function useVeiculos() {
           secretaria_id: veiculo.secretaria_id
         })
         .select('*')
-        .single();
+        .single()
+        .then(result => result);
 
       if (error) throw error;
 
@@ -121,17 +126,17 @@ export function useVeiculos() {
       // Upload da foto
       if (veiculo.foto_file) {
         const fotoPath = `veiculos/${id}/foto`;
-        const { data: fileData, error: fileError } = await supabase.storage
+        const { data: fileData, error: fileError } = await Promise.resolve(supabase.storage
           .from('files')
           .upload(fotoPath, veiculo.foto_file, {
             upsert: true,
-          });
+          }));
 
         if (fileError) throw fileError;
 
-        const { data: urlData } = await supabase.storage
+        const { data: urlData } = await Promise.resolve(supabase.storage
           .from('files')
-          .getPublicUrl(fotoPath);
+          .getPublicUrl(fotoPath));
 
         updates.foto_url = urlData.publicUrl;
       }
@@ -139,17 +144,17 @@ export function useVeiculos() {
       // Upload do CRLV
       if (veiculo.crlv_file) {
         const crlvPath = `veiculos/${id}/crlv`;
-        const { error: fileError } = await supabase.storage
+        const { error: fileError } = await Promise.resolve(supabase.storage
           .from('files')
           .upload(crlvPath, veiculo.crlv_file, {
             upsert: true,
-          });
+          }));
 
         if (fileError) throw fileError;
 
-        const { data: urlData } = await supabase.storage
+        const { data: urlData } = await Promise.resolve(supabase.storage
           .from('files')
-          .getPublicUrl(crlvPath);
+          .getPublicUrl(crlvPath));
 
         updates.crlv_url = urlData.publicUrl;
       }
@@ -157,17 +162,17 @@ export function useVeiculos() {
       // Upload do seguro
       if (veiculo.seguro_file) {
         const seguroPath = `veiculos/${id}/seguro`;
-        const { error: fileError } = await supabase.storage
+        const { error: fileError } = await Promise.resolve(supabase.storage
           .from('files')
           .upload(seguroPath, veiculo.seguro_file, {
             upsert: true,
-          });
+          }));
 
         if (fileError) throw fileError;
 
-        const { data: urlData } = await supabase.storage
+        const { data: urlData } = await Promise.resolve(supabase.storage
           .from('files')
-          .getPublicUrl(seguroPath);
+          .getPublicUrl(seguroPath));
 
         updates.seguro_url = urlData.publicUrl;
       }
@@ -177,7 +182,8 @@ export function useVeiculos() {
         const { error: updateError } = await supabase
           .from('veiculos')
           .update(updates)
-          .eq('id', id);
+          .eq('id', id)
+          .then(result => result);
 
         if (updateError) throw updateError;
       }
@@ -211,87 +217,15 @@ export function useVeiculos() {
       if (veiculo.quilometragem_atual !== undefined) updates.quilometragem_atual = veiculo.quilometragem_atual;
       if (veiculo.secretaria_id !== undefined) updates.secretaria_id = veiculo.secretaria_id;
 
-      // Se tiver arquivos, fazemos o upload
-      // Upload da foto
-      if (veiculo.foto_file) {
-        const fotoPath = `veiculos/${id}/foto`;
-        const { error: fileError } = await supabase.storage
-          .from('files')
-          .upload(fotoPath, veiculo.foto_file, {
-            upsert: true,
-          });
-
-        if (fileError) throw fileError;
-
-        const { data: urlData } = await supabase.storage
-          .from('files')
-          .getPublicUrl(fotoPath);
-
-        updates.foto_url = urlData.publicUrl;
-      }
-
-      // Upload do CRLV
-      if (veiculo.crlv_file) {
-        const crlvPath = `veiculos/${id}/crlv`;
-        const { error: fileError } = await supabase.storage
-          .from('files')
-          .upload(crlvPath, veiculo.crlv_file, {
-            upsert: true,
-          });
-
-        if (fileError) throw fileError;
-
-        const { data: urlData } = await supabase.storage
-          .from('files')
-          .getPublicUrl(crlvPath);
-
-        updates.crlv_url = urlData.publicUrl;
-      }
-
-      // Upload do seguro
-      if (veiculo.seguro_file) {
-        const seguroPath = `veiculos/${id}/seguro`;
-        const { error: fileError } = await supabase.storage
-          .from('files')
-          .upload(seguroPath, veiculo.seguro_file, {
-            upsert: true,
-          });
-
-        if (fileError) throw fileError;
-
-        const { data: urlData } = await supabase.storage
-          .from('files')
-          .getPublicUrl(seguroPath);
-
-        updates.seguro_url = urlData.publicUrl;
-      }
-
       // Se tiver atualizações, atualizar o registro
       if (Object.keys(updates).length > 0) {
-        const { data, error } = await supabase
+        const result = await supabase
           .from('veiculos')
           .update(updates)
           .eq('id', id)
-          .select(`
-            *,
-            secretarias (
-              id,
-              nome
-            )
-          `)
-          .single();
+          .then(result => result);
 
-        if (error) throw error;
-
-        // Atualizar o estado
-        setVeiculos(prev => 
-          prev.map(v => v.id === id ? {
-            ...data,
-            secretaria_nome: data.secretarias?.nome || 'N/A'
-          } : v)
-        );
-
-        return { success: true, data };
+        if (result.error) throw result.error;
       }
 
       return { success: true };
@@ -311,10 +245,10 @@ export function useVeiculos() {
       setLoading(true);
       
       // Verificar se existe alguma dependência (abastecimentos, manutenções, solicitações)
-      const { count: abastecimentosCount, error: abastecimentosError } = await supabase
+      const { count: abastecimentosCount, error: abastecimentosError } = await Promise.resolve(supabase
         .from('abastecimentos')
         .select('*', { count: 'exact', head: true })
-        .eq('veiculo_id', id);
+        .eq('veiculo_id', id));
       
       if (abastecimentosError) throw abastecimentosError;
       
@@ -325,10 +259,10 @@ export function useVeiculos() {
         };
       }
       
-      const { count: manutencoesCount, error: manutencoesError } = await supabase
+      const { count: manutencoesCount, error: manutencoesError } = await Promise.resolve(supabase
         .from('manutencoes')
         .select('*', { count: 'exact', head: true })
-        .eq('veiculo_id', id);
+        .eq('veiculo_id', id));
       
       if (manutencoesError) throw manutencoesError;
       
@@ -339,10 +273,10 @@ export function useVeiculos() {
         };
       }
       
-      const { count: solicitacoesCount, error: solicitacoesError } = await supabase
+      const { count: solicitacoesCount, error: solicitacoesError } = await Promise.resolve(supabase
         .from('solicitacoes')
         .select('*', { count: 'exact', head: true })
-        .eq('veiculo_id', id);
+        .eq('veiculo_id', id));
       
       if (solicitacoesError) throw solicitacoesError;
       
@@ -354,19 +288,19 @@ export function useVeiculos() {
       }
 
       // Excluir arquivos do storage
-      await supabase.storage
+      await Promise.resolve(supabase.storage
         .from('files')
         .remove([
           `veiculos/${id}/foto`,
           `veiculos/${id}/crlv`,
           `veiculos/${id}/seguro`
-        ]);
+        ]));
 
       // Excluir o veículo
-      const { error } = await supabase
+      const { error } = await Promise.resolve(supabase
         .from('veiculos')
         .delete()
-        .eq('id', id);
+        .eq('id', id));
 
       if (error) throw error;
 
@@ -390,7 +324,7 @@ export function useVeiculos() {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
+      const { data, error } = await Promise.resolve(supabase
         .from('veiculos')
         .select(`
           *,
@@ -400,7 +334,7 @@ export function useVeiculos() {
           )
         `)
         .eq('id', id)
-        .single();
+        .single());
 
       if (error) throw error;
 

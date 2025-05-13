@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAutorizacao } from '@/hooks/useAutorizacao';
+import { usePermissoes } from '@/hooks/usePermissoes';
 import VeiculoNovoModal from '@/components/modals/VeiculoNovoModal';
 import { VeiculoFormData } from '@/types/Veiculo';
 import AcoesDropdown from '@/components/ui/AcoesDropdown';
@@ -119,7 +119,7 @@ export default function Veiculos() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [modalVeiculoAberto, setModalVeiculoAberto] = useState(false);
 
-  const { verificarPermissao } = useAutorizacao();
+  const { verificarPermissao } = usePermissoes();
   const podeCriar = verificarPermissao({ recurso: 'veiculos', acao: 'criar', redirecionarSeNaoAutorizado: false });
 
   // Simular carregamento de dados

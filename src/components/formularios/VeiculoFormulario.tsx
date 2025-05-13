@@ -22,17 +22,24 @@ export default function VeiculoFormulario({
   onCancel
 }: VeiculoFormularioProps) {
   // Estado inicial
-  const [formData, setFormData] = useState<VeiculoFormData>({
-    placa: veiculo?.placa || '',
-    modelo: veiculo?.modelo || '',
-    ano: veiculo?.ano || new Date().getFullYear(),
-    tipo: veiculo?.tipo || 'Sedan',
-    combustivel: veiculo?.combustivel || 'Flex',
-    status: veiculo?.status === 'Ativo' ? 'ativo' : veiculo?.status === 'Inativo' ? 'inativo' : 'em_manutencao',
-    quilometragem_atual: veiculo?.km || 0,
-    secretaria_id: veiculo?.secretaria ? (secretarias.find(s => s.nome === veiculo.secretaria)?.id || '') : '',
-    foto_file: null,
-    documentos_files: []
+  const [formData, setFormData] = useState<VeiculoFormData>(() => {
+    // Determinar o secretaria_id correto
+    const secretariaIdValue = veiculo?.secretaria 
+      ? (secretarias.find(s => s.nome === veiculo.secretaria)?.id || '')
+      : '';
+    
+    return {
+      placa: veiculo?.placa || '',
+      modelo: veiculo?.modelo || '',
+      ano: veiculo?.ano || new Date().getFullYear(),
+      tipo: veiculo?.tipo || 'Sedan',
+      combustivel: veiculo?.combustivel || 'Flex',
+      status: veiculo?.status === 'Ativo' ? 'ativo' : veiculo?.status === 'Inativo' ? 'inativo' : 'em_manutencao',
+      quilometragem_atual: veiculo?.km || 0,
+      secretaria_id: secretariaIdValue,
+      foto_file: null,
+      documentos_files: []
+    };
   });
 
   const [enviando, setEnviando] = useState(false);

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAutorizacao } from '@/hooks/useAutorizacao';
+import { usePermissoes } from '@/hooks/usePermissoes';
 import MotoristaNovoModal from '@/components/modals/MotoristaNovoModal';
 import { MotoristaFormData } from '@/types/Motorista';
 import AcoesDropdown from '@/components/ui/AcoesDropdown';
@@ -142,7 +142,7 @@ export default function Motoristas() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [modalMotoristaAberto, setModalMotoristaAberto] = useState(false);
 
-  const { verificarPermissao } = useAutorizacao();
+  const { verificarPermissao } = usePermissoes();
   const podeCriar = verificarPermissao({ recurso: 'motoristas', acao: 'criar', redirecionarSeNaoAutorizado: false });
 
   // Simular carregamento de dados

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAutorizacao } from '@/hooks/useAutorizacao';
+import { usePermissoes } from '@/hooks/usePermissoes';
 import { useRouter } from 'next/navigation';
 import { 
   Home, 
@@ -53,7 +53,7 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick, onCollapseChange }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [collapsed, setCollapsed] = useState(false);
-  const { verificarPermissao, carregando, usuarioAtual, isSuperAdmin, isAdmin, getPerfilUsuario } = useAutorizacao();
+  const { verificarPermissao, carregando, usuarioAtual, isSuperAdmin, isAdmin, getPerfilUsuario } = usePermissoes();
   const router = useRouter();
 
   // Efeito para sincronizar o estado collapsed com isOpen

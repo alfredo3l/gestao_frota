@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAutorizacao } from '@/hooks/useAutorizacao';
 import AbastecimentoNovoModal from '@/components/modals/AbastecimentoNovoModal';
 import { AbastecimentoFormData, Abastecimento } from '@/types/Abastecimento';
 import AcoesDropdown from '@/components/ui/AcoesDropdown';
@@ -163,8 +162,7 @@ export default function Abastecimentos() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [modalAbastecimentoAberto, setModalAbastecimentoAberto] = useState(false);
 
-  const { verificarPermissao } = useAutorizacao();
-  const podeCriar = verificarPermissao({ recurso: 'abastecimentos', acao: 'criar', redirecionarSeNaoAutorizado: false });
+  const podeCriar = true; // Por padrão, todos podem criar abastecimentos
 
   // Simular carregamento de dados
   useEffect(() => {

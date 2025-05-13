@@ -9,6 +9,7 @@ export interface Veiculo {
   km: number;
   quilometragem_atual: number;
   secretaria: string;
+  secretaria_id: string;
   secretaria_nome?: string;
   ultimaManutencao?: string;
   proximaManutencao?: string;

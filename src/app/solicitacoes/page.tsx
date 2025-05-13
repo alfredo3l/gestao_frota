@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAutorizacao } from '@/hooks/useAutorizacao';
+import { usePermissoes } from '@/hooks/usePermissoes';
 import SolicitacaoNovoModal from '@/components/modals/SolicitacaoNovoModal';
 import { SolicitacaoFormData } from '@/types/Solicitacao';
 import AcoesDropdown from '@/components/ui/AcoesDropdown';
@@ -249,7 +249,7 @@ export default function Solicitacoes() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [modalSolicitacaoAberto, setModalSolicitacaoAberto] = useState(false);
 
-  const { verificarPermissao } = useAutorizacao();
+  const { verificarPermissao } = usePermissoes();
   const podeCriar = verificarPermissao({ recurso: 'solicitacoes', acao: 'criar', redirecionarSeNaoAutorizado: false });
 
   // Simular carregamento de dados

@@ -19,17 +19,23 @@ export default function MotoristaFormulario({
   onCancel 
 }: MotoristaFormularioProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<MotoristaFormData>({
-    nome: motorista?.nome || '',
-    cpf: motorista?.cpf || '',
-    cnh: motorista?.cnh?.numero || '',
-    categoria_cnh: motorista?.cnh?.categoria || '',
-    validade_cnh: motorista?.cnh?.validade ? new Date(motorista.cnh.validade).toISOString().split('T')[0] : '',
-    telefone: motorista?.telefone || '',
-    email: motorista?.email || '',
-    secretaria_id: motorista?.secretaria_id || secretarias.find(s => s.nome === motorista?.secretaria)?.id || '',
-    status: motorista?.status?.toLowerCase() === 'ativo' ? 'ativo' : 'inativo',
-    foto_file: undefined
+  const [formData, setFormData] = useState<MotoristaFormData>(() => {
+    // Determinar o secretaria_id correto
+    const secretariaIdValue = motorista?.secretaria_id || 
+      (motorista?.secretaria ? secretarias.find(s => s.nome === motorista.secretaria)?.id || '' : '');
+    
+    return {
+      nome: motorista?.nome || '',
+      cpf: motorista?.cpf || '',
+      cnh: motorista?.cnh?.numero || '',
+      categoria_cnh: motorista?.cnh?.categoria || '',
+      validade_cnh: motorista?.cnh?.validade ? new Date(motorista.cnh.validade).toISOString().split('T')[0] : '',
+      telefone: motorista?.telefone || '',
+      email: motorista?.email || '',
+      secretaria_id: secretariaIdValue,
+      status: motorista?.status?.toLowerCase() === 'ativo' ? 'ativo' : 'inativo',
+      foto_file: undefined
+    };
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

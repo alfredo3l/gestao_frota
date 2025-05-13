@@ -60,11 +60,16 @@ export function useAbastecimentos() {
       }
 
       if (filtros?.data_inicio && filtros?.data_fim) {
-        query = query.gte('data', filtros.data_inicio).lte('data', filtros.data_fim);
+        const dataInicioFormatada = filtros.data_inicio;
+        const dataFimFormatada = filtros.data_fim;
+        query = query.gte('data', dataInicioFormatada);
+        query = query.lte('data', dataFimFormatada);
       } else if (filtros?.data_inicio) {
-        query = query.gte('data', filtros.data_inicio);
+        const dataInicioFormatada = filtros.data_inicio;
+        query = query.gte('data', dataInicioFormatada);
       } else if (filtros?.data_fim) {
-        query = query.lte('data', filtros.data_fim);
+        const dataFimFormatada = filtros.data_fim;
+        query = query.lte('data', dataFimFormatada);
       }
 
       if (filtros?.termoBusca) {
@@ -75,8 +80,7 @@ export function useAbastecimentos() {
       // Aplicar ordenação
       if (orderConfig) {
         query = query.order(orderConfig.column, { 
-          ascending: orderConfig.direction === 'asc',
-          nullsFirst: orderConfig.direction === 'asc'
+          ascending: orderConfig.direction === 'asc'
         });
       } else {
         query = query.order('data', { ascending: false });
@@ -85,12 +89,14 @@ export function useAbastecimentos() {
       // Aplicar paginação
       query = query.range(from, to);
 
-      const { data, error, count } = await query;
+      // Execute a query
+      const response = await Promise.resolve(query.then());
+      const { data, error, count } = response;
 
       if (error) throw error;
-
+  
       // Processar dados para incluir informações relacionadas
-      const abastecimentosProcessados = data.map(abastecimento => {
+      const abastecimentosProcessados = data.map((abastecimento: any) => {
         // Calcular valor por litro
         const valorLitro = abastecimento.litros > 0 
           ? abastecimento.valor_total / abastecimento.litros
@@ -108,13 +114,33 @@ export function useAbastecimentos() {
           ? km_percorridos / abastecimento.litros
           : 0;
 
+        // Adaptar o objeto para corresponder à interface Abastecimento
         return {
-          ...abastecimento,
+          id: abastecimento.id,
+          data: abastecimento.data,
+          veiculo: {
+            id: abastecimento.veiculo_id,
+            placa: abastecimento.veiculos?.placa || 'N/A',
+            modelo: abastecimento.veiculos?.modelo || 'N/A'
+          },
+          motorista: {
+            id: abastecimento.motorista_id,
+            nome: abastecimento.motoristas?.nome || 'N/A'
+          },
+          combustivel: abastecimento.tipo_combustivel,
+          litros: abastecimento.litros,
+          valor: abastecimento.valor_total,
+          kmAtual: abastecimento.quilometragem,
+          kmAnterior: km_anterior,
+          kmRodados: km_percorridos,
+          consumoMedio: consumo_medio,
+          cupomFiscal: !!abastecimento.cupom_fiscal_url,
+          secretaria: abastecimento.secretaria || 'N/A',
+          observacoes: abastecimento.observacoes,
+          // Campos adicionais para uso interno
           veiculo_placa: abastecimento.veiculos?.placa || 'N/A',
           motorista_nome: abastecimento.motoristas?.nome || 'N/A',
-          valor_litro: valorLitro,
-          km_percorridos,
-          consumo_medio
+          valor_litro: valorLitro
         };
       });
 
@@ -135,12 +161,15 @@ export function useAbastecimentos() {
       setLoading(true);
       
       // Buscar quilometragem atual do veículo
-      const { data: veiculo, error: veiculoError } = await supabase
+      const veiculoResponse = await Promise.resolve(supabase
         .from('veiculos')
         .select('quilometragem_atual')
         .eq('id', abastecimento.veiculo_id)
-        .single();
-        
+        .single()
+        .then());
+      
+      const { data: veiculo, error: veiculoError } = veiculoResponse;
+      
       if (veiculoError) throw veiculoError;
       
       // Validar quilometragem (não pode ser menor que a atual do veículo)
@@ -152,7 +181,7 @@ export function useAbastecimentos() {
       }
       
       // Primeiro inserimos os dados básicos do abastecimento
-      const { data, error } = await supabase
+      const insertResponse = await Promise.resolve(supabase
         .from('abastecimentos')
         .insert({
           veiculo_id: abastecimento.veiculo_id,
@@ -164,16 +193,22 @@ export function useAbastecimentos() {
           quilometragem: abastecimento.quilometragem
         })
         .select('*')
-        .single();
+        .single()
+        .then());
+      
+      const { data, error } = insertResponse;
 
       if (error) throw error;
 
       // Atualizar a quilometragem do veículo
-      const { error: updateError } = await supabase
+      const updateResponse = await Promise.resolve(supabase
         .from('veiculos')
         .update({ quilometragem_atual: abastecimento.quilometragem })
-        .eq('id', abastecimento.veiculo_id);
-        
+        .eq('id', abastecimento.veiculo_id)
+        .then());
+      
+      const { error: updateError } = updateResponse;
+      
       if (updateError) throw updateError;
 
       // Se tiver arquivo de cupom fiscal, fazer o upload
@@ -182,26 +217,33 @@ export function useAbastecimentos() {
 
       if (abastecimento.cupom_fiscal_file) {
         const cupomPath = `abastecimentos/${id}/cupom_fiscal`;
-        const { error: fileError } = await supabase.storage
+        const uploadResult = await Promise.resolve(supabase.storage
           .from('files')
           .upload(cupomPath, abastecimento.cupom_fiscal_file, {
             upsert: true,
-          });
+          }));
+        
+        const { error: fileError } = uploadResult;
 
         if (fileError) throw fileError;
 
-        const { data: urlData } = await supabase.storage
+        const urlResult = await Promise.resolve(supabase.storage
           .from('files')
-          .getPublicUrl(cupomPath);
+          .getPublicUrl(cupomPath));
+        
+        const { data: urlData } = urlResult;
 
         cupom_fiscal_url = urlData.publicUrl;
         
         // Atualizar o registro com a URL do cupom
-        const { error: updateCupomError } = await supabase
+        const updateCupomResult = await Promise.resolve(supabase
           .from('abastecimentos')
           .update({ cupom_fiscal_url })
-          .eq('id', id);
-          
+          .eq('id', id)
+          .then());
+        
+        const { error: updateCupomError } = updateCupomResult;
+        
         if (updateCupomError) throw updateCupomError;
       }
 
@@ -228,12 +270,15 @@ export function useAbastecimentos() {
       setLoading(true);
       
       // Buscar abastecimento atual para comparação
-      const { data: abastecimentoAtual, error: getError } = await supabase
+      const abastecimentoResponse = await Promise.resolve(supabase
         .from('abastecimentos')
         .select('quilometragem, veiculo_id')
         .eq('id', id)
-        .single();
-        
+        .single()
+        .then());
+      
+      const { data: abastecimentoAtual, error: getError } = abastecimentoResponse;
+      
       if (getError) throw getError;
       
       // Verificar se a quilometragem está sendo atualizada
@@ -242,12 +287,15 @@ export function useAbastecimentos() {
       
       if (abastecimento.quilometragem && abastecimento.quilometragem !== abastecimentoAtual.quilometragem) {
         // Buscar quilometragem atual do veículo
-        const { data: veiculo, error: veiculoError } = await supabase
+        const veiculoResponse = await Promise.resolve(supabase
           .from('veiculos')
           .select('quilometragem_atual')
           .eq('id', veiculo_id)
-          .single();
+          .single()
+          .then());
           
+        const { data: veiculo, error: veiculoError } = veiculoResponse;
+        
         if (veiculoError) throw veiculoError;
         
         // Se a nova quilometragem for maior que a atual do veículo, atualizar o veículo também
@@ -257,7 +305,7 @@ export function useAbastecimentos() {
       }
       
       // Preparar as atualizações para o abastecimento
-      const updates: Partial<Abastecimento> = {};
+      const updates: any = {};
       
       if (abastecimento.veiculo_id !== undefined) updates.veiculo_id = abastecimento.veiculo_id;
       if (abastecimento.motorista_id !== undefined) updates.motorista_id = abastecimento.motorista_id;
@@ -270,27 +318,39 @@ export function useAbastecimentos() {
       // Se tiver arquivo de cupom fiscal, fazer o upload
       if (abastecimento.cupom_fiscal_file) {
         const cupomPath = `abastecimentos/${id}/cupom_fiscal`;
-        const { error: fileError } = await supabase.storage
+        const uploadResult = await Promise.resolve(supabase.storage
           .from('files')
           .upload(cupomPath, abastecimento.cupom_fiscal_file, {
             upsert: true,
-          });
+          }));
+        
+        const { error: fileError } = uploadResult;
 
         if (fileError) throw fileError;
 
-        const { data: urlData } = await supabase.storage
+        const urlResult = await Promise.resolve(supabase.storage
           .from('files')
-          .getPublicUrl(cupomPath);
+          .getPublicUrl(cupomPath));
+        
+        const { data: urlData } = urlResult;
 
         updates.cupom_fiscal_url = urlData.publicUrl;
       }
 
       // Atualizar o abastecimento
       if (Object.keys(updates).length > 0) {
-        const { data, error } = await supabase
+        // Primeiro fazemos o update
+        const updateBasicResult = await Promise.resolve(supabase
           .from('abastecimentos')
           .update(updates)
           .eq('id', id)
+          .then());
+
+        if (updateBasicResult.error) throw updateBasicResult.error;
+
+        // Depois buscamos os dados atualizados
+        const getUpdateResult = await Promise.resolve(supabase
+          .from('abastecimentos')
           .select(`
             *,
             veiculos (
@@ -303,17 +363,24 @@ export function useAbastecimentos() {
               nome
             )
           `)
-          .single();
+          .eq('id', id)
+          .single()
+          .then());
+
+        const { data, error } = getUpdateResult;
 
         if (error) throw error;
 
         // Se a quilometragem foi atualizada, atualizar também o veículo
         if (quilometragem_atualizada && abastecimento.quilometragem) {
-          const { error: updateVeiculoError } = await supabase
+          const updateVeiculoResult = await Promise.resolve(supabase
             .from('veiculos')
             .update({ quilometragem_atual: abastecimento.quilometragem })
-            .eq('id', veiculo_id);
+            .eq('id', veiculo_id)
+            .then());
             
+          const { error: updateVeiculoError } = updateVeiculoResult;
+          
           if (updateVeiculoError) throw updateVeiculoError;
         }
 
@@ -347,24 +414,30 @@ export function useAbastecimentos() {
       setLoading(true);
 
       // Buscar o abastecimento para obter informações antes de excluir
-      const { data: abastecimento, error: getError } = await supabase
+      const abastecimentoResult = await Promise.resolve(supabase
         .from('abastecimentos')
         .select('*')
         .eq('id', id)
-        .single();
+        .single()
+        .then());
         
+      const { data: abastecimento, error: getError } = abastecimentoResult;
+      
       if (getError) throw getError;
 
       // Excluir arquivos do storage
-      await supabase.storage
+      await Promise.resolve(supabase.storage
         .from('files')
-        .remove([`abastecimentos/${id}/cupom_fiscal`]);
+        .remove([`abastecimentos/${id}/cupom_fiscal`]));
 
       // Excluir o abastecimento
-      const { error } = await supabase
+      const deleteResult = await Promise.resolve(supabase
         .from('abastecimentos')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .then());
+
+      const { error } = deleteResult;
 
       if (error) throw error;
 
@@ -388,7 +461,7 @@ export function useAbastecimentos() {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
+      const abastecimentoResult = await Promise.resolve(supabase
         .from('abastecimentos')
         .select(`
           *,
@@ -403,7 +476,10 @@ export function useAbastecimentos() {
           )
         `)
         .eq('id', id)
-        .single();
+        .single()
+        .then());
+
+      const { data, error } = abastecimentoResult;
 
       if (error) throw error;
 
@@ -443,14 +519,17 @@ export function useAbastecimentos() {
         .toISOString().split('T')[0];
       
       // Buscar abastecimentos no período, ordenados por data
-      const { data, error } = await supabase
+      const abastecimentosResult = await Promise.resolve(supabase
         .from('abastecimentos')
         .select('data, quilometragem, litros')
         .eq('veiculo_id', veiculo_id)
         .gte('data', data_inicio)
         .lte('data', data_fim)
-        .order('data', { ascending: true });
+        .order('data', { ascending: true })
+        .then());
         
+      const { data, error } = abastecimentosResult;
+      
       if (error) throw error;
       
       // Se não houver pelo menos dois abastecimentos, não é possível calcular
@@ -472,7 +551,7 @@ export function useAbastecimentos() {
       const total_km = km_final - km_inicial;
       
       // Calcular o total de combustível usado
-      const total_litros = data.slice(0, -1).reduce((acc, item) => acc + item.litros, 0);
+      const total_litros = data.slice(0, -1).reduce((acc: number, item: any) => acc + item.litros, 0);
       
       // Calcular o consumo médio
       const consumo_medio = total_litros > 0 ? total_km / total_litros : 0;

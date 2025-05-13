@@ -147,6 +147,17 @@ const filterObjects = (objects: any[], filters: Record<string, any>) => {
         return obj[childKey]?.toLowerCase().includes(value.toLowerCase());
       }
       
+      // Tratamento para operadores _gte e _lte
+      if (key.endsWith('_gte')) {
+        const field = key.replace('_gte', '');
+        return obj[field] >= value;
+      }
+      
+      if (key.endsWith('_lte')) {
+        const field = key.replace('_lte', '');
+        return obj[field] <= value;
+      }
+      
       // Tratamento para operadores como 'in', 'eq', etc.
       if (key === 'in' && Array.isArray(value)) {
         const [field, values] = value;
@@ -252,6 +263,14 @@ export const mockSupabaseClient = {
             filters[`${column}_neq`] = value;
             return mockSupabaseClient.from(table).select(columns, options);
           },
+          gte: (column: string, value: any) => {
+            filters[`${column}_gte`] = value;
+            return mockSupabaseClient.from(table).select(columns, options);
+          },
+          lte: (column: string, value: any) => {
+            filters[`${column}_lte`] = value;
+            return mockSupabaseClient.from(table).select(columns, options);
+          },
           in: (column: string, values: any[]) => {
             filters.in = [column, values];
             return mockSupabaseClient.from(table).select(columns, options);
@@ -278,7 +297,24 @@ export const mockSupabaseClient = {
             return mockSupabaseClient.from(table).select(columns, options);
           },
           single: () => {
-            return mockSupabaseClient.from(table).select(columns, options).then();
+            return {
+              then: async () => {
+                await delay(300); // Simular delay de rede
+                
+                let filteredData = filterObjects(data, filters);
+                
+                if (searchFields.length > 0 && searchTerm) {
+                  filteredData = searchObjects(filteredData, searchTerm, searchFields);
+                }
+                
+                const sortedData = sortObjects(filteredData, orderColumn, orderAscending);
+                
+                return {
+                  data: sortedData.length > 0 ? sortedData[0] : null,
+                  error: null
+                };
+              }
+            };
           },
           ilike: (column: string, value: string) => {
             filters.ilike = [column, value];
@@ -312,14 +348,70 @@ export const mockSupabaseClient = {
           }
         };
       },
-      insert: (records: any[]) => {
+      insert: (records: any | any[]) => {
+        // Garantir que records é um array
+        const recordsArray = Array.isArray(records) ? records : [records];
+        
         return {
-          select: () => {
+          select: (columns: string = '*') => {
             return {
+              single: () => {
+                return {
+                  then: async () => {
+                    await delay(300); // Simular delay de rede
+                    
+                    const newRecords = recordsArray.map(record => {
+                      const id = Math.random().toString(36).substring(2, 11);
+                      return { id, ...record };
+                    });
+                    
+                    // Adicionar aos dados mockados (na memória apenas)
+                    switch (table) {
+                      case 'apoiadores':
+                        mockApoiadores.push(...newRecords);
+                        break;
+                      case 'liderancas':
+                        mockLiderancas.push(...newRecords);
+                        break;
+                      case 'demandas':
+                        mockDemandas.push(...newRecords);
+                        break;
+                      case 'eventos':
+                        mockEventos.push(...newRecords);
+                        break;
+                      case 'apoios_politicos':
+                        mockApoiosPoliticos.push(...newRecords);
+                        break;
+                      case 'candidatos':
+                        mockCandidatos.push(...newRecords);
+                        break;
+                      case 'regioes':
+                        mockRegioes.push(...newRecords);
+                        break;
+                      case 'conversacoes_ia':
+                        mockConversacoesIA.push(...newRecords);
+                        break;
+                      case 'mensagens_ia':
+                        // Caso especial
+                        const conversacaoId = records[0].conversacaoId as string;
+                        if (!mockMensagensIA[conversacaoId]) {
+                          mockMensagensIA[conversacaoId] = [];
+                        }
+                        mockMensagensIA[conversacaoId].push(...newRecords);
+                        break;
+                    }
+                    
+                    return {
+                      data: newRecords.length > 0 ? newRecords[0] : null,
+                      error: null
+                    };
+                  }
+                };
+              },
               then: async () => {
                 await delay(300); // Simular delay de rede
                 
-                const newRecords = records.map(record => {
+                const newRecords = recordsArray.map(record => {
                   const id = Math.random().toString(36).substring(2, 11);
                   return { id, ...record };
                 });
@@ -370,7 +462,7 @@ export const mockSupabaseClient = {
           then: async () => {
             await delay(300); // Simular delay de rede
             
-            const newRecords = records.map(record => {
+            const newRecords = recordsArray.map(record => {
               const id = Math.random().toString(36).substring(2, 11);
               return { id, ...record };
             });
@@ -652,5 +744,31 @@ export const mockSupabaseClient = {
         };
       }
     };
+  },
+  storage: {
+    from: (bucket: string) => {
+      return {
+        upload: async (path: string, file: File, options?: any) => {
+          await delay(300); // Simular delay de rede
+          return {
+            data: { path },
+            error: null
+          };
+        },
+        getPublicUrl: (path: string) => {
+          return {
+            data: { publicUrl: `https://mock-storage.example.com/${bucket}/${path}` },
+            error: null
+          };
+        },
+        remove: async (paths: string[]) => {
+          await delay(300); // Simular delay de rede
+          return {
+            data: { removed: paths },
+            error: null
+          };
+        }
+      };
+    }
   }
 }; 

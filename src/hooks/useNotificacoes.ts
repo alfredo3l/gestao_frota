@@ -1,14 +1,17 @@
+// Hook simplificado para notificações
+// Para sistema de gestão de frotas
+
+'use client';
+
 import { useState, useEffect } from 'react';
-import { useAutorizacao } from './useAutorizacao';
 
 export interface Notificacao {
   id: string;
   titulo: string;
   mensagem: string;
   tipo: 'info' | 'sucesso' | 'aviso' | 'erro';
-  lida: boolean;
-  paraUsuarioId: string;
   timestamp: Date;
+  lida: boolean;
   link?: string;
   acao?: string;
 }
@@ -17,170 +20,119 @@ export function useNotificacoes() {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
-  const { usuarioAtual } = useAutorizacao();
 
-  // Carregar notificações do usuário atual
+  // Carregar notificações (simulação)
   useEffect(() => {
     const carregarNotificacoes = async () => {
-      if (!usuarioAtual) return;
-      
-      setCarregando(true);
-      setErro(null);
-      
       try {
-        // Simulação de chamada à API
+        // Simulando carregamento da API
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Dados mockados que viriam do backend
-        const dadosNotificacoes: Notificacao[] = [
+        // Exemplo de notificações para demonstração
+        const notificacoesExemplo: Notificacao[] = [
           {
             id: '1',
-            titulo: 'Novo usuário cadastrado',
-            mensagem: 'O usuário Carlos Santos foi cadastrado no sistema.',
+            titulo: 'Manutenção agendada',
+            mensagem: 'Veículo ABC-1234 tem manutenção agendada para amanhã',
             tipo: 'info',
+            timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutos atrás
             lida: false,
-            paraUsuarioId: usuarioAtual.id,
-            timestamp: new Date(Date.now() - 3600000 * 2), // 2 horas atrás
-            link: '/admin',
-            acao: 'Ver usuários'
+            link: '/manutencoes',
+            acao: 'Ver manutenção'
           },
           {
             id: '2',
-            titulo: 'Permissões atualizadas',
-            mensagem: 'Suas permissões de acesso foram atualizadas por um administrador.',
-            tipo: 'info',
+            titulo: 'CNH próxima do vencimento',
+            mensagem: 'A CNH do motorista João Silva vencerá em 15 dias',
+            tipo: 'aviso',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 horas atrás
             lida: false,
-            paraUsuarioId: usuarioAtual.id,
-            timestamp: new Date(Date.now() - 3600000), // 1 hora atrás
+            link: '/motoristas',
+            acao: 'Ver motorista'
           },
           {
             id: '3',
-            titulo: 'Erro no sistema',
-            mensagem: 'Ocorreu um erro ao processar sua última solicitação. Por favor, tente novamente.',
-            tipo: 'erro',
-            lida: true,
-            paraUsuarioId: usuarioAtual.id,
-            timestamp: new Date(Date.now() - 86400000), // 1 dia atrás
-          },
-          {
-            id: '4',
-            titulo: 'Bem-vindo ao sistema',
-            mensagem: 'Bem-vindo ao sistema de Evolução Política. Explore as funcionalidades disponíveis.',
+            titulo: 'Abastecimento registrado',
+            mensagem: 'Abastecimento do veículo DEF-5678 foi registrado com sucesso',
             tipo: 'sucesso',
+            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 dia atrás
             lida: true,
-            paraUsuarioId: usuarioAtual.id,
-            timestamp: new Date(Date.now() - 86400000 * 7), // 7 dias atrás
-            link: '/dashboard',
-            acao: 'Ir para Dashboard'
+            link: '/abastecimentos',
+            acao: 'Ver detalhes'
           }
         ];
-        
-        setNotificacoes(dadosNotificacoes);
+
+        setNotificacoes(notificacoesExemplo);
+        setCarregando(false);
       } catch (error) {
         console.error('Erro ao carregar notificações:', error);
         setErro('Não foi possível carregar as notificações');
-      } finally {
         setCarregando(false);
       }
     };
-    
-    carregarNotificacoes();
-  }, [usuarioAtual]);
 
-  // Marcar notificação como lida
-  const marcarComoLida = async (notificacaoId: string): Promise<boolean> => {
+    carregarNotificacoes();
+  }, []);
+
+  // Marcar uma notificação como lida
+  const marcarComoLida = async (id: string) => {
     try {
-      // Simulação de chamada à API
+      // Simulando chamada à API
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      setNotificacoes(prevNotificacoes => 
-        prevNotificacoes.map(notificacao => 
-          notificacao.id === notificacaoId 
+      setNotificacoes(prev => 
+        prev.map(notificacao => 
+          notificacao.id === id 
             ? { ...notificacao, lida: true } 
             : notificacao
         )
       );
       
-      return true;
+      return Promise.resolve();
     } catch (error) {
       console.error('Erro ao marcar notificação como lida:', error);
-      return false;
+      setErro('Não foi possível marcar a notificação como lida');
+      return Promise.reject(error);
     }
   };
 
   // Marcar todas as notificações como lidas
-  const marcarTodasComoLidas = async (): Promise<boolean> => {
+  const marcarTodasComoLidas = async () => {
     try {
-      // Simulação de chamada à API
+      // Simulando chamada à API
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      setNotificacoes(prevNotificacoes => 
-        prevNotificacoes.map(notificacao => ({ ...notificacao, lida: true }))
+      setNotificacoes(prev => 
+        prev.map(notificacao => ({ ...notificacao, lida: true }))
       );
       
-      return true;
+      return Promise.resolve();
     } catch (error) {
       console.error('Erro ao marcar todas notificações como lidas:', error);
-      return false;
+      setErro('Não foi possível marcar todas as notificações como lidas');
+      return Promise.reject(error);
     }
   };
 
-  // Excluir notificação
-  const excluirNotificacao = async (notificacaoId: string): Promise<boolean> => {
+  // Excluir uma notificação
+  const excluirNotificacao = async (id: string) => {
     try {
-      // Simulação de chamada à API
+      // Simulando chamada à API
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      setNotificacoes(prevNotificacoes => 
-        prevNotificacoes.filter(notificacao => notificacao.id !== notificacaoId)
+      setNotificacoes(prev => 
+        prev.filter(notificacao => notificacao.id !== id)
       );
       
-      return true;
+      return Promise.resolve();
     } catch (error) {
       console.error('Erro ao excluir notificação:', error);
-      return false;
+      setErro('Não foi possível excluir a notificação');
+      return Promise.reject(error);
     }
   };
 
-  // Criar nova notificação (para uso interno do sistema)
-  const criarNotificacao = async (
-    titulo: string,
-    mensagem: string,
-    tipo: 'info' | 'sucesso' | 'aviso' | 'erro',
-    paraUsuarioId: string,
-    link?: string,
-    acao?: string
-  ): Promise<boolean> => {
-    try {
-      // Criar nova notificação
-      const novaNotificacao: Notificacao = {
-        id: `${Date.now()}`,
-        titulo,
-        mensagem,
-        tipo,
-        lida: false,
-        paraUsuarioId,
-        timestamp: new Date(),
-        link,
-        acao
-      };
-      
-      // Simulação de chamada à API
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Se a notificação for para o usuário atual, adicionar ao estado local
-      if (usuarioAtual && paraUsuarioId === usuarioAtual.id) {
-        setNotificacoes(prevNotificacoes => [novaNotificacao, ...prevNotificacoes]);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Erro ao criar notificação:', error);
-      return false;
-    }
-  };
-
-  // Obter contagem de notificações não lidas
+  // Obter notificações não lidas
   const getNotificacoesNaoLidas = () => {
     return notificacoes.filter(notificacao => !notificacao.lida);
   };
@@ -192,7 +144,6 @@ export function useNotificacoes() {
     marcarComoLida,
     marcarTodasComoLidas,
     excluirNotificacao,
-    criarNotificacao,
     getNotificacoesNaoLidas
   };
 } 

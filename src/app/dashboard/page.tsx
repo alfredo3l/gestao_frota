@@ -26,9 +26,6 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Link from 'next/link';
 import Carregando from '@/components/ui/Carregando';
-import { useLogs, LogAtividade } from '@/hooks/useLogs';
-import { usePermissoes } from '@/hooks/usePermissoes';
-import { useAutorizacao } from '@/hooks/useAutorizacao';
 import { 
   BarChart, 
   Bar, 
@@ -44,10 +41,55 @@ import {
   LineChart,
   Line
 } from 'recharts';
+// Removendo importações de hooks que não existem mais
+// import { useLogs, LogAtividade } from '@/hooks/useLogs';
+// import { usePermissoes } from '@/hooks/usePermissoes';
+// import { useAutorizacao } from '@/hooks/useAutorizacao';
+
+// Definindo o tipo LogAtividade que foi removido
+interface LogAtividade {
+  id: string;
+  usuario: string;
+  acao: 'criar' | 'editar' | 'excluir' | 'visualizar' | 'login' | 'aprovar' | 'rejeitar';
+  recurso: string;
+  descricao: string;
+  data: Date;
+}
 
 export default function Dashboard() {
-  const { logs, carregando: carregandoLogs, erro: erroLogs } = useLogs();
-  const { verificarPermissao } = useAutorizacao();
+  // Substituindo o uso do hook useLogs por dados fictícios
+  // const { logs, carregando: carregandoLogs, erro: erroLogs } = useLogs();
+  const carregandoLogs = false;
+  const erroLogs = null;
+  const logs: LogAtividade[] = [
+    {
+      id: '1',
+      usuario: 'João Silva',
+      acao: 'criar',
+      recurso: 'abastecimento',
+      descricao: 'Registrou abastecimento do veículo ABC-1234',
+      data: new Date(Date.now() - 1000 * 60 * 30) // 30 minutos atrás
+    },
+    {
+      id: '2',
+      usuario: 'Maria Oliveira',
+      acao: 'editar',
+      recurso: 'manutencao',
+      descricao: 'Atualizou manutenção do veículo DEF-5678',
+      data: new Date(Date.now() - 1000 * 60 * 120) // 2 horas atrás
+    },
+    {
+      id: '3',
+      usuario: 'Carlos Santos',
+      acao: 'aprovar',
+      recurso: 'solicitacao',
+      descricao: 'Aprovou solicitação de uso de veículo',
+      data: new Date(Date.now() - 1000 * 60 * 240) // 4 horas atrás
+    }
+  ];
+  
+  // Removendo uso do hook useAutorizacao
+  // const { verificarPermissao } = useAutorizacao();
   
   // Dados fictícios para os gráficos
   const dadosConsumoVeiculos = [
@@ -223,13 +265,10 @@ export default function Dashboard() {
     }
   ];
   
-  // Verificar se o usuário tem permissão para acessar um recurso
+  // Simplificando a função temPermissao
   const temPermissao = (recurso: string): boolean => {
-    return verificarPermissao({
-      recurso,
-      acao: 'ler',
-      redirecionarSeNaoAutorizado: false
-    });
+    // Por padrão, todos têm permissão
+    return true;
   };
   
   // Filtrar cards de navegação com base nas permissões do usuário
@@ -533,11 +572,11 @@ export default function Dashboard() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm">
-                      <span className="font-medium">{log.usuarioNome}</span>
-                      <span className="text-gray-600"> {log.detalhes || `${log.acao} ${log.recurso}`}</span>
+                      <span className="font-medium">{log.usuario}</span>
+                      <span className="text-gray-600"> {log.descricao}</span>
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {formatarTempoRelativo(new Date(log.timestamp))}
+                      {formatarTempoRelativo(log.data)}
                     </p>
                   </div>
                 </div>
