@@ -7,11 +7,18 @@ export interface Veiculo {
   combustivel: string;
   status: string;
   km: number;
+  quilometragem_atual: number;
   secretaria: string;
+  secretaria_nome?: string;
   ultimaManutencao?: string;
   proximaManutencao?: string;
   documentos: string[];
   imagens: number;
+  foto_url?: string;
+  crlv_url?: string;
+  seguro_url?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface VeiculoFormData {
