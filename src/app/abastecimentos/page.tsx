@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useAutorizacao } from '@/hooks/useAutorizacao';
 import AbastecimentoNovoModal from '@/components/modals/AbastecimentoNovoModal';
-import { AbastecimentoFormData } from '@/types/Abastecimento';
+import { AbastecimentoFormData, Abastecimento } from '@/types/Abastecimento';
 import AcoesDropdown from '@/components/ui/AcoesDropdown';
 import AbastecimentoDetalhes from '@/components/detalhes/AbastecimentoDetalhes';
 import AbastecimentoFormulario from '@/components/formularios/AbastecimentoFormulario';
@@ -152,31 +152,6 @@ const motoristasMock = [
   { id: '5', nome: 'Pedro Souza' }
 ];
 
-// Interface para o Abastecimento
-interface Abastecimento {
-  id: string;
-  data: string;
-  veiculo: {
-    id: string;
-    placa: string;
-    modelo: string;
-  };
-  motorista: {
-    id: string;
-    nome: string;
-  };
-  combustivel: string;
-  litros: number;
-  valor: number;
-  kmAtual: number;
-  kmAnterior: number;
-  kmRodados: number;
-  consumoMedio: number;
-  cupomFiscal: boolean;
-  secretaria: string;
-  observacoes: string;
-}
-
 export default function Abastecimentos() {
   const [abastecimentos, setAbastecimentos] = useState<Abastecimento[]>([]);
   const [filtro, setFiltro] = useState('');
@@ -263,7 +238,7 @@ export default function Abastecimentos() {
       consumoMedio: Number((300 / data.litros).toFixed(2)), // Mock: calcular consumo médio
       cupomFiscal: Boolean(data.cupom_fiscal_file),
       secretaria: 'Administração', // Mock
-      observacoes: ''
+      observacoes: data.observacoes ?? ''
     };
     
     setAbastecimentos([novoAbastecimento, ...abastecimentos]);
@@ -275,7 +250,7 @@ export default function Abastecimentos() {
   const totalKmRodados = abastecimentosFiltrados.reduce((total, item) => total + item.kmRodados, 0);
   
   // Calcular consumo médio geral
-  const consumoMedioGeral = totalLitros > 0 ? (totalKmRodados / totalLitros).toFixed(2) : 0;
+  const consumoMedioGeral = totalLitros > 0 ? Number((totalKmRodados / totalLitros).toFixed(2)) : 0;
 
   return (
     <div>
@@ -569,7 +544,7 @@ export default function Abastecimentos() {
                                         litros: data.litros,
                                         valor: data.valor_total,
                                         kmAtual: data.quilometragem,
-                                        observacoes: data.observacoes
+                                        observacoes: data.observacoes ?? ''
                                       } 
                                     : item
                                 ));

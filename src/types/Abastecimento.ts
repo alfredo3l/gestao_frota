@@ -1,23 +1,3 @@
-export interface Abastecimento {
-  id: string;
-  empresa_id: string;
-  veiculo_id: string;
-  veiculo_placa?: string;
-  motorista_id: string;
-  motorista_nome?: string;
-  data: string;
-  litros: number;
-  valor_total: number;
-  valor_litro?: number;
-  tipo_combustivel: string;
-  quilometragem: number;
-  km_percorridos?: number;
-  consumo_medio?: number;  // km/litro
-  cupom_fiscal_url?: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface AbastecimentoFormData {
   veiculo_id: string;
   motorista_id: string;
