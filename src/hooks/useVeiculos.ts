@@ -79,10 +79,10 @@ export function useVeiculos() {
       if (error) throw error;
 
       // Processar dados para incluir o nome da secretaria
-      const veiculosProcessados = data.map(veiculo => ({
+      const veiculosProcessados = Array.isArray(data) ? data.map(veiculo => ({
         ...veiculo,
         secretaria_nome: veiculo.secretarias?.nome || 'N/A'
-      }));
+      })) : [];
 
       setVeiculos(veiculosProcessados);
       if (count !== null) setTotalCount(count);
