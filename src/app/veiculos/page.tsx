@@ -381,7 +381,7 @@ export default function Veiculos() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex space-x-1">
-                        {veiculo.documentos.map((doc, index) => (
+                        {veiculo.documentos.map((doc: string, index) => (
                           <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                             <FileText className="h-3 w-3 mr-1" />
                             {doc}
