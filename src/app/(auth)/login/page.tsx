@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 interface NoSSRProps {
@@ -17,6 +17,7 @@ const NoSSR = dynamic(() => Promise.resolve((props: NoSSRProps) => <>{props.chil
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -53,6 +54,28 @@ export default function LoginPage() {
       >
         <div className="absolute inset-0 backdrop-blur-sm bg-black/40" />
       </div>
+
+      {/* Modal de Esqueceu sua senha */}
+      {showForgotPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full relative">
+            <button 
+              onClick={() => setShowForgotPasswordModal(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="text-xl font-semibold mb-4">Recuperação de senha</h3>
+            <p className="text-gray-700">Entre em contato com o administrador do sistema</p>
+            <button
+              onClick={() => setShowForgotPasswordModal(false)}
+              className="mt-6 w-full py-2 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition-colors"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Conteúdo */}
       <div className="w-full max-w-md space-y-8 bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-lg relative">
@@ -110,16 +133,13 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-end">
-            <NoSSR>
-              <Link
-                href="/forgot-password"
-                className="text-sm text-primary hover:text-primary/80 font-medium"
-                prefetch={false}
-                key="forgot-password-link"
-              >
-                Esqueceu sua senha?
-              </Link>
-            </NoSSR>
+            <button
+              type="button"
+              onClick={() => setShowForgotPasswordModal(true)}
+              className="text-sm text-primary hover:text-primary/80 font-medium"
+            >
+              Esqueceu sua senha?
+            </button>
           </div>
 
           <button
@@ -128,20 +148,6 @@ export default function LoginPage() {
           >
             Entrar
           </button>
-
-          <p className="text-center text-sm text-gray-600">
-            Não tem uma conta?{' '}
-            <NoSSR>
-              <Link 
-                href="/register" 
-                className="text-primary hover:text-primary/80 font-medium"
-                prefetch={false}
-                key="register-link"
-              >
-                Cadastre-se
-              </Link>
-            </NoSSR>
-          </p>
         </form>
       </div>
     </div>

@@ -12,85 +12,7 @@ import { VeiculoFormData } from '@/types/Veiculo';
 import AcoesDropdown from '@/components/ui/AcoesDropdown';
 import VeiculoDetalhes from '@/components/detalhes/VeiculoDetalhes';
 import VeiculoFormulario from '@/components/formularios/VeiculoFormulario';
-
-// Mock de dados para demonstração
-const veiculosMock = [
-  {
-    id: '1',
-    placa: 'ABC-1234',
-    modelo: 'Toyota Corolla',
-    ano: 2020,
-    tipo: 'Sedan',
-    combustivel: 'Flex',
-    status: 'Ativo',
-    km: 45000,
-    secretaria: 'Administração',
-    ultimaManutencao: '2023-05-10',
-    proximaManutencao: '2023-11-10',
-    documentos: ['CRLV', 'Seguro'],
-    imagens: 2
-  },
-  {
-    id: '2',
-    placa: 'DEF-5678',
-    modelo: 'Fiat Strada',
-    ano: 2019,
-    tipo: 'Utilitário',
-    combustivel: 'Diesel',
-    status: 'Em Manutenção',
-    km: 67800,
-    secretaria: 'Obras',
-    ultimaManutencao: '2023-07-15',
-    proximaManutencao: '2023-10-15',
-    documentos: ['CRLV'],
-    imagens: 3
-  },
-  {
-    id: '3',
-    placa: 'GHI-9012',
-    modelo: 'VW Gol',
-    ano: 2021,
-    tipo: 'Hatch',
-    combustivel: 'Flex',
-    status: 'Ativo',
-    km: 28000,
-    secretaria: 'Saúde',
-    ultimaManutencao: '2023-06-20',
-    proximaManutencao: '2023-12-20',
-    documentos: ['CRLV', 'Seguro', 'Inventário'],
-    imagens: 4
-  },
-  {
-    id: '4',
-    placa: 'JKL-3456',
-    modelo: 'Chevrolet S10',
-    ano: 2018,
-    tipo: 'Caminhonete',
-    combustivel: 'Diesel',
-    status: 'Inativo',
-    km: 95000,
-    secretaria: 'Agricultura',
-    ultimaManutencao: '2023-04-05',
-    proximaManutencao: '2023-10-05',
-    documentos: ['CRLV'],
-    imagens: 1
-  },
-  {
-    id: '5',
-    placa: 'MNO-7890',
-    modelo: 'Renault Duster',
-    ano: 2022,
-    tipo: 'SUV',
-    combustivel: 'Flex',
-    status: 'Ativo',
-    km: 15000,
-    secretaria: 'Educação',
-    ultimaManutencao: '2023-08-12',
-    proximaManutencao: '2024-02-12',
-    documentos: ['CRLV', 'Seguro'],
-    imagens: 5
-  }
-];
+import { useVeiculos } from '@/hooks/useVeiculos';
 
 // Opções de filtros
 const tiposVeiculo = ['Todos', 'Sedan', 'Hatch', 'SUV', 'Caminhonete', 'Utilitário', 'Ônibus', 'Caminhão'];
@@ -109,44 +31,53 @@ const secretariasMock = [
 ];
 
 export default function Veiculos() {
-  const [veiculos, setVeiculos] = useState<any[]>([]);
   const [filtro, setFiltro] = useState('');
-  const [carregando, setCarregando] = useState(true);
   const [filtroPorTipo, setFiltroPorTipo] = useState('Todos');
   const [filtroPorCombustivel, setFiltroPorCombustivel] = useState('Todos');
   const [filtroPorStatus, setFiltroPorStatus] = useState('Todos');
   const [filtroPorSecretaria, setFiltroPorSecretaria] = useState('Todas');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [modalVeiculoAberto, setModalVeiculoAberto] = useState(false);
+  
+  // Usar o hook useVeiculos
+  const { 
+    veiculos, 
+    loading: carregando, 
+    error, 
+    fetchVeiculos, 
+    createVeiculo,
+    updateVeiculo, 
+    deleteVeiculo
+  } = useVeiculos();
 
   const { verificarPermissao } = usePermissoes();
   const podeCriar = verificarPermissao({ recurso: 'veiculos', acao: 'criar', redirecionarSeNaoAutorizado: false });
 
-  // Simular carregamento de dados
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVeiculos(veiculosMock);
-      setCarregando(false);
-    }, 500);
+  // Função para converter o status para o formato esperado pela API
+  const converterStatus = (status: string): "ativo" | "inativo" | "em_manutencao" | undefined => {
+    if (status === 'Todos') return undefined;
+    
+    const statusMinusculo = status.toLowerCase();
+    if (statusMinusculo === 'ativo') return "ativo";
+    if (statusMinusculo === 'inativo') return "inativo";
+    if (statusMinusculo === 'em manutenção') return "em_manutencao";
+    
+    return undefined;
+  };
 
-    return () => clearTimeout(timer);
-  }, []);
+  // Carregar veículos do Supabase
+  useEffect(() => {
+    fetchVeiculos(1, 50, {
+      termoBusca: filtro || undefined,
+      tipo: filtroPorTipo !== 'Todos' ? filtroPorTipo : undefined,
+      combustivel: filtroPorCombustivel !== 'Todos' ? filtroPorCombustivel : undefined,
+      status: converterStatus(filtroPorStatus),
+      secretaria_id: undefined // Implementar quando tivermos o mapeamento de IDs
+    });
+  }, [filtro, filtroPorTipo, filtroPorCombustivel, filtroPorStatus, filtroPorSecretaria]);
 
   // Filtrar veículos
-  const veiculosFiltrados = veiculos.filter(veiculo => {
-    // Filtro por texto de busca
-    const matchFiltro = filtro === '' || 
-      veiculo.placa.toLowerCase().includes(filtro.toLowerCase()) || 
-      veiculo.modelo.toLowerCase().includes(filtro.toLowerCase());
-
-    // Filtros por seleção
-    const matchTipo = filtroPorTipo === 'Todos' || veiculo.tipo === filtroPorTipo;
-    const matchCombustivel = filtroPorCombustivel === 'Todos' || veiculo.combustivel === filtroPorCombustivel;
-    const matchStatus = filtroPorStatus === 'Todos' || veiculo.status === filtroPorStatus;
-    const matchSecretaria = filtroPorSecretaria === 'Todas' || veiculo.secretaria === filtroPorSecretaria;
-
-    return matchFiltro && matchTipo && matchCombustivel && matchStatus && matchSecretaria;
-  });
+  const veiculosFiltrados = veiculos;
 
   // Função para renderizar o badge de status com a cor correta
   const renderStatusBadge = (status: string) => {
@@ -168,30 +99,15 @@ export default function Veiculos() {
 
   // Handler para salvar novo veículo
   const handleSaveVeiculo = async (data: VeiculoFormData) => {
-    // Em um ambiente real, isso enviaria os dados para a API
-    console.log('Salvando veículo:', data);
-    
-    // Simular um atraso de rede
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Adicionar o novo veículo ao estado local (mock)
-    const novoVeiculo = {
-      id: `temp-${Date.now()}`,
-      placa: data.placa,
-      modelo: data.modelo,
-      ano: data.ano,
-      tipo: data.tipo,
-      combustivel: data.combustivel,
-      status: data.status === 'ativo' ? 'Ativo' : data.status === 'inativo' ? 'Inativo' : 'Em Manutenção',
-      km: data.quilometragem_atual,
-      secretaria: secretariasMock.find(sec => sec.id === data.secretaria_id)?.nome || '',
-      ultimaManutencao: new Date().toISOString().slice(0, 10),
-      proximaManutencao: '',
-      documentos: ['CRLV'],
-      imagens: data.foto_file ? 1 : 0
-    };
-    
-    setVeiculos([novoVeiculo, ...veiculos]);
+    await createVeiculo(data);
+  };
+
+  // Handler para confirmar exclusão
+  const handleConfirmDelete = async (id: string) => {
+    const result = await deleteVeiculo(id);
+    if (!result.success) {
+      alert(result.error);
+    }
   };
 
   return (
@@ -312,92 +228,104 @@ export default function Veiculos() {
         )}
       </div>
 
-      {/* Lista de Veículos */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        {carregando ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin inline-block w-6 h-6 border-2 border-current border-t-transparent text-blue-600 rounded-full" role="status" aria-label="loading"></div>
-            <p className="mt-2 text-gray-500">Carregando veículos...</p>
-          </div>
-        ) : veiculosFiltrados.length === 0 ? (
-          <div className="p-8 text-center">
-            <Car className="h-12 w-12 mx-auto text-gray-400" />
-            <p className="mt-2 text-gray-500">Nenhum veículo encontrado para os critérios selecionados.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+      {/* Tabela de Veículos */}
+      <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Placa
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Veículo
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Secretaria
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Km
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Status
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {carregando ? (
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Placa/Modelo
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tipo/Combustível
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Secretaria
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quilometragem
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Documentos
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ações
-                  </th>
+                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                    <div className="flex justify-center items-center space-x-2">
+                      <Clock className="h-5 w-5 animate-spin" />
+                      <span>Carregando veículos...</span>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {veiculosFiltrados.map((veiculo) => (
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-red-500">
+                    <div className="flex justify-center items-center space-x-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      <span>Erro ao carregar veículos. Por favor, tente novamente.</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : veiculosFiltrados.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                    Nenhum veículo encontrado.
+                  </td>
+                </tr>
+              ) : (
+                veiculosFiltrados.map((veiculo) => (
                   <tr key={veiculo.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                          <Car className="h-5 w-5" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{veiculo.placa}</div>
-                          <div className="text-sm text-gray-500">{veiculo.modelo} ({veiculo.ano})</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{veiculo.tipo}</div>
-                      <div className="text-sm text-gray-500">{veiculo.combustivel}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {renderStatusBadge(veiculo.status)}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {veiculo.placa}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {veiculo.secretaria}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{veiculo.km.toLocaleString('pt-BR')} km</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex space-x-1">
-                        {veiculo.documentos.map((doc: string, index: number) => (
-                          <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                            <FileText className="h-3 w-3 mr-1" />
-                            {doc}
-                          </span>
-                        ))}
+                      <div className="flex flex-col">
+                        <span>{veiculo.modelo}</span>
+                        <span className="text-xs text-gray-400">{veiculo.ano}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {veiculo.secretaria_nome || veiculo.secretaria}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {veiculo.quilometragem_atual || veiculo.km}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {renderStatusBadge(veiculo.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                       <AcoesDropdown 
                         itens={[
                           {
-                            label: 'Detalhes',
+                            label: 'Ver Detalhes',
                             icon: <Eye className="w-4 h-4" />,
                             modalContent: <VeiculoDetalhes veiculo={veiculo} />,
-                            modalTitulo: `Detalhes do Veículo - ${veiculo.placa}`,
-                            modalTamanho: 'lg'
+                            modalTitulo: 'Detalhes do Veículo'
                           },
                           {
                             label: 'Editar',
@@ -406,52 +334,32 @@ export default function Veiculos() {
                               veiculo={veiculo}
                               secretarias={secretariasMock}
                               onSave={async (data) => {
-                                console.log('Editando veículo:', data);
-                                // Simular atualização
-                                await new Promise(resolve => setTimeout(resolve, 1000));
-                                // Atualizar a lista
-                                setVeiculos(veiculos.map(item => 
-                                  item.id === veiculo.id 
-                                    ? {
-                                        ...veiculo,
-                                        placa: data.placa,
-                                        modelo: data.modelo,
-                                        ano: data.ano,
-                                        tipo: data.tipo,
-                                        combustivel: data.combustivel,
-                                        status: data.status === 'ativo' ? 'Ativo' : 
-                                               data.status === 'inativo' ? 'Inativo' : 'Em Manutenção',
-                                        km: data.quilometragem_atual,
-                                        secretaria: secretariasMock.find(s => s.id === data.secretaria_id)?.nome || veiculo.secretaria
-                                      } 
-                                    : item
-                                ));
+                                await updateVeiculo(veiculo.id, data);
                               }}
                               onCancel={() => {
                                 console.log('Cancelando edição');
                               }}
                             />,
                             modalTitulo: 'Editar Veículo',
-                            modalTamanho: 'lg'
                           },
                           {
                             label: 'Excluir',
                             icon: <Trash className="w-4 h-4" />,
-                            variant: 'destructive',
-                            onClick: () => {
-                              console.log('Excluir veículo', veiculo.id);
-                              setVeiculos(veiculos.filter(item => item.id !== veiculo.id));
+                            confirmacao: {
+                              titulo: 'Confirmar Exclusão',
+                              mensagem: `Tem certeza que deseja excluir o veículo ${veiculo.placa}?`,
+                              onConfirm: () => handleConfirmDelete(veiculo.id)
                             }
                           }
                         ]}
                       />
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Modal de Novo Veículo */}

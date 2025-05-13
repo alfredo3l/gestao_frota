@@ -138,12 +138,6 @@ export default function Sidebar({ isOpen, onClose, activeItem, onMenuItemClick, 
       id: 'manutencoes'
     },
     {
-      title: 'Solicitações',
-      icon: <FileSearch className="w-5 h-5" />,
-      href: '/solicitacoes',
-      id: 'solicitacoes'
-    },
-    {
       title: 'Relatórios',
       icon: <FileBarChart className="w-5 h-5" />,
       href: '/relatorios',
