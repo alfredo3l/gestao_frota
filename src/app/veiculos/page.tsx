@@ -149,7 +149,7 @@ export default function Veiculos() {
   });
 
   // Função para renderizar o badge de status com a cor correta
-  const renderStatusBadge = (status) => {
+  const renderStatusBadge = (status: string) => {
     const statusNormalizado = status.toLowerCase();
     switch(statusNormalizado) {
       case 'ativo':
