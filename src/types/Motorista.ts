@@ -25,6 +25,8 @@ export interface MotoristaFormData {
   status: 'ativo' | 'inativo';
   foto_file?: File;
   cnh_file?: File;
+  telefone?: string;
+  email?: string;
 }
 
 export interface MotoristaFiltros {
