@@ -213,16 +213,16 @@ interface Solicitacao {
 }
 
 // Interface para o formulário
-interface SolicitacaoFormData {
-  solicitante: string;
-  data_inicio: string;
-  data_fim?: string;
-  destino: string;
-  motivo: string;
-  distancia_estimada: number;
-  passageiros: number;
-  prioridade: string;
-}
+// interface SolicitacaoFormData {
+//   solicitante: string;
+//   data_inicio: string;
+//   data_fim?: string;
+//   destino: string;
+//   motivo: string;
+//   distancia_estimada: number;
+//   passageiros: number;
+//   prioridade: string;
+// }
 
 export default function Solicitacoes() {
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
