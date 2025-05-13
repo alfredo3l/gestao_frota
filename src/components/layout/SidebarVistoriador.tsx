@@ -199,7 +199,7 @@ export default function SidebarVistoriador({
           {/* Botão de alternar entre Vistorias e Configurações */}
           <div className="absolute bottom-0 left-0 w-full border-t border-gray-200 p-3 bg-white">
             <button
-              onClick={showSettings ? onVistoriaClick('1') : onSettingsClick}
+              onClick={showSettings ? () => onVistoriaClick('1') : onSettingsClick}
               className={`
                 w-full py-2 px-3 rounded-lg transition-colors
                 ${showSettings ? 'hover:bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-700'}
