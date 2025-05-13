@@ -31,7 +31,8 @@ export default function NovoVeiculoPage() {
     secretaria_id: '',
     crlv_file: null,
     seguro_file: null,
-    foto_file: null
+    foto_file: null,
+    documentos_files: []
   });
 
   // Lista de tipos de veículos
