@@ -4,6 +4,14 @@ import { LogOut, Settings, Building2, Sparkles, ChevronLeftCircle } from 'lucide
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+interface SidebarImobiliariaProps {
+  isOpen: boolean;
+  onClose: () => void;
+  activeImobiliaria: any;
+  onImobiliariaClick: (imobiliaria: any) => void;
+  onSettingsClick: () => void;
+}
+
 export default function SidebarImobiliaria({ 
   isOpen, 
   onClose, 
