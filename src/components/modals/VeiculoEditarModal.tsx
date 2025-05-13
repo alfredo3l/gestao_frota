@@ -32,7 +32,8 @@ export default function VeiculoEditarModal({
     secretaria_id: '',
     crlv_file: null,
     seguro_file: null,
-    foto_file: null
+    foto_file: null,
+    documentos_files: []
   };
 
   const [formData, setFormData] = useState<VeiculoFormData>(initialFormData);
@@ -78,6 +79,10 @@ export default function VeiculoEditarModal({
         status: veiculo.status,
         quilometragem_atual: veiculo.quilometragem_atual,
         secretaria_id: veiculo.secretaria_id,
+        crlv_file: null,
+        seguro_file: null,
+        foto_file: null,
+        documentos_files: []
       });
 
       // Se tiver foto, mostrar preview
