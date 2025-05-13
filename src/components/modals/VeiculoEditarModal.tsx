@@ -30,9 +30,9 @@ export default function VeiculoEditarModal({
     status: 'ativo',
     quilometragem_atual: 0,
     secretaria_id: '',
-    crlv_file: undefined,
-    seguro_file: undefined,
-    foto_file: undefined
+    crlv_file: null,
+    seguro_file: null,
+    foto_file: null
   };
 
   const [formData, setFormData] = useState<VeiculoFormData>(initialFormData);
