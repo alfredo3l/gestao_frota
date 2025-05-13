@@ -64,8 +64,8 @@ URL_OFICIAL_DO_PROJETO="https://github.com/alfredo3l/gestao_frota"
     git config --get user.email
     
     # Se não estiver configurado, configurar:
-    # git config --global user.name "Seu Nome"
-    # git config --global user.email "seu@email.com"
+    # git config --global user.name "Alfredo Oliveira"
+    # git config --global user.email "estanciamorroazul@gmail.com"
     ```
     
 3. Verificar login Github:
