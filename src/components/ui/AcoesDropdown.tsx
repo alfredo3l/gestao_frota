@@ -56,17 +56,26 @@ export default function AcoesDropdown({ itens, align = 'right' }: AcoesDropdownP
   
   // Manipular ação de excluir
   const handleExcluir = (item: AcaoItem) => {
-    if (item.confirmacao?.titulo && item.confirmacao?.mensagem && item.confirmacao?.onConfirm) {
-      setConfirmacaoTitulo(item.confirmacao.titulo);
-      setConfirmacaoMensagem(item.confirmacao.mensagem);
-      setAcaoExcluir(() => item.confirmacao.onConfirm);
-      setConfirmarExcluir(true);
-      setAberto(false);
-    } else if (item.onClick) {
-      setAcaoExcluir(() => item.onClick);
-      setConfirmarExcluir(true);
-      setAberto(false);
+    // Primeiro definir valores padrão
+    let titulo = 'Confirmar exclusão';
+    let mensagem = 'Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.';
+    let onConfirm = item.onClick || (() => {});
+    
+    // Se tiver confirmacao definida, sobrescrever os valores padrão
+    if (item.confirmacao) {
+      titulo = item.confirmacao.titulo || titulo;
+      mensagem = item.confirmacao.mensagem || mensagem;
+      if (item.confirmacao.onConfirm) {
+        onConfirm = item.confirmacao.onConfirm;
+      }
     }
+    
+    // Atualizar o estado
+    setConfirmacaoTitulo(titulo);
+    setConfirmacaoMensagem(mensagem);
+    setAcaoExcluir(() => onConfirm);
+    setConfirmarExcluir(true);
+    setAberto(false);
   };
   
   // Manipular ação de visualizar ou editar
