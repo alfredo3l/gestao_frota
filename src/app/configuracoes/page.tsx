@@ -186,19 +186,17 @@ export default function PaginaConfiguracoes() {
     }
     
     if (modoEdicao) {
-      // Remover o tema original
-      const novosTemas = temas.filter(tema => tema.nome !== temaOriginal);
-      // Adicionar o tema editado
-      const temasAtualizados = [...novosTemas, novoTema];
-      localStorage.setItem('temas', JSON.stringify(temasAtualizados));
-      
+      // Primeiro remove o tema original (se não for o padrão)
+      if (temaOriginal !== 'Padrão') {
+        removerTema(temaOriginal); 
+      }
+      // Depois adiciona o novo (editado)
+      adicionarTema(novoTema);
+
       // Atualizar o tema atual se for o que está sendo editado
       if (temaAtual.nome === temaOriginal) {
         alterarTema(novoTema);
       }
-      
-      // Atualizar a lista de temas
-      setTemas(temasAtualizados);
     } else {
       adicionarTema(novoTema);
     }
