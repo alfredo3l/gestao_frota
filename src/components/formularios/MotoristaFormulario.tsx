@@ -29,7 +29,7 @@ export default function MotoristaFormulario({
     email: motorista?.email || '',
     secretaria_id: motorista?.secretaria_id || secretarias.find(s => s.nome === motorista?.secretaria)?.id || '',
     status: motorista?.status?.toLowerCase() === 'ativo' ? 'ativo' : 'inativo',
-    foto_file: null
+    foto_file: undefined
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
