@@ -42,4 +42,5 @@ export interface VeiculoFiltros {
   secretaria_id?: string;
   tipo?: string;
   termoBusca?: string;
+  combustivel?: string;
 } 

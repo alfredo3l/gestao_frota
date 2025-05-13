@@ -15,6 +15,11 @@ interface AcaoItem {
   modalContent?: React.ReactNode;
   modalTitulo?: string;
   modalTamanho?: 'sm' | 'md' | 'lg' | 'xl';
+  confirmacao?: {
+    titulo: string;
+    mensagem: string;
+    onConfirm: () => void;
+  };
 }
 
 interface AcoesDropdownProps {
@@ -30,6 +35,8 @@ export default function AcoesDropdown({ itens, align = 'right' }: AcoesDropdownP
   const [modalConteudo, setModalConteudo] = useState<React.ReactNode | null>(null);
   const [modalTitulo, setModalTitulo] = useState('');
   const [modalTamanho, setModalTamanho] = useState<'sm' | 'md' | 'lg' | 'xl'>('md');
+  const [confirmacaoTitulo, setConfirmacaoTitulo] = useState('Confirmar exclusão');
+  const [confirmacaoMensagem, setConfirmacaoMensagem] = useState('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.');
   
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -48,9 +55,15 @@ export default function AcoesDropdown({ itens, align = 'right' }: AcoesDropdownP
   }, []);
   
   // Manipular ação de excluir
-  const handleExcluir = (onClick?: () => void) => {
-    if (onClick) {
-      setAcaoExcluir(() => onClick);
+  const handleExcluir = (item: AcaoItem) => {
+    if (item.confirmacao) {
+      setConfirmacaoTitulo(item.confirmacao.titulo);
+      setConfirmacaoMensagem(item.confirmacao.mensagem);
+      setAcaoExcluir(() => item.confirmacao.onConfirm);
+      setConfirmarExcluir(true);
+      setAberto(false);
+    } else if (item.onClick) {
+      setAcaoExcluir(() => item.onClick);
       setConfirmarExcluir(true);
       setAberto(false);
     }
@@ -86,12 +99,12 @@ export default function AcoesDropdown({ itens, align = 'right' }: AcoesDropdownP
     );
     
     // Verificar se é uma ação de exclusão
-    if (item.variant === 'destructive') {
+    if (item.variant === 'destructive' || item.confirmacao) {
       return (
         <button
           key={index}
           className={itemClass}
-          onClick={() => handleExcluir(item.onClick)}
+          onClick={() => handleExcluir(item)}
         >
           {content}
         </button>
@@ -173,8 +186,8 @@ export default function AcoesDropdown({ itens, align = 'right' }: AcoesDropdownP
           if (acaoExcluir) acaoExcluir();
           setConfirmarExcluir(false);
         }}
-        titulo="Confirmar exclusão"
-        mensagem="Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."
+        titulo={confirmacaoTitulo}
+        mensagem={confirmacaoMensagem}
         botaoConfirmarTexto="Excluir"
         botaoCancelarTexto="Cancelar"
       />
