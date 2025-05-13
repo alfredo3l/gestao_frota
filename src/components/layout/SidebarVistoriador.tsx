@@ -4,7 +4,19 @@ import { useState } from 'react';
 import { Home, Settings, ChevronRight, User, Calendar, FileText, Clipboard, CheckSquare, Lock, Cog } from 'lucide-react';
 import Link from 'next/link';
 
-export const vistorias = [
+export interface Vistoria {
+  id: string;
+  numero: string;
+  endereco: string;
+  imovel: string;
+  dataAgendada: string;
+  horario: string;
+  status: string; // Poderia ser um tipo mais específico: 'agendada' | 'em_andamento' | 'concluida', etc.
+  tipo: string;
+  coordenadas?: { lat: number; lng: number }; // Adicionado campo opcional de coordenadas
+}
+
+export const vistorias: Vistoria[] = [
   {
     id: '1',
     numero: 'VST-2023/001',
