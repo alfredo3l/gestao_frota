@@ -230,75 +230,63 @@ export default function Veiculos() {
 
       {/* Tabela de Veículos */}
       <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Placa
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Veículo
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Secretaria
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Km
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Status
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {carregando ? (
+        {carregando ? (
+          <div className="p-6 text-center text-gray-500">Carregando veículos...</div>
+        ) : error ? (
+          <div className="p-6 text-center text-red-600 bg-red-50 border border-red-200 rounded-md">
+            <AlertTriangle className="inline-block w-5 h-5 mr-2" />
+            {error}
+          </div>
+        ) : veiculosFiltrados.length === 0 ? (
+          <div className="p-6 text-center text-gray-700 bg-gray-50 border border-gray-200 rounded-md">
+            <Car className="inline-block w-5 h-5 mr-2 text-gray-400" />
+            Não existem veículos cadastrados até o momento.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                    <div className="flex justify-center items-center space-x-2">
-                      <Clock className="h-5 w-5 animate-spin" />
-                      <span>Carregando veículos...</span>
-                    </div>
-                  </td>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Placa
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Veículo
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Secretaria
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Km
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Ações
+                  </th>
                 </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-red-500">
-                    <div className="flex justify-center items-center space-x-2">
-                      <AlertTriangle className="h-5 w-5" />
-                      <span>Erro ao carregar veículos. Por favor, tente novamente.</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : veiculosFiltrados.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                    Nenhum veículo encontrado.
-                  </td>
-                </tr>
-              ) : (
-                veiculosFiltrados.map((veiculo) => (
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {veiculosFiltrados.map((veiculo) => (
                   <tr key={veiculo.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {veiculo.placa}
@@ -355,11 +343,11 @@ export default function Veiculos() {
                       />
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Modal de Novo Veículo */}

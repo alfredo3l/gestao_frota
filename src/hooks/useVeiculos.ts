@@ -100,6 +100,11 @@ export function useVeiculos() {
     try {
       setLoading(true);
       
+      const veiculoSecretariaId = veiculo.secretaria_id;
+      const secretariaIdEhUUIDValido = 
+        typeof veiculoSecretariaId === 'string' && 
+        /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(veiculoSecretariaId);
+
       // Primeiro inserimos os dados básicos do veículo
       const { data, error } = await supabase
         .from('veiculos')
@@ -111,7 +116,7 @@ export function useVeiculos() {
           combustivel: veiculo.combustivel,
           status: veiculo.status,
           quilometragem_atual: veiculo.quilometragem_atual,
-          secretaria_id: veiculo.secretaria_id
+          secretaria_id: secretariaIdEhUUIDValido ? veiculoSecretariaId : null
         })
         .select('*')
         .single()
@@ -215,7 +220,18 @@ export function useVeiculos() {
       if (veiculo.combustivel !== undefined) updates.combustivel = veiculo.combustivel;
       if (veiculo.status !== undefined) updates.status = veiculo.status;
       if (veiculo.quilometragem_atual !== undefined) updates.quilometragem_atual = veiculo.quilometragem_atual;
-      if (veiculo.secretaria_id !== undefined) updates.secretaria_id = veiculo.secretaria_id;
+      
+      if (veiculo.secretaria_id !== undefined) {
+        const veiculoSecretariaId = veiculo.secretaria_id;
+        let idParaAtualizar: string | undefined = undefined;
+
+        if (typeof veiculoSecretariaId === 'string' && 
+            /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(veiculoSecretariaId)) {
+          idParaAtualizar = veiculoSecretariaId;
+        }
+        // Se não for um UUID válido, idParaAtualizar permanece undefined.
+        updates.secretaria_id = idParaAtualizar; 
+      }
 
       // Se tiver atualizações, atualizar o registro
       if (Object.keys(updates).length > 0) {
